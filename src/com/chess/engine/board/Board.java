@@ -102,30 +102,25 @@ public class Board {
             int filesAddedForRow = 0;
 
             // For each character in the current rank
-            for(int colCount = 0; colCount < charArray.length; colCount++) {
+            for (char ch : charArray) {
 
                 // Get the next character in the rank
-                char ch = charArray[colCount];
-
                 // If the character is a digit
-                if(Character.isDigit(ch)) {
+                if (Character.isDigit(ch)) {
 
                     // Add an empty tile in the current rank denoted by digit in FEN
                     int numFiles = Integer.parseInt(ch + "");
                     int tempFile = filesAddedForRow;
-                    for(int i = tempFile; i < (numFiles + tempFile); i++) {
-                        this.getTiles().add(new EmptyTile(new Position(7-rankCount, i)));
+                    for (int i = tempFile; i < (numFiles + tempFile); i++) {
+                        this.getTiles().add(new EmptyTile(new Position(7 - rankCount, i)));
                         filesAddedForRow++;
                     }
-
                 }
                 // If the character was a piece, then add it for white or black
                 else {
-                    Player color = Character.isUpperCase(ch) ? Player.WHITE : Player.BLACK;
-                    Position piecePosition = new Position((7-rankCount), filesAddedForRow);
-                    Piece thePiece = BoardUtils.getInstance().constructPiece(ch, piecePosition);
-                    color.addPiece(thePiece);
-                    this.getTiles().add(new OccupiedTile(piecePosition, thePiece));
+                    Position piecePosition = new Position(7 - rankCount, filesAddedForRow);
+                    Piece newPiece = BoardUtils.getInstance().constructPiece(ch, piecePosition);
+                    this.getTiles().add(new OccupiedTile(piecePosition, newPiece));
                     filesAddedForRow++;
                 }
             }

@@ -70,6 +70,9 @@ public class BoardUtils {
                 break;
         }
 
+        // Add the piece for that player
+        color.addPiece(piece);
+
         // return the piece
         return piece;
     }
