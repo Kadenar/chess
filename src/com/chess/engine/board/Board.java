@@ -43,6 +43,7 @@ public class Board {
             this.loadFen(fen);
         } catch(Exception e) {
             System.out.println("Error encountered parsing fen");
+            e.printStackTrace();
         }
     }
 
@@ -73,34 +74,20 @@ public class Board {
 
         // Get the game piece locations and add them to the board
         buildFromFEN(FenUtils.getGamePieces(fen));
-
         currentMove = FenUtils.getPlayerTurn(fen).equals(Player.WHITE.toString()) ? Player.WHITE : Player.BLACK;
         castling = FenUtils.getCastlingAbility(fen);
         enPassant = FenUtils.getEnPassantSquare(fen);
         halfMoves = FenUtils.getHalfMove(fen);
         fullMoves = FenUtils.getFullMove(fen);
-
-        //printFen();
-
-        System.out.println("Black pieces: " + Player.BLACK.getPieces().size());
-        for(Piece piece : Player.BLACK.getPieces()) {
-            System.out.println("Piece: " + piece.toString()
-                    + " - Board coord: " + piece.getPosition()
-                    + " - Array coord: " + piece.getPosition().getTileCoord());
-        }
-
-        System.out.println("White pieces: " + Player.WHITE.getPieces().size());
-        for (Piece piece : Player.WHITE.getPieces()) {
-            System.out.println("Piece: " + piece.toString()
-                    + " - Board coord: " + piece.getPosition()
-                    + " - Array coord: " + piece.getPosition().getTileCoord());
-        }
-
-        // print the board
-        System.out.println(toString());
     }
 
+    /**
+     * Build board with pieces from fen
+     * @param boardPositions
+     * @throws Exception
+     */
     private void buildFromFEN(final String boardPositions) throws Exception {
+
         // Split fen to create each rank
         String ranks[] = boardPositions.split("/");
         if(ranks.length !=8 ) {
@@ -109,31 +96,37 @@ public class Board {
 
         // For each of the ranks in the fen string (should be 8)
         for(int rankCount = 0; rankCount < ranks.length; rankCount++) {
+
             // For each character in the rank
             char[] charArray = ranks[rankCount].toCharArray();
-            int columnsAddedForRow = 0;
+            int filesAddedForRow = 0;
 
+            // For each character in the current rank
             for(int colCount = 0; colCount < charArray.length; colCount++) {
+
                 // Get the next character in the rank
                 char ch = charArray[colCount];
 
-                // If there is a character a digit
+                // If the character is a digit
                 if(Character.isDigit(ch)) {
+
                     // Add an empty tile in the current rank denoted by digit in FEN
-                    for(int i = columnsAddedForRow; i < ch + columnsAddedForRow && i < 8; i++) {
-                        this.getTiles().add(new EmptyTile(new Position(rankCount, i)));
+                    int numFiles = Integer.parseInt(ch + "");
+                    int tempFile = filesAddedForRow;
+                    for(int i = tempFile; i < (numFiles + tempFile); i++) {
+                        this.getTiles().add(new EmptyTile(new Position(7-rankCount, i)));
+                        filesAddedForRow++;
                     }
-                    // Increment number of columns added for the row (empty tiles)
-                    columnsAddedForRow += ch;
+
                 }
                 // If the character was a piece, then add it for white or black
                 else {
                     Player color = Character.isUpperCase(ch) ? Player.WHITE : Player.BLACK;
-                    Position piecePosition = new Position(rankCount, colCount);
+                    Position piecePosition = new Position((7-rankCount), filesAddedForRow);
                     Piece thePiece = BoardUtils.getInstance().constructPiece(ch, piecePosition);
                     color.addPiece(thePiece);
                     this.getTiles().add(new OccupiedTile(piecePosition, thePiece));
-                    columnsAddedForRow++;
+                    filesAddedForRow++;
                 }
             }
         }
@@ -169,8 +162,9 @@ public class Board {
         final StringBuilder builder = new StringBuilder();
         for (int i = 0; i < NUM_TILES; i++) {
             if(i == 0 || i % 8 == 0) {
-                builder.append(i/8+1 + " ");
+                builder.append(7 - i/8+1 + " ");
             }
+
             final String tileText = prettyPrint(getTiles().get(i));
             builder.append(String.format("%3s", tileText));
             if ((i + 1) % 8 == 0) {
