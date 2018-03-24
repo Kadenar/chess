@@ -12,12 +12,11 @@ import java.util.List;
 import java.util.Map;
 
 public class Board {
-    private Map<String, Player> players = new HashMap<>();
     private static final int NUM_TILES = 64;
     private List<Tile> tiles = new ArrayList<>(NUM_TILES);
+    private Map<String, Player> players = new HashMap<>();
 
     // Variables used to load/save FEN:
-
     // Full FEN string
     private String fen;
 
@@ -30,6 +29,9 @@ public class Board {
     // Number of halfmoves / full moves
     private int halfMoves, fullMoves;
 
+    public Board() {
+        this("");
+    }
 
     public Board(String fen) {
         // Add both players
@@ -70,7 +72,7 @@ public class Board {
         this.fen = fen;
 
         // Get the game piece locations and add them to the board
-        addGamePieces(FenUtils.getGamePieces(fen));
+        buildFromFEN(FenUtils.getGamePieces(fen));
 
         currentMove = FenUtils.getPlayerTurn(fen).equals(Player.WHITE.toString()) ? Player.WHITE : Player.BLACK;
         castling = FenUtils.getCastlingAbility(fen);
@@ -81,64 +83,60 @@ public class Board {
         //printFen();
 
         System.out.println("Black pieces: " + Player.BLACK.getPieces().size());
-        List<Piece> blackPieces = Player.BLACK.getPieces();
-        for(int i = 0; i < blackPieces.size(); i++) {
-            Piece piece = blackPieces.get(i);
-            System.out.println(piece.toString() + " " + piece.getPosition() + " " + piece.getPosition().getTileCoord());
+        for(Piece piece : Player.BLACK.getPieces()) {
+            System.out.println("Piece: " + piece.toString()
+                    + " - Board coord: " + piece.getPosition()
+                    + " - Array coord: " + piece.getPosition().getTileCoord());
         }
 
         System.out.println("White pieces: " + Player.WHITE.getPieces().size());
-        List<Piece> whitePieces = Player.WHITE.getPieces();
-        for(int i = 0; i < whitePieces.size(); i++) {
-            Piece piece = whitePieces.get(i);
+        for (Piece piece : Player.WHITE.getPieces()) {
             System.out.println("Piece: " + piece.toString()
-                                + " Chess coord: " + piece.getPosition()
-                                + " Tile coord: " + piece.getPosition().getTileCoord());
+                    + " - Board coord: " + piece.getPosition()
+                    + " - Array coord: " + piece.getPosition().getTileCoord());
         }
 
         // print the board
-        //System.out.println(toString());
-        System.out.println("Board tile size: " + getTiles().size());
+        System.out.println(toString());
     }
 
-    private void addGamePieces(final String boardPositions) {
+    private void buildFromFEN(final String boardPositions) throws Exception {
         // Split fen to create each rank
         String ranks[] = boardPositions.split("/");
+        if(ranks.length !=8 ) {
+            throw new Exception("Board representation incorrect in the FEN.");
+        }
 
         // For each of the ranks in the fen string (should be 8)
         for(int rankCount = 0; rankCount < ranks.length; rankCount++) {
             // For each character in the rank
             char[] charArray = ranks[rankCount].toCharArray();
-            System.out.println(charArray);
             int columnsAddedForRow = 0;
 
             for(int colCount = 0; colCount < charArray.length; colCount++) {
+                // Get the next character in the rank
                 char ch = charArray[colCount];
-                System.out.println("Current char: " + ch);
+
                 // If there is a character a digit
                 if(Character.isDigit(ch)) {
+                    // Add an empty tile in the current rank denoted by digit in FEN
+                    for(int i = columnsAddedForRow; i < ch + columnsAddedForRow && i < 8; i++) {
+                        this.getTiles().add(new EmptyTile(new Position(rankCount, i)));
+                    }
                     // Increment number of columns added for the row (empty tiles)
                     columnsAddedForRow += ch;
-                    // Add an empty tile in the current rank denoted by digit in FEN
-                    for(int i = columnsAddedForRow; i < ch + columnsAddedForRow; i++) {
-                        this.addTile(new EmptyTile(new Position(rankCount, i)));
-                    }
                 }
                 // If the character was a piece, then add it for white or black
                 else {
                     Player color = Character.isUpperCase(ch) ? Player.WHITE : Player.BLACK;
                     Position piecePosition = new Position(rankCount, colCount);
-                    Piece thePiece = BoardUtils.getInstance().getPiece(ch, piecePosition);
+                    Piece thePiece = BoardUtils.getInstance().constructPiece(ch, piecePosition);
                     color.addPiece(thePiece);
-                    this.addTile(new OccupiedTile(piecePosition, thePiece));
+                    this.getTiles().add(new OccupiedTile(piecePosition, thePiece));
+                    columnsAddedForRow++;
                 }
             }
         }
-    }
-
-    // Add the tiles to the board
-    private void addTile(Tile tile) {
-        tiles.add(tile);
     }
 
     public List<Tile> getTiles() {
@@ -170,12 +168,16 @@ public class Board {
     public String toString() {
         final StringBuilder builder = new StringBuilder();
         for (int i = 0; i < NUM_TILES; i++) {
+            if(i == 0 || i % 8 == 0) {
+                builder.append(i/8+1 + " ");
+            }
             final String tileText = prettyPrint(getTiles().get(i));
             builder.append(String.format("%3s", tileText));
             if ((i + 1) % 8 == 0) {
                 builder.append("\n");
             }
         }
+        builder.append("   a  b  c  d  e  f  g  h");
         return builder.toString();
     }
 

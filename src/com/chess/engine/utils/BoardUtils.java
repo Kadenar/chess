@@ -40,11 +40,11 @@ public class BoardUtils {
         }
     }
 
-    public Piece getPiece(char ch, Position position) {
+    public Piece constructPiece(char ch, Position position) {
         Piece piece = null;
 
         // Determine the color this piece belongs to
-        Player color = Character.isUpperCase(ch) ? Player.BLACK : Player.WHITE;
+        Player color = Character.isUpperCase(ch) ? Player.WHITE : Player.BLACK;
 
         // Determine the type of piece
         switch(Character.toLowerCase(ch)) {

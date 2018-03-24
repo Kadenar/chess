@@ -54,5 +54,6 @@ public class Position {
     @Override
     public String toString() {
         return getColumnChar() + "" + (getRow() + 1);
+        //return "[" + getRow() + ", " + getColumn() + "]";
     }
 }

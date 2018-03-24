@@ -23,6 +23,6 @@ public class Bishop extends Piece {
 
     @Override
     public String toString() {
-        return getOwner().isWhite() ? "b" : "B";
+        return getOwner().isWhite() ? "B" : "b";
     }
 }

@@ -3,7 +3,7 @@ import com.chess.engine.board.Board;
 public class Chess {
 
     public static void main(String[] args) {
-        Board board = new Board("");
+        Board board = new Board();
 
         // Test another positino
         //BoardUtils.getInstance().updateBoardWithFen(board,

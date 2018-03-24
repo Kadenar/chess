@@ -23,6 +23,6 @@ public class Rook extends Piece {
 
     @Override
     public String toString() {
-        return getOwner().isWhite() ? "r" : "R";
+        return getOwner().isWhite() ? "R" : "r";
     }
 }

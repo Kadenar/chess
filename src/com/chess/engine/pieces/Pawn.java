@@ -23,6 +23,6 @@ public class Pawn extends Piece {
 
     @Override
     public String toString() {
-        return getOwner().isWhite() ? "p" : "P";
+        return getOwner().isWhite() ? "P" : "p";
     }
 }

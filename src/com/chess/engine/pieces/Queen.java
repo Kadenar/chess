@@ -23,6 +23,6 @@ public class Queen extends Piece {
 
     @Override
     public String toString() {
-        return getOwner().isWhite() ? "q" : "Q";
+        return getOwner().isWhite() ? "Q" : "q";
     }
 }
