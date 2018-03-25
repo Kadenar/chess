@@ -4,13 +4,11 @@ import com.chess.engine.pieces.Piece;
 
 import javax.imageio.ImageIO;
 import javax.swing.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 
-public class PieceUI extends JLabel implements ActionListener{
+public class PieceUI extends JLabel {
     private final Piece piece;
     PieceUI(Piece piece) {
         this.piece = piece;
@@ -26,10 +24,5 @@ public class PieceUI extends JLabel implements ActionListener{
 
     public Piece getPiece() {
         return this.piece;
-    }
-
-    @Override
-    public void actionPerformed(ActionEvent e) {
-        System.out.println(e);
     }
 }

@@ -21,6 +21,10 @@ public abstract class Tile {
         return getPosition().getRow() * 8 + getPosition().getColumn();
     }
 
+    public void replacePiece(Piece piece) {
+       //TODO
+    }
+
     public static class EmptyTile extends Tile {
         public EmptyTile(Position coord) {
             super(coord);

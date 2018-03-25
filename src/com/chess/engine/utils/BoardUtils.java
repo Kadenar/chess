@@ -11,6 +11,8 @@ public class BoardUtils {
 
     private static final BoardUtils INSTANCE = getInstance();
 
+    private Board board;
+
     public static BoardUtils getInstance() {
         if(INSTANCE == null) {
             return new BoardUtils();
@@ -23,7 +25,13 @@ public class BoardUtils {
         // Do not allow instantiation elsewhere
     }
 
+    public Board getBoard() {
+        return this.board;
+    }
+
     public void updateBoardWithFen(Board board, String fen) {
+        this.board = board;
+
         // Clear each player's pieces
         for (Map.Entry<String, Player> entry : board.getPlayers().entrySet()) {
             entry.getValue().getPieces().clear();
