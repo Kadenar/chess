@@ -13,6 +13,13 @@ public abstract class Tile {
     public abstract boolean isOccupied();
     public abstract Piece getPiece();
 
+    public Position getPosition() {
+        return this.coordinate;
+    }
+
+    public int getBoardIndex() {
+        return getPosition().getRow() * 8 + getPosition().getColumn();
+    }
 
     public static class EmptyTile extends Tile {
         public EmptyTile(Position coord) {

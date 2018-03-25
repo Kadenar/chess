@@ -1,5 +1,5 @@
 import com.chess.engine.board.Board;
-import com.chess.engine.utils.BoardUtils;
+import com.chess.ui.BoardGUI;
 
 public class Chess {
 
@@ -10,8 +10,8 @@ public class Chess {
         String fen4 = "r1bqkbnr/pppp1ppp/2n5/1B2p3/4P3/5N2/PPPP1PPP/RNBQK2R w KQkq c6 0 2";
 
         //Board board = new Board();
-        Board board = new Board();
-        System.out.println(board.toString());
+        Board board = new Board(fen4);
+        /*System.out.println(board.toString());
 
         // Test another positino
         BoardUtils.getInstance().updateBoardWithFen(board, fen1);
@@ -22,8 +22,10 @@ public class Chess {
 
         BoardUtils.getInstance().updateBoardWithFen(board, fen3);
         System.out.println(board.toString());
+        */
+        //BoardUtils.getInstance().updateBoardWithFen(board, fen4);
+        //System.out.println(board.toString());
 
-        BoardUtils.getInstance().updateBoardWithFen(board, fen4);
-        System.out.println(board.toString());
+        new BoardGUI(board);
     }
 }
