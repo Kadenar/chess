@@ -16,9 +16,9 @@ public class TileUI extends JPanel {
     private PieceUI thePiece = null;
 
     TileUI(Tile tile) {
+        super();
         this.tile = tile;
-        int boardIndex = (tile.getBoardIndex() + tile.getPosition().getRow()) % 2;
-        setBackground(boardIndex == 0 ? Color.WHITE : Color.BLUE);
+        setBackground(tile.isLight() ? Color.WHITE : Color.BLUE);
         setBorder(BorderFactory.createLineBorder(Color.BLACK, 1));
 
         //add(new JLabel(tile.getPosition() + " - [" + tile.getPosition().getRow() + "," + tile.getPosition().getColumn() + "]"));
@@ -30,16 +30,24 @@ public class TileUI extends JPanel {
         }
     }
 
-    public void setPieceUI(PieceUI piece) {
-        thePiece = piece;
-    }
-
+    /**
+     * Get the ui representation of a piece on this tile
+     * @return the ui representation of a piece
+     */
     public PieceUI getPieceUI() {
         return this.thePiece;
     }
 
+    /**
+     * Get the tile that ui is sourced from
+     * @return the backend tile containing the piece
+     */
     public Tile getTile() {
         return this.tile;
+    }
+
+    public boolean equals(TileUI tileUI) {
+        return this.getTile().getPosition().equals(tileUI.getTile().getPosition());
     }
 
     /**
@@ -48,10 +56,9 @@ public class TileUI extends JPanel {
      */
     public void movePieceToTile(TileUI fromTile) {
 
-        // If the destination tile is occupied
-        boolean destinationTileOccupied = getTile().isOccupied();
-
-        if(!destinationTileOccupied || getTile().getPiece().getOwner() != fromTile.getTile().getPiece().getOwner()) {
+        // If the destination tile is not occupied or is an opponent's piece
+        if(!getTile().isOccupied()
+            || getTile().getPiece().getOwner() != fromTile.getTile().getPiece().getOwner()) {
             // Replace the opponents piece with our piece
             this.updatePieceOnTile(fromTile.getPieceUI());
 

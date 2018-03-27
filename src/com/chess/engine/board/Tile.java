@@ -6,22 +6,32 @@ public abstract class Tile {
 
     private final Position coordinate;
 
-    private Tile(Position coord) {
-        this.coordinate = coord;
+    private Tile(Position pos) {
+        this.coordinate = pos;
     }
 
     public abstract boolean isOccupied();
     public abstract Piece getPiece();
     public abstract void setPiece(Piece piece);
 
+    /**
+     * Get the tile's position
+     * @return returns the position of the tile
+     */
     public Position getPosition() {
         return this.coordinate;
     }
 
-    public int getBoardIndex() {
-        return getPosition().getRow() * 8 + getPosition().getColumn();
+    /**
+     * @return is this tile light or dark
+     */
+    public boolean isLight() {
+        return (getPosition().getRow() % 2) == (getPosition().getColumn() % 2);
     }
 
+    /**
+     * Represents an empty tile with no piece on it
+     */
     public static class EmptyTile extends Tile {
         public EmptyTile(Position coord) {
             super(coord);
@@ -46,6 +56,9 @@ public abstract class Tile {
         }
     }
 
+    /**
+     * Represents an occupied tile with a given piece on it
+     */
     public static class OccupiedTile extends Tile {
         private Piece piece;
 
@@ -54,10 +67,12 @@ public abstract class Tile {
             this.piece = piece;
         }
 
+        @Override
         public Piece getPiece() {
             return this.piece;
         }
 
+        @Override
         public void setPiece(Piece piece) {
             this.piece = piece;
         }

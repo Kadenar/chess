@@ -9,12 +9,14 @@ import java.io.File;
 import java.io.IOException;
 
 public class PieceUI extends JLabel {
+
     private final Piece piece;
+
     PieceUI(Piece piece) {
+        super();
         this.piece = piece;
-        BufferedImage myPicture;
         try {
-            myPicture = ImageIO.read(new File(piece.getPieceImagePath()));
+            BufferedImage myPicture = ImageIO.read(new File(piece.getPieceImagePath()));
             ImageIcon pieceIcon = new ImageIcon(myPicture);
             setIcon(pieceIcon);
         } catch (IOException e) {
@@ -22,6 +24,10 @@ public class PieceUI extends JLabel {
         }
     }
 
+    /**
+     * Get the piece that this ui is sourced from
+     * @return the piece
+     */
     public Piece getPiece() {
         return this.piece;
     }
