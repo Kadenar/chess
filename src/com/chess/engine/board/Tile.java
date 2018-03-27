@@ -12,6 +12,7 @@ public abstract class Tile {
 
     public abstract boolean isOccupied();
     public abstract Piece getPiece();
+    public abstract void setPiece(Piece piece);
 
     public Position getPosition() {
         return this.coordinate;
@@ -19,10 +20,6 @@ public abstract class Tile {
 
     public int getBoardIndex() {
         return getPosition().getRow() * 8 + getPosition().getColumn();
-    }
-
-    public void replacePiece(Piece piece) {
-       //TODO
     }
 
     public static class EmptyTile extends Tile {
@@ -41,6 +38,9 @@ public abstract class Tile {
         }
 
         @Override
+        public void setPiece(Piece p) { }
+
+        @Override
         public String toString() {
             return "[ ]";
         }
@@ -49,13 +49,17 @@ public abstract class Tile {
     public static class OccupiedTile extends Tile {
         private Piece piece;
 
-        public OccupiedTile(Position coord, Piece piece) {
-            super(coord);
+        public OccupiedTile(Position pos, Piece piece) {
+            super(pos);
             this.piece = piece;
         }
 
         public Piece getPiece() {
             return this.piece;
+        }
+
+        public void setPiece(Piece piece) {
+            this.piece = piece;
         }
 
         @Override

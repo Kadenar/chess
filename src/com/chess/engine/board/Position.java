@@ -1,5 +1,7 @@
 package com.chess.engine.board;
 
+import java.awt.*;
+
 /*
  * Represents a piece position on the chessboard
  */
@@ -15,6 +17,12 @@ public class Position {
     public Position(Position other){
         this.row = other.row;
         this.column = other.column;
+    }
+
+    public Position(Point point) {
+        this.row = point.y;
+        this.column = point.x;
+
     }
 
     public int getColumn() {
@@ -54,6 +62,5 @@ public class Position {
     @Override
     public String toString() {
         return getColumnChar() + "" + (getRow() + 1);
-        //return "[" + getRow() + ", " + getColumn() + "]";
     }
 }

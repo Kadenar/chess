@@ -1,9 +1,14 @@
 package com.chess.ui;
 
+import com.chess.engine.board.Position;
 import com.chess.engine.board.Tile;
+import com.chess.engine.board.Tile.EmptyTile;
+import com.chess.engine.board.Tile.OccupiedTile;
+import com.chess.engine.utils.BoardUtils;
 
 import javax.swing.*;
 import java.awt.*;
+import java.util.Map;
 
 public class TileUI extends JPanel {
 
@@ -13,14 +18,20 @@ public class TileUI extends JPanel {
     TileUI(Tile tile) {
         this.tile = tile;
         int boardIndex = (tile.getBoardIndex() + tile.getPosition().getRow()) % 2;
-        setBackground( boardIndex == 0 ? Color.WHITE : Color.BLUE);
+        setBackground(boardIndex == 0 ? Color.WHITE : Color.BLUE);
         setBorder(BorderFactory.createLineBorder(Color.BLACK, 1));
+
+        //add(new JLabel(tile.getPosition() + " - [" + tile.getPosition().getRow() + "," + tile.getPosition().getColumn() + "]"));
 
         // If the tile is occupied, add the image to it
         if(tile.isOccupied()) {
             thePiece = new PieceUI(tile.getPiece());
-            addPieceToTile(thePiece, true);
+            add(thePiece);
         }
+    }
+
+    public void setPieceUI(PieceUI piece) {
+        thePiece = piece;
     }
 
     public PieceUI getPieceUI() {
@@ -31,34 +42,60 @@ public class TileUI extends JPanel {
         return this.tile;
     }
 
-    public void addPieceToTile(PieceUI piece, boolean init) {
+    /**
+     * Move the given piece to the current tile
+     * @param fromTile the tile which we are moving from
+     */
+    public void movePieceToTile(TileUI fromTile) {
 
-        // Get the tile we are adding the piece to
-        Tile tileToAddPieceTo = this.tile;
+        // If the destination tile is occupied
+        boolean destinationTileOccupied = getTile().isOccupied();
 
-        // If the destination tile is occupied by the opponent
-        if(tileToAddPieceTo.isOccupied()
-                && tileToAddPieceTo.getPiece().getOwner() != piece.getPiece().getOwner()) {
+        if(!destinationTileOccupied || getTile().getPiece().getOwner() != fromTile.getTile().getPiece().getOwner()) {
+            // Replace the opponents piece with our piece
+            this.updatePieceOnTile(fromTile.getPieceUI());
 
-            // Remove previous piece from the UI
-            removePieceFromTile(tileToAddPieceTo);
-
-            // Add new piece to the UI
-            add(piece);
-        // Destination tile was not occupied or we are initializing game pieces
-        } else if(!tileToAddPieceTo.isOccupied() || init){
-            // Add new piece to the UI
-            add(piece);
+            // Remove dragged piece from original tile
+            fromTile.updatePieceOnTile(null);
         }
     }
 
-    public void removePieceFromTile(Tile tile) {
-        // Remove the piece from the UI
-        removeAll();
+    private void updatePieceOnTile(PieceUI piece) {
 
-        if(tile.isOccupied()) {
-            // Need to remove the piece from the backend as well
-            //TODO
+        // Remove the old piece from the UI
+        if(getComponents().length > 0) {
+            remove(0);
+        }
+
+        // Need to remove the piece from the backend as well and replace with an empty tile
+        Position origPos = tile.getPosition();
+        String origPosStr = origPos.toString();
+        Map<String, Tile> tiles = BoardUtils.getInstance().getBoard().getTileMap();
+
+        // If we replacing tile with nothing, remove old piece and replace tile with empty tile
+        if(piece == null) {
+            EmptyTile newEmpty = new EmptyTile(origPos);
+            tiles.put(origPosStr, newEmpty);
+            this.tile = newEmpty;
+            this.thePiece = null;
+        } else { // Otherwise...
+
+            // Add the new piece in the UI
+            add(piece);
+
+            // Update pointer for the PieceUI
+            this.thePiece = piece;
+
+            // If the tile was not previously occupied, then mark it as occupied now
+            if(!tiles.get(origPosStr).isOccupied()) {
+                OccupiedTile occupied = new OccupiedTile(origPos, piece.getPiece());
+                tiles.put(origPosStr, occupied);
+                this.tile = occupied;
+            } else { // Otherwise, just update the piece on the tile in our board
+                tiles.get(origPosStr).setPiece(piece.getPiece());
+                // Update the actual piece object itself
+                getTile().setPiece(piece.getPiece());
+            }
         }
     }
 }

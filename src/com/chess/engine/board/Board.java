@@ -1,19 +1,14 @@
 package com.chess.engine.board;
 
-import com.chess.engine.board.Tile.EmptyTile;
-import com.chess.engine.board.Tile.OccupiedTile;
-import com.chess.engine.pieces.Piece;
 import com.chess.engine.utils.BoardUtils;
 import com.chess.engine.utils.FenUtils;
 
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 public class Board {
-    private static final int NUM_TILES = 64;
-    private List<Tile> tiles = new ArrayList<>(NUM_TILES);
+    private Map<String, Tile> tileMap = new LinkedHashMap<>();
     private Map<String, Player> players = new HashMap<>();
 
     // Variables used to load/save FEN:
@@ -40,105 +35,27 @@ public class Board {
 
         // Load in the default position
         try {
-            this.loadFen(fen);
+            BoardUtils.getInstance().updateBoardWithFen(this, fen);
         } catch(Exception e) {
             System.out.println("Error encountered parsing fen");
             e.printStackTrace();
         }
     }
 
-    /**
-     * Loads the given fen string if valid
-     * - Populates the board with the pieces for each player
-     * - Sets whose turn it is
-     * - Determines castling ability
-     * - Gets enpassant square if any
-     * - Sets half move counter
-     * - Sets full move counter
-     * @param fen a valid FEN string for a standard chess game
-     * @throws Exception parsing error occurred and FEN string was not valid
-     */
-    public void loadFen(String fen) throws Exception {
-        // If no FEN was provided, use the default starting position
-        if ("".equals(fen)) {
-            fen = FenUtils.DEFAULT_POSITION;
-        }
+    // SETTERS
+    public void setCurrentFen(String fen) { this.fen = fen; }
+    public void setCurrentMove(Player currentMove) { this.currentMove = currentMove; }
+    public void setCastlingAbility(String castlingAbility) { this.castling = castlingAbility; }
+    public void setEnpassantSquare(String enpassantSquare) { this.enPassant = enpassantSquare; }
+    public void setHalfMoves(int halfMoves) { this.halfMoves = halfMoves; }
+    public void setFullMoves(int fullMoves) { this.fullMoves = fullMoves; }
 
-        // Check if the FEN string provided was valid
-        if(!FenUtils.isValid(fen)) {
-            throw new Exception("Invalid fen attempted to be loaded");
-        }
+    // GETTERS
+    public Map<String, Tile> getTileMap() { return this.tileMap; }
+    public Map<String, Player> getPlayers() { return this.players; }
+    public String getCurrentFen() { return fen; }
 
-        // Set the current board's fen if it was valid
-        this.fen = fen;
-
-        // Get the game piece locations and add them to the board
-        buildFromFEN(FenUtils.getGamePieces(fen));
-        currentMove = FenUtils.getPlayerTurn(fen).equals(Player.WHITE.toString()) ? Player.WHITE : Player.BLACK;
-        castling = FenUtils.getCastlingAbility(fen);
-        enPassant = FenUtils.getEnPassantSquare(fen);
-        halfMoves = FenUtils.getHalfMove(fen);
-        fullMoves = FenUtils.getFullMove(fen);
-    }
-
-    /**
-     * Build board with pieces from fen
-     * @param boardPositions
-     * @throws Exception
-     */
-    private void buildFromFEN(final String boardPositions) throws Exception {
-
-        // Split fen to create each rank
-        String ranks[] = boardPositions.split("/");
-        if(ranks.length !=8 ) {
-            throw new Exception("Board representation incorrect in the FEN.");
-        }
-
-        // For each of the ranks in the fen string (should be 8)
-        for(int rankCount = 0; rankCount < ranks.length; rankCount++) {
-
-            // For each character in the rank
-            char[] charArray = ranks[rankCount].toCharArray();
-            int filesAddedForRow = 0;
-
-            // For each character in the current rank
-            for (char ch : charArray) {
-
-                // Get the next character in the rank
-                // If the character is a digit
-                if (Character.isDigit(ch)) {
-
-                    // Add an empty tile in the current rank denoted by digit in FEN
-                    int numFiles = Integer.parseInt(ch + "");
-                    int tempFile = filesAddedForRow;
-                    for (int i = tempFile; i < (numFiles + tempFile); i++) {
-                        this.getTiles().add(new EmptyTile(new Position(7 - rankCount, i)));
-                        filesAddedForRow++;
-                    }
-                }
-                // If the character was a piece, then add it for white or black
-                else {
-                    Position piecePosition = new Position(7 - rankCount, filesAddedForRow);
-                    Piece newPiece = BoardUtils.getInstance().constructPiece(ch, piecePosition);
-                    this.getTiles().add(new OccupiedTile(piecePosition, newPiece));
-                    filesAddedForRow++;
-                }
-            }
-        }
-    }
-
-    public List<Tile> getTiles() {
-        return this.tiles;
-    }
-
-    public Map<String, Player> getPlayers() {
-        return this.players;
-    }
-
-    public String getCurrentFen() {
-        return fen;
-    }
-
+    // DEBUGGING
     public void printFen() {
         String fen = getCurrentFen();
         // Print the current fen
@@ -155,22 +72,22 @@ public class Board {
     @Override
     public String toString() {
         final StringBuilder builder = new StringBuilder();
-        for (int i = 0; i < NUM_TILES; i++) {
+
+        int i = 0;
+        for(Map.Entry<String, Tile> entry : getTileMap().entrySet()) {
             if(i == 0 || i % 8 == 0) {
-                builder.append(7 - i/8+1 + " ");
+                builder.append(7 - i / 8 + 1).append(" ");
             }
 
-            final String tileText = prettyPrint(getTiles().get(i));
-            builder.append(String.format("%3s", tileText));
+            builder.append(String.format("%3s", entry.getValue().toString()));
+
             if ((i + 1) % 8 == 0) {
                 builder.append("\n");
             }
+            i++;
         }
+
         builder.append("   a  b  c  d  e  f  g  h");
         return builder.toString();
-    }
-
-    private static String prettyPrint(Tile tile) {
-        return tile.toString();
     }
 }
