@@ -19,12 +19,12 @@ public enum Player {
         return pieces;
     }
 
-    public boolean isWhite() {
-        return this == WHITE;
+    public boolean isSameSide(Player p) {
+        return this == p;
     }
 
-    public boolean isBlack() {
-        return this == BLACK;
+    public boolean isWhite() {
+        return this == WHITE;
     }
 
     public String toString() {

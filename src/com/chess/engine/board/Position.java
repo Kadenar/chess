@@ -22,7 +22,10 @@ public class Position {
     public Position(Point point) {
         this.row = point.y;
         this.column = point.x;
+    }
 
+    public Position getOffSetPosition(int x, int y) {
+        return new Position(this.getRow() + y, this.getColumn() + x);
     }
 
     public int getColumn() {
@@ -33,34 +36,19 @@ public class Position {
         return row;
     }
 
-    public boolean equals(Position other){
-        return (this.row == other.row) && (this.column == other.column);
-    }
-
     public boolean isValidCoord() {
         return this.row >= 0 && this.row < 8 && this.column >= 0 && this.column < 8;
     }
 
-    public int getTileCoord() {
-        return row * 8 + column;
-    }
-
-    /**
-     * 97 = a
-     * 98 = b
-     * 99 = c
-     * 100 = d
-     * 101 = e
-     * 102 = f
-     * 103 = g
-     * 104 = h
-     */
-    public char getColumnChar() {
-        return (char) (this.column + 97);
+    @Override
+    public boolean equals(Object other) {
+        if(!(other instanceof Position)) return false;
+        Position pos = (Position) other;
+        return this.row == pos.row && this.column == pos.column;
     }
 
     @Override
     public String toString() {
-        return getColumnChar() + "" + (getRow() + 1);
+        return (char)(this.column + 97) + "" + (getRow() + 1);
     }
 }

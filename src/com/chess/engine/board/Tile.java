@@ -23,6 +23,20 @@ public abstract class Tile {
     }
 
     /**
+     * Returns if given tile is the same as passed in tile
+     * @param tile the tile to check
+     * @return true if same tile, false if not
+     */
+
+    @Override
+    public boolean equals(Object tile) {
+        if(!(tile instanceof  Tile)) return false;
+        Tile t = (Tile) tile;
+        return this.getPosition().equals(t.getPosition());
+    }
+
+    /**
+     * Return whether the given tile is a light or dark square
      * @return is this tile light or dark
      */
     public boolean isLight() {
