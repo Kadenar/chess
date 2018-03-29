@@ -5,7 +5,6 @@ import com.chess.engine.board.Position;
 import com.chess.engine.utils.MoveUtils;
 import com.chess.engine.utils.MoveUtils.Direction;
 
-import java.util.ArrayList;
 import java.util.List;
 
 public class Pawn extends Piece {
@@ -25,18 +24,11 @@ public class Pawn extends Piece {
 
     @Override
     public List<Position> createPossibleMoves() {
-        List<Position> validPositions = new ArrayList<>();
-
         // Vertical movement
         Direction d  = getOwner().isWhite() ? Direction.UP : Direction.DOWN;
-        validPositions.addAll(MoveUtils.addPositionsForPawn(this, d));
-
-        // Diagonal movement
-        validPositions.addAll(MoveUtils.addPositionsForDirection(this, Direction.UP, true));
-        validPositions.addAll(MoveUtils.addPositionsForDirection(this, Direction.DOWN, true));
 
         // Return valid positions that the pawn can move to
-        return validPositions;
+        return MoveUtils.addPositionsForPawn(this, d);
     }
 
     @Override

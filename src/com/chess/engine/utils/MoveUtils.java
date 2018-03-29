@@ -62,15 +62,8 @@ public class MoveUtils {
         // First check if the pawn can move in the forward direction
         validPositions.addAll(addPositionsForOffset(piece, 0, yOffSet));
 
-        System.out.println(validPositions.size());
-
-        // Next check if the pawn can move diagonally in either direction
-
-        // Break if the owner of the current tile is the same as owner of the piece being moved
-        /*if(offSetTile.isOccupied()
-                && offSetTile.getPiece().getOwner().isSameSide(ownerOfMove)) {
-            break;
-        }*/
+        // Next check if the pawn can move in the diagonal direction
+        validPositions.addAll(MoveUtils.addPositionsForDirection(piece, d, true));
 
         return validPositions;
     }
