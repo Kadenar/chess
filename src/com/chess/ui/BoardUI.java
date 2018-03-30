@@ -1,6 +1,7 @@
 package com.chess.ui;
 
 import com.chess.engine.board.Board;
+import com.chess.engine.board.GameState;
 import com.chess.engine.board.Position;
 import com.chess.engine.board.Tile;
 import com.chess.engine.utils.BoardUtils;
@@ -63,6 +64,10 @@ public class BoardUI extends JFrame {
         Button newGame = new Button("New game");
         getContentPane().add(newGame, BorderLayout.NORTH);
         newGame.addActionListener(e -> resetGameState());
+
+        //Button printFen = new Button("Print fen");
+        //getContentPane().add(printFen, BorderLayout.NORTH);
+        //printFen.addActionListener(e -> System.out.println(FenUtils.getFen(board)));
 
         // Add history panel
         this.historyPanel = new JPanel();
@@ -138,6 +143,13 @@ public class BoardUI extends JFrame {
         // Originating tile piece
         if(originatingTileUI == null || originatingTileUI.getPieceUI() == null) return false;
 
+        Tile originatingTile = originatingTileUI.getTile();
+
+        // Check if the originating piece being moved came from player whose turn it is
+        if(!GameState.getInstance().getPlayerTurn().isSameSide(originatingTile.getPiece().getOwner())) {
+            return false;
+        }
+
         // Get dragged to tile from mouse position
         TileUI draggedToTileUI = uiTiles.getOrDefault(
                                 new Position(getTilePositionFromMouse()).toString(), null);
@@ -146,7 +158,6 @@ public class BoardUI extends JFrame {
         if(draggedToTileUI == null || draggedToTileUI.isSameTile(originatingTileUI)) return false;
 
         Tile draggedToTile = draggedToTileUI.getTile();
-        Tile originatingTile = originatingTileUI.getTile();
 
         // If the destination tile is not occupied or is an opponent's piece
         if(draggedToTile.isOccupied()
@@ -175,11 +186,7 @@ public class BoardUI extends JFrame {
     private void movePieceToTile(TileUI fromTile, TileUI draggedToTile) {
 
         // Replace the opponents piece with our piece
-        MoveUtils.executeMove(board, draggedToTile, fromTile.getPieceUI());
-
-        // Remove dragged piece from original tile
-        MoveUtils.executeMove(board, fromTile, null);
-
+        MoveUtils.executeMove(board, fromTile, draggedToTile);
     }
 
     /**

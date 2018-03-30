@@ -1,12 +1,13 @@
 package com.chess.engine.utils;
 
 import com.chess.engine.board.Board;
+import com.chess.engine.board.GameState;
 import com.chess.engine.board.Position;
 import com.chess.engine.board.Tile;
 import com.chess.engine.board.Tile.EmptyTile;
+import com.chess.engine.board.Tile.OccupiedTile;
 import com.chess.engine.pieces.Pawn;
 import com.chess.engine.pieces.Piece;
-import com.chess.ui.PieceUI;
 import com.chess.ui.TileUI;
 
 import java.util.ArrayList;
@@ -167,77 +168,96 @@ public class MoveUtils {
 
     /**
      * Updates the piece displayed on a given tile
-     * @param tileToUpdate the tile to be updated
-     * @param uiPiece the piece to add (null if we want to remove any previous piece)
+     * @param fromTile the tile the move was executed from
+     * @param tileToUpdate the tile the move will be executed to
      */
-    public static void executeMove(Board board, TileUI tileToUpdate, PieceUI uiPiece) {
+    public static void executeMove(Board board, TileUI fromTile, TileUI tileToUpdate) {
 
         // If no tile provided, break out
-        if(tileToUpdate == null) {
+        if(fromTile == null || tileToUpdate == null) {
             return;
         }
 
         // Play our sound move
-        //TODO get more sounds / play different sounds depending on the kind of move made
+        // TODO get more sounds / play different sounds depending on the kind of move made
         // i.e - check, checkmate, castles, captures piece, regular move
         SoundUtils.playMoveSound();
 
-        // Remove the old piece from the UI
+        // Remove piece that is being replaced by new piece
         if(tileToUpdate.getComponents().length > 0) {
             tileToUpdate.remove(0);
         }
 
+        // Remove dragged piece from previous tile
+        if(fromTile.getComponents().length > 0) {
+            fromTile.remove(0);
+        }
+
         // Need to remove the piece from the backend as well and replace with an empty tile
+        Position origPos = fromTile.getTile().getPosition();
         Position updatePos = tileToUpdate.getTile().getPosition();
+        String origPosString = origPos.toString();
         String updatePosString = updatePos.toString();
         Map<String, Tile> tiles = board.getTileMap();
 
-        // If we replacing tile with nothing...
-        if(uiPiece == null) {
+        // Add the new piece as a component
+        tileToUpdate.add(fromTile.getPieceUI());
 
-            // Create a new empty tile and replace entry in map
-            EmptyTile newEmpty = new EmptyTile(updatePos);
-            tiles.put(updatePosString, newEmpty);
+        // Update PieceUI pointer for the tile
+        tileToUpdate.setPieceUI(fromTile.getPieceUI());
 
-            // Update the tile ui to reference new empty tile
-            tileToUpdate.setTile(newEmpty);
+        // Get piece information and update that
+        Piece piece = fromTile.getPieceUI().getPiece();
+        piece.setPosition(updatePos);
+        piece.setHasMoved(true);
 
-            // Update the tile ui to have no piece
-            tileToUpdate.setPieceUI(null);
+        // Create a new empty tile at original position and replace entry in map
+        EmptyTile newEmpty = new EmptyTile(updatePos);
+        tiles.put(origPosString, newEmpty);
+
+        // Update the tile ui to reference new empty tile
+        fromTile.setTile(newEmpty);
+
+        // Update the tile ui to have no piece
+        fromTile.setPieceUI(null);
+
+        // Update game state
+        GameState state = GameState.getInstance();
+        state.setPlayerTurn(piece.getOwner().opposite());
+        state.setFullMoves(state.getFullMoves() + 1);
+
+        // This counter is reset after captures or pawn moves, and incremented otherwise.
+        state.setHalfMoves(0); // TODO Have to implement this still
+
+        // Sets enpassant square if last move was pawn move
+        if(piece instanceof Pawn && origPos.getOffSetPosition(0, 2).equals(updatePos)) {
+            state.setEnpassantSquare(origPos.getOffSetPosition(0,1));
+        } else {
+            state.setEnpassantSquare(null);
+        }
+
+        // If the tile was not previously occupied...
+        if(!tiles.get(updatePosString).isOccupied()) {
+
+            // Create a new occupied tile
+            OccupiedTile occupied = new OccupiedTile(updatePos, piece);
+
+            // add the tile to our map
+            tiles.put(updatePosString, occupied);
+
+            // Update our
+            tileToUpdate.setTile(occupied);
 
         } else { // Otherwise...
 
-            // Add the new piece as a component
-            tileToUpdate.add(uiPiece);
+            // Update the piece on the tile in our board
+            tiles.get(updatePosString).setPiece(piece);
 
-            // Update PieceUI pointer for the tile
-            tileToUpdate.setPieceUI(uiPiece);
-
-            Piece piece = uiPiece.getPiece();
-            piece.setPosition(updatePos);
-            piece.setHasMoved(true);
-
-
-            // If the tile was not previously occupied...
-            if(!tiles.get(updatePosString).isOccupied()) {
-
-                // Create a new occupied tile
-                Tile.OccupiedTile occupied = new Tile.OccupiedTile(updatePos, piece);
-
-                // add the tile to our map
-                tiles.put(updatePosString, occupied);
-
-                // Update our
-                tileToUpdate.setTile(occupied);
-
-            } else { // Otherwise...
-
-                // Update the piece on the tile in our board
-                tiles.get(updatePosString).setPiece(piece);
-
-                // Update the actual piece object itself
-                tileToUpdate.getTile().setPiece(piece);
-            }
+            // Update the actual piece object itself
+            tileToUpdate.getTile().setPiece(piece);
         }
+
+        // Print out the fen after each move
+        System.out.println(FenUtils.getFen(board));
     }
 }

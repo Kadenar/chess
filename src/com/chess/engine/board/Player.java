@@ -23,6 +23,9 @@ public enum Player {
         return this == p;
     }
 
+    public Player opposite() {
+        return isWhite() ? Player.BLACK : Player.WHITE;
+    }
     public boolean isWhite() {
         return this == WHITE;
     }
