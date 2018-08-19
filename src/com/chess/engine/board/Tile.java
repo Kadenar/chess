@@ -2,17 +2,33 @@ package com.chess.engine.board;
 
 import com.chess.engine.pieces.Piece;
 
-public abstract class Tile {
+import javax.swing.BorderFactory;
+import javax.swing.JPanel;
+import java.awt.Color;
+
+public class Tile extends JPanel {
 
     private final Position coordinate;
+    private Piece piece;
 
-    private Tile(Position pos) {
-        this.coordinate = pos;
+    public Tile(Position pos) {
+        this(pos, null);
     }
 
-    public abstract boolean isOccupied();
-    public abstract Piece getPiece();
-    public abstract void setPiece(Piece piece);
+    public Tile(Position pos, Piece piece) {
+        super();
+        this.coordinate = pos;
+        setBackground(isLight() ? Color.WHITE : Color.GRAY);
+        setBorder(BorderFactory.createLineBorder(Color.YELLOW, 1));
+
+        this.piece = piece;
+
+        //add(new JLabel(getPosition() + " - [" + getPosition().getRow() + "," + getPosition().getColumn() + "]"));
+        // If the piece isn't null, add it
+        if(piece != null) {
+            add(piece);
+        }
+    }
 
     /**
      * Get the tile's position
@@ -44,61 +60,45 @@ public abstract class Tile {
     }
 
     /**
-     * Represents an empty tile with no piece on it
+     * If given tile is the same position as current tile
+     * @param tile the other tile to check
+     * @return true if same position, false otherwise
      */
-    public static class EmptyTile extends Tile {
-        public EmptyTile(Position coord) {
-            super(coord);
-        }
-
-        @Override
-        public boolean isOccupied() {
-            return false;
-        }
-
-        @Override
-        public Piece getPiece() {
-            return null;
-        }
-
-        @Override
-        public void setPiece(Piece p) { }
-
-        @Override
-        public String toString() {
-            return "[ ]";
-        }
+    public boolean isSameTile(Tile tile) {
+        return this.getPosition().equals(tile.getPosition());
     }
 
     /**
-     * Represents an occupied tile with a given piece on it
+     * Whether this tile is occupied
+     * @return if there is a piece, it is occupied
      */
-    public static class OccupiedTile extends Tile {
-        private Piece piece;
+    public boolean isOccupied() {
+        return getPiece() != null;
+    }
 
-        public OccupiedTile(Position pos, Piece piece) {
-            super(pos);
-            this.piece = piece;
-        }
+    /**
+     * Get the piece for this tile
+     * @return the piece on this tile, or null if there isn't one
+     */
+    public Piece getPiece() {
+        return this.piece;
+    }
 
-        @Override
-        public Piece getPiece() {
-            return this.piece;
-        }
+    /**
+     * Put a piece on this tile and if not null add it as a component as well
+     * @param piece the piece to add, or null
+     */
+    public void setPiece(Piece piece) {
+        this.piece = piece;
 
-        @Override
-        public void setPiece(Piece piece) {
-            this.piece = piece;
+        // If we are putting a piece on the tile, add it to the UI as well as the backend tile
+        if(piece != null) {
+            this.add(piece);
         }
+    }
 
-        @Override
-        public boolean isOccupied() {
-            return true;
-        }
-
-        @Override
-        public String toString() {
-            return "[" + piece.toString() + "]";
-        }
+    @Override
+    public String toString() {
+        return isOccupied() ? "[ ]" : "[" + this.piece.toString() + "]";
     }
 }

@@ -3,6 +3,7 @@ package com.chess.engine.utils;
 import com.chess.engine.board.Board;
 import com.chess.engine.board.Player;
 import com.chess.engine.board.Position;
+import com.chess.engine.board.Tile;
 import com.chess.engine.pieces.*;
 import com.chess.engine.utils.FenUtils.FenException;
 
@@ -53,31 +54,32 @@ public class BoardUtils {
         }
     }
 
-    /**
-     * Converts coordinates to square index.
-     *
-     *@param col the column (file)
-     *@param row the row (rank)
-     *@return the square index
-     */
-    public static final int coorToSqi(int col, int row) {
-        return row * 8 + col;
+    /*
+    * Return a position given a square index such as A8
+    */
+    public static Position  sqiToPosition(final String sqi) {
+        if("-".equals(sqi)) {
+            return null;
+        }
+
+        char colChar = sqi.charAt(0);
+        int col = colChar - 97;
+        char row = sqi.charAt(1);
+
+        return new Position(Integer.parseInt(row + ""), col);
     }
 
-    /**
-     * Extract the column of a square index.
-     *
-     *@param sqi the square index
-     *@return the column
-     */
-    public static final int sqiToCol(int sqi) {
-        return sqi % 8;
+    /*
+    * Get difference in rows
+    */
+    public static int deltaRow(final Tile pos1, final Tile pos2) {
+        return Math.abs(pos1.getPosition().getRow() - pos2.getPosition().getRow());
     }
 
     /*
     * Construct a game piece at the given position
     */
-    protected Piece constructPiece(char ch, Position position) {
+    protected static Piece constructPiece(final char ch) {
         Piece piece = null;
 
         // Determine the color this piece belongs to
@@ -86,22 +88,22 @@ public class BoardUtils {
         // Determine the type of piece
         switch(Character.toLowerCase(ch)) {
             case 'p':
-                piece = new Pawn(color, position);
+                piece = new Pawn(color);
                 break;
             case 'b':
-                piece = new Bishop(color, position);
+                piece = new Bishop(color);
                 break;
             case 'r':
-                piece = new Rook(color, position);
+                piece = new Rook(color);
                 break;
             case 'n':
-                piece = new Knight(color, position);
+                piece = new Knight(color);
                 break;
             case 'q':
-                piece = new Queen(color, position);
+                piece = new Queen(color);
                 break;
             case 'k':
-                piece = new King(color, position);
+                piece = new King(color);
                 break;
             default:
                 break;

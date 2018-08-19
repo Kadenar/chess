@@ -8,7 +8,7 @@ import java.util.Map;
 public class FenUtils {
 
     // The default starting position for a chess game
-    private static final String DEFAULT_POSITION = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
+    public static final String DEFAULT_POSITION = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
 
     /**
      * Loads the given fen string if valid
@@ -31,7 +31,7 @@ public class FenUtils {
         setGameState(board, fen);
     }
 
-    public static String getFen(Board board) {
+    public static String getFen(final Board board) {
         StringBuilder sb = new StringBuilder();
 
         /*========== 1st field : pieces ==========*/
@@ -86,37 +86,37 @@ public class FenUtils {
     /*
     * Sets the game state from fen string
     */
-    private static void setGameState(Board board, String fen) throws FenException {
+    private static void setGameState(Board board, final String fen) throws FenException {
         String[] tokens = fen.split(" ");
         if(tokens.length != 6) throw new FenException("Invalid fen string");
 
         // Add game pieces
         buildBoardFromFEN(board, tokens[0]);
 
+        GameState gameState = GameState.getInstance();
+
         // Set player's move
-        GameState.getInstance().setPlayerTurn(getPlayerTurn(tokens[1]));
+        gameState.setPlayerTurn(getPlayerTurn(tokens[1]));
 
         // Set castling
-        GameState.getInstance().setCastlingAbility(getCastlingAbility(tokens[2]));
+        gameState.setCastlingAbility(getCastlingAbility(tokens[2]));
 
-        // Set enpassant TODO - This is a really ugly way to doing this...
-        Tile t = board.getTileMap().getOrDefault(tokens[3], null);
-        Position p = null;
-        if(t != null) { p = t.getPosition(); }
-        GameState.getInstance().setEnpassantSquare(p);
+        // Set enpassant
+        Position epSq = BoardUtils.sqiToPosition(tokens[3]);
+        gameState.setEnpassantSquare(epSq);
 
         // Set half move counter
-        GameState.getInstance().setHalfMoves(getHalfMove(tokens[4]));
+        gameState.setHalfMoves(getHalfMove(tokens[4]));
 
         // Set full move counter
-        GameState.getInstance().setFullMoves(getFullMove(tokens[5]));
+        gameState.setFullMoves(getFullMove(tokens[5]));
     }
 
     /**
      * Build board with pieces from fen
      * @param boardPositions the board position portion of the FEN string
      */
-    private static void buildBoardFromFEN(Board board, final String boardPositions) throws FenException {
+    private static void buildBoardFromFEN(final Board board, final String boardPositions) throws FenException {
 
         // Split fen to create each rank
         String ranks[] = boardPositions.split("/");
@@ -142,46 +142,48 @@ public class FenUtils {
                     int tempFile = filesAddedForRow;
                     for (int i = tempFile; i < (numFiles + tempFile); i++) {
                         Position pos = new Position(7-rankCount, i);
-                        board.getTileMap().put(pos.toString(), new Tile.EmptyTile(pos));
+                        board.getTileMap().put(pos.toString(), new Tile(pos));
                         filesAddedForRow++;
                     }
                 }
                 // If the character was a piece, then add it for white or black
                 else {
+                    Piece newPiece = BoardUtils.constructPiece(ch);
                     Position piecePosition = new Position(7 - rankCount, filesAddedForRow);
-                    Piece newPiece = BoardUtils.getInstance().constructPiece(ch, piecePosition);
-                    board.getTileMap().put(piecePosition.toString(), new Tile.OccupiedTile(piecePosition, newPiece));
+                    board.getTileMap().put(piecePosition.toString(), new Tile(piecePosition, newPiece));
                     filesAddedForRow++;
                 }
             }
         }
     }
 
+    // Whose turn it is White or Black
     private static Player getPlayerTurn(final String turn) throws FenException {
-        if(turn.equals(Player.WHITE.toString())) {
+        if(Player.WHITE.toString().equals(turn)) {
             return Player.WHITE;
-        } else if(turn.equals(Player.BLACK.toString())) {
+        } else if(Player.BLACK.toString().equals(turn)) {
             return Player.BLACK;
         } else {
             throw new FenException("Malformed fen string: expected 'to play' as second field but found " + turn);
         }
     }
 
+    // Whether castling is allowed for a player
     private static String getCastlingAbility(String castles) {
-
         return castles;
     }
 
+    // Number of moves without a capture
     private static int getHalfMove(String halfMove) {
         return Integer.valueOf(halfMove);
     }
 
+    // Number of moves in this game
     private static int getFullMove(String fullMoves) {
         return Integer.valueOf(fullMoves);
     }
 
-    public static class FenException extends Exception {
-
+    static class FenException extends Exception {
         FenException(String message) {
             super(message);
         }

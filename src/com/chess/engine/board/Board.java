@@ -10,10 +10,6 @@ public class Board {
     private Map<String, Tile> tileMap = new LinkedHashMap<>();
     private Map<String, Player> players = new HashMap<>();
 
-    public Board() {
-        this("");
-    }
-
     public Board(String fen) {
         // Add both players
         this.players.put(Player.WHITE.toString(), Player.WHITE);

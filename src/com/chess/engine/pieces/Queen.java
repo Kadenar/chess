@@ -10,32 +10,33 @@ import java.util.List;
 
 public class Queen extends Piece {
 
-    public Queen(Player color, Position position) {
-        super(color, position);
+    public Queen(Player color) {
+        super(color, "queen.png");
     }
 
     @Override
-    public String getPieceImagePath() {
-        return "images/" + getOwner().toString() + "queen.png";
-    }
-
-    @Override
-    public List<Position> createPossibleMoves() {
+    public List<Position> createPossibleMoves(Position currentPosition) {
         List<Position> validPositions = new ArrayList<>();
 
         // Diagonal movement
-        validPositions.addAll(MoveUtils.addPositionsForDirection(this, Direction.UP, true));
-        validPositions.addAll(MoveUtils.addPositionsForDirection(this, Direction.DOWN, true));
+        validPositions.addAll(MoveUtils.addPositionsForDirection(this, currentPosition,
+                                                                Direction.UP, true));
+        validPositions.addAll(MoveUtils.addPositionsForDirection(this, currentPosition,
+                                                                Direction.DOWN, true));
 
         // Vertical movement
-        validPositions.addAll(MoveUtils.addPositionsForDirection(this, Direction.UP, false));
-        validPositions.addAll(MoveUtils.addPositionsForDirection(this, Direction.DOWN, false));
+        validPositions.addAll(MoveUtils.addPositionsForDirection(this, currentPosition,
+                                                                Direction.UP, false));
+        validPositions.addAll(MoveUtils.addPositionsForDirection(this, currentPosition,
+                                                                Direction.DOWN, false));
 
         // Right
-        validPositions.addAll(MoveUtils.addPositionsForDirection(this, Direction.RIGHT, false));
+        validPositions.addAll(MoveUtils.addPositionsForDirection(this, currentPosition,
+                                                                Direction.RIGHT, false));
 
         // Left
-        validPositions.addAll(MoveUtils.addPositionsForDirection(this, Direction.LEFT, false));
+        validPositions.addAll(MoveUtils.addPositionsForDirection(this, currentPosition,
+                                                                Direction.LEFT, false));
 
         // Return valid positions that the queen can move to
         return validPositions;

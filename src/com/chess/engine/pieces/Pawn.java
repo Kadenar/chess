@@ -9,26 +9,26 @@ import java.util.List;
 
 public class Pawn extends Piece {
 
-    public Pawn(Player color, Position position) {
-        super(color, position);
+    public Pawn(Player color) {
+        super(color, "pawn.png");
     }
 
-    public boolean canMoveTwoSquares() {
-        return !hasMoved();
+    // Determine direction for enpassant
+    public int getEnpassantDirection() {
+        if(getOwner().isSameSide(Player.WHITE)) {
+            return 1;
+        } else {
+            return -1;
+        }
     }
 
     @Override
-    public String getPieceImagePath() {
-        return "images/" + getOwner().toString() + "pawn.png";
-    }
-
-    @Override
-    public List<Position> createPossibleMoves() {
+    public List<Position> createPossibleMoves(Position currentPosition) {
         // Vertical movement
-        Direction d  = getOwner().isWhite() ? Direction.UP : Direction.DOWN;
+        Direction dir  = getOwner().isWhite() ? Direction.UP : Direction.DOWN;
 
         // Return valid positions that the pawn can move to
-        return MoveUtils.addPositionsForPawn(this, d);
+        return MoveUtils.addPositionsForPawn(this, currentPosition, dir);
     }
 
     @Override

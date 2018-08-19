@@ -7,8 +7,9 @@ import java.util.List;
 
 public class GameState {
 
-    List<Piece> whiteCaptured;
-    List<Piece> blackCaptured;
+    // Lists of white / black captured pieces
+    private List<Piece> whiteCaptured;
+    private List<Piece> blackCaptured;
 
     // Is the game over?
     private boolean gameOver;
@@ -23,8 +24,13 @@ public class GameState {
     // Number of halfmoves / full moves
     private int halfMoves, fullMoves;
 
+    // Initialize singleton instance
     private static final GameState INSTANCE = getInstance();
 
+    /**
+     * Get the current game state of a game
+     * @return the current game state of a given game
+     */
     public static GameState getInstance() {
         if(INSTANCE == null) {
             return new GameState(Player.WHITE);
@@ -33,6 +39,10 @@ public class GameState {
         return INSTANCE;
     }
 
+    /**
+     * Game state instance to hold game specific information
+     * @param turn
+     */
     private GameState(Player turn) {
         this.playerTurn = turn;
         gameOver = false;
@@ -62,4 +72,31 @@ public class GameState {
     public void setHalfMoves(int halfMoves) { this.halfMoves = halfMoves; }
     public void setFullMoves(int fullMoves) { this.fullMoves = fullMoves; }
 
+    /**
+     * Add a piece to capture pieces
+     * @param piece the piece that was captured
+     */
+    public void addCapturedPiece(Piece piece) {
+        if(piece.getOwner().isWhite()) {
+            whiteCaptured.add(piece);
+        } else {
+            blackCaptured.add(piece);
+        }
+    }
+
+    /**
+     * Get pieces that have been captured by black
+     * @return white pieces that have been captured
+     */
+    public List<Piece> getWhiteCaptured() {
+        return whiteCaptured;
+    }
+
+    /**
+     * Get pieces that have been captured by white
+     * @return black pieces that have been captured
+     */
+    public List<Piece> getBlackCaptured() {
+        return blackCaptured;
+    }
 }

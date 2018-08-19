@@ -1,10 +1,11 @@
 package com.chess.ui;
 
 import com.chess.engine.board.Board;
-import com.chess.engine.board.GameState;
 import com.chess.engine.board.Position;
 import com.chess.engine.board.Tile;
+import com.chess.engine.pieces.Piece;
 import com.chess.engine.utils.BoardUtils;
+import com.chess.engine.utils.FenUtils;
 import com.chess.engine.utils.MoveUtils;
 
 import javax.swing.*;
@@ -12,12 +13,10 @@ import java.awt.*;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
-import java.util.LinkedHashMap;
 import java.util.Map;
 
 public class BoardUI extends JFrame {
 
-    private final Map<String, TileUI> uiTiles;
     private JLayeredPane layeredPane;
     private JPanel chessBoard;
     private JPanel historyPanel; // TODO To be implemented further
@@ -28,7 +27,6 @@ public class BoardUI extends JFrame {
     public BoardUI(Board board) {
         super("Chess");
         this.board = board;
-        this.uiTiles = new LinkedHashMap<>();
         initFrame();
     }
 
@@ -65,10 +63,6 @@ public class BoardUI extends JFrame {
         getContentPane().add(newGame, BorderLayout.NORTH);
         newGame.addActionListener(e -> resetGameState());
 
-        //Button printFen = new Button("Print fen");
-        //getContentPane().add(printFen, BorderLayout.NORTH);
-        //printFen.addActionListener(e -> System.out.println(FenUtils.getFen(board)));
-
         // Add history panel
         this.historyPanel = new JPanel();
         this.historyPanel.setSize(20, 20);
@@ -78,19 +72,18 @@ public class BoardUI extends JFrame {
         // Create the chess tiles
         PieceListener listener = new PieceListener();
         this.chessBoard = new JPanel();
-        this.chessBoard.setLayout(new GridLayout(8, 8) );
+        this.chessBoard.setLayout(new GridLayout(8, 8));
         this.chessBoard.addMouseListener(listener);
         this.chessBoard.addMouseMotionListener(listener);
 
         //TODO - Need to get better sizing here...
+        // Prevent mouse from dragging pieces outside of the board
         this.chessBoard.setBounds(0, 0, WINDOW_WIDTH-20, WINDOW_HEIGHT-60);
 
         // Add all the chess tiles to the UI
         int i = 0;
         for (Map.Entry<String, Tile> entry : board.getTileMap().entrySet()) {
-            TileUI uiTile = new TileUI(entry.getValue());
-            this.chessBoard.add(uiTile, i);
-            this.uiTiles.put(entry.getKey(), uiTile);
+            this.chessBoard.add(entry.getValue(), i);
             i++;
         }
 
@@ -108,10 +101,9 @@ public class BoardUI extends JFrame {
 
         // Remove all objects from the frame
         this.getContentPane().removeAll();
-        this.uiTiles.clear();
 
         // Recreate the board object with default position
-        BoardUtils.getInstance().updateBoardWithFen(board, "");
+        BoardUtils.getInstance().updateBoardWithFen(board, FenUtils.DEFAULT_POSITION);
 
         // Re-add all UI headers etc
         initBoardUI();
@@ -135,82 +127,48 @@ public class BoardUI extends JFrame {
 
     /**
      * Move originating piece to dragged to tile location
-     * @param originatingTileUI the originating tile on mouse press
+     * @param originatingTile the originating tile on mouse press
      * @return true if the piece was moved, false if not
      */
-    private boolean attemptMove(TileUI originatingTileUI) {
+    private boolean attemptPieceMove(Tile originatingTile) {
+        Position draggedToPosition = new Position(getTilePositionFromMouse());
+        Tile draggedToTile = board.getTileMap().getOrDefault(draggedToPosition.toString(), null);
 
-        // Originating tile piece
-        if(originatingTileUI == null || originatingTileUI.getPieceUI() == null) return false;
-
-        Tile originatingTile = originatingTileUI.getTile();
-
-        // Check if the originating piece being moved came from player whose turn it is
-        if(!GameState.getInstance().getPlayerTurn().isSameSide(originatingTile.getPiece().getOwner())) {
-            return false;
-        }
-
-        // Get dragged to tile from mouse position
-        TileUI draggedToTileUI = uiTiles.getOrDefault(
-                                new Position(getTilePositionFromMouse()).toString(), null);
-
-        // If the dragged to tile is null or the same as original, just exit
-        if(draggedToTileUI == null || draggedToTileUI.isSameTile(originatingTileUI)) return false;
-
-        Tile draggedToTile = draggedToTileUI.getTile();
-
-        // If the destination tile is not occupied or is an opponent's piece
-        if(draggedToTile.isOccupied()
-            && draggedToTile.getPiece().getOwner()
-                .isSameSide(originatingTile.getPiece().getOwner())) {
-            return false;
-        }
-
-        // Check whether the given piece on the originating tile has the dragged to tile as a valid tile
-        if(!originatingTile.getPiece().getMoves().contains(draggedToTile.getPosition())) {
-            return false;
-        }
-
-        // Otherwise, move the piece on the originating tile to the new tile
-        movePieceToTile(originatingTileUI, draggedToTileUI);
+        // Attempt to move the piece on the originating tile to the new tile
+        boolean moved = MoveUtils.executeMove(this.getBoard(), originatingTile, draggedToTile);
         layeredPane.revalidate();
         layeredPane.repaint();
 
-        return true;
+        return moved;
     }
 
-    /**
-     * Move the given piece to the current tile
-     * @param fromTile the tile which we are moving from
-     */
-    private void movePieceToTile(TileUI fromTile, TileUI draggedToTile) {
-
-        // Replace the opponents piece with our piece
-        MoveUtils.executeMove(board, fromTile, draggedToTile);
+    public Board getBoard() {
+        return board;
     }
 
     /**
      * Handle mouse interactions with pieces
      */
     class PieceListener implements MouseListener, MouseMotionListener {
-        private TileUI originatingTile = null;
-        private PieceUI originatingPiece = null;
+        private Tile originatingTile = null;
+        private Piece originatingPiece = null;
         private int xAdjustment, yAdjustment;
 
         @Override
         public void mousePressed(MouseEvent e) {
-            this.originatingTile = uiTiles.getOrDefault(new Position(getTilePositionFromMouse()).toString(), null);
+            this.originatingTile = board.getTileMap().getOrDefault(new Position(getTilePositionFromMouse()).toString(), null);
 
             // If user clicked on a piece
             if(this.originatingTile != null) {
 
-                originatingPiece = originatingTile.getPieceUI();
+                originatingPiece = originatingTile.getPiece();
 
+                // If we have a piece, add it to our layered pane to drag it around
                 if(originatingPiece != null) {
                     Point origLoc = originatingTile.getLocation();
                     xAdjustment = origLoc.x - e.getX();
                     yAdjustment = origLoc.y - e.getY();
-                    originatingPiece.setLocation(origLoc.x + 2, origLoc.y-2);
+                    originatingPiece.setLocation(origLoc.x + 2, origLoc.y - 2);
                     layeredPane.add(originatingPiece, JLayeredPane.DRAG_LAYER);
                 }
             }
@@ -220,18 +178,14 @@ public class BoardUI extends JFrame {
         public void mouseReleased(MouseEvent e) {
 
             // If the piece was not moved, then restore it to previous position
-            if(!attemptMove(this.originatingTile)) {
-
+            if(originatingPiece != null && !attemptPieceMove(this.originatingTile)) {
                 // If we had a piece that we attempted to move from a tile
-                if(originatingPiece != null) {
-                    originatingPiece.setVisible(false);
-                    layeredPane.remove(originatingPiece);
-                    originatingTile.add(originatingPiece);
-                    originatingPiece.setVisible(true);
-                }
+                // Remove it from our layered pane and add it back to the originating tile
+                originatingPiece.setVisible(false);
+                layeredPane.remove(originatingPiece);
+                originatingTile.add(originatingPiece);
+                originatingPiece.setVisible(true);
             }
-
-            layeredPane.repaint();
         }
 
         @Override

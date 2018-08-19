@@ -4,11 +4,8 @@ import com.chess.engine.board.Board;
 import com.chess.engine.board.GameState;
 import com.chess.engine.board.Position;
 import com.chess.engine.board.Tile;
-import com.chess.engine.board.Tile.EmptyTile;
-import com.chess.engine.board.Tile.OccupiedTile;
 import com.chess.engine.pieces.Pawn;
 import com.chess.engine.pieces.Piece;
-import com.chess.ui.TileUI;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -23,83 +20,133 @@ public class MoveUtils {
         RIGHT,
     }
 
-    /*
-    * Method specifically used for Knights for movement
-    */
-    public static List<Position> addPositionsForKnight(Piece piece) {
+    /**
+     * Method specifically used for Knights for movement
+     * @param piece the knight to be moved
+     * @param currentPosition the current position of the knight
+     * @return the positions that are valid to be moved to
+     */
+    public static List<Position> addPositionsForKnight(Piece piece, Position currentPosition) {
         List<Position> positions = new ArrayList<>();
 
         // Over 1 up and down 2
-        positions.addAll(addPositionsForOffset(piece, 1, -2));
-        positions.addAll(addPositionsForOffset(piece, 1, 2));
-        positions.addAll(addPositionsForOffset(piece, -1, 2));
-        positions.addAll(addPositionsForOffset(piece, -1, -2));
+        positions.addAll(addPositionsForOffset(piece, currentPosition, 1, -2));
+        positions.addAll(addPositionsForOffset(piece, currentPosition, 1, 2));
+        positions.addAll(addPositionsForOffset(piece, currentPosition, -1, 2));
+        positions.addAll(addPositionsForOffset(piece, currentPosition, -1, -2));
 
         // Over 2 up and down 1
-        positions.addAll(addPositionsForOffset(piece, 2, -1));
-        positions.addAll(addPositionsForOffset(piece, 2, 1));
-        positions.addAll(addPositionsForOffset(piece, -2, 1));
-        positions.addAll(addPositionsForOffset(piece, -2, -1));
+        positions.addAll(addPositionsForOffset(piece, currentPosition, 2, -1));
+        positions.addAll(addPositionsForOffset(piece, currentPosition, 2, 1));
+        positions.addAll(addPositionsForOffset(piece, currentPosition, -2, 1));
+        positions.addAll(addPositionsForOffset(piece, currentPosition, -2, -1));
 
         return positions;
     }
 
-    /*
+    /**
      * Movement for the pawn
+     * @param piece the pawn piece
+     * @param currentPosition the current position of the pawn
+     * @param dir the direction
+     * @return the positions that are valid to be moved to
      */
-    public static List<Position> addPositionsForPawn(Piece piece, Direction d) {
+    public static List<Position> addPositionsForPawn(Piece piece, Position currentPosition, Direction dir) {
         List<Position> validPositions = new ArrayList<>();
 
         // Only allow this to be called for pawns
         if(!(piece instanceof Pawn)) return validPositions;
 
         int yOffSet = 0;
-        if(d == Direction.UP) {
+        if(dir == Direction.UP) {
             yOffSet = 1;
-        } else if(d == Direction.DOWN) {
+        } else if(dir == Direction.DOWN) {
             yOffSet = -1;
         }
 
         // First check if the pawn can move in the forward direction
-        validPositions.addAll(addPositionsForOffset(piece, 0, yOffSet));
+        validPositions.addAll(addPositionsForOffset(piece, currentPosition, 0, yOffSet));
 
         // Next check if the pawn can move in the diagonal direction
-        validPositions.addAll(MoveUtils.addPositionsForDirection(piece, d, true));
+        validPositions.addAll(MoveUtils.addPositionsForDirection(piece, currentPosition, dir, true));
 
         return validPositions;
     }
 
-
-    /*
+    /**
      * Movement for Bishop, Rook, Queen
+     * @param piece the piece
+     * @param currentPosition the current position of the piece
+     * @param dir the direction of movement (up, down, left, right)
+     * @param isDiagonal whether diagonal movement
+     * @return the positions that are valid to be moved to
      */
-    public static List<Position> addPositionsForDirection(Piece piece, Direction d, boolean diag) {
+    public static List<Position> addPositionsForDirection(Piece piece, Position currentPosition,
+                                                         Direction dir, boolean isDiagonal) {
         List<Position> positions = new ArrayList<>();
-        if(diag) {
-            if(d == Direction.UP) {
-                positions.addAll(addPositionsForDiagonal(piece, 1, 1));
-                positions.addAll(addPositionsForDiagonal(piece, -1, 1));
-            } else if(d == Direction.DOWN) {
-                positions.addAll(addPositionsForDiagonal(piece, 1, -1));
-                positions.addAll(addPositionsForDiagonal(piece, -1, -1));
-            }
-        } else if(d == Direction.UP) {
-            positions.addAll(addPositionsForVertical(piece, -1));
-        } else if(d == Direction.DOWN) {
-            positions.addAll(addPositionsForVertical(piece, 1));
-        } else if(d == Direction.LEFT) {
-            positions.addAll(addPositionsForHorizontal(piece, -1));
-        } else if(d == Direction.RIGHT) {
-            positions.addAll(addPositionsForHorizontal(piece, 1));
+        if(isDiagonal) {
+            int yOffSet = dir == Direction.UP ? 1 : -1;
+            positions.addAll(addPositionsForDiagonal(piece, currentPosition, 1, yOffSet));
+            positions.addAll(addPositionsForDiagonal(piece, currentPosition, -1, yOffSet));
+        } else if(dir == Direction.UP) {
+            positions.addAll(addPositionsForVertical(piece, currentPosition, -1));
+        } else if(dir == Direction.DOWN) {
+            positions.addAll(addPositionsForVertical(piece, currentPosition, 1));
+        } else if(dir == Direction.LEFT) {
+            positions.addAll(addPositionsForHorizontal(piece, currentPosition, -1));
+        } else if(dir == Direction.RIGHT) {
+            positions.addAll(addPositionsForHorizontal(piece, currentPosition, 1));
         }
 
         return positions;
     }
 
-    private static List<Position> addPositionsForOffset(Piece piece, int xOffSet, int yOffSet) {
-        List<Position> positionsForOffset = new ArrayList<>();
-        Position currentPos = piece.getPosition();
-        Position offSetPos = currentPos.getOffSetPosition(xOffSet, yOffSet);
+    /**
+     * Add positions for a diagonal in given x and y offset direction
+     * @param piece the piece to determine positions for
+     * @param currentPosition the current position of the piece
+     * @param xOffSet the x-offset
+     * @param yOffSet the y-offset
+     * @return the positions that are valid to be moved to
+     */
+    private static List<Position> addPositionsForDiagonal(Piece piece, Position currentPosition,
+                                                         int xOffSet, int yOffSet) {
+        return addPositionsForOffset(piece, currentPosition, xOffSet, yOffSet);
+    }
+
+    /**
+     * Add positions for a vertical in given y offset direction
+     * @param piece the piece
+     * @param currentPosition the current position of the piece
+     * @param yOffSet the y-offset
+     * @return the positions that are valid to be moved to
+     */
+    private static List<Position> addPositionsForVertical(Piece piece, Position currentPosition, int yOffSet) {
+        return addPositionsForOffset(piece, currentPosition, 0, yOffSet);
+    }
+
+    /**
+     * Add positions for a horizontal in given x offset direction
+     * @param piece the piece
+     * @param currentPosition the current position of the piece
+     * @param xOffSet the x-offset
+     * @return the positions that are valid to be moved to
+     */
+    private static List<Position> addPositionsForHorizontal(Piece piece, Position currentPosition, int xOffSet) {
+        return addPositionsForOffset(piece, currentPosition, xOffSet, 0);
+    }
+
+    /**
+     * Add positions for a given offset
+     * @param piece the piece
+     * @param currentPosition the current position of the piece
+     * @param xOffSet the x-offset
+     * @param yOffSet the y-offset
+     * @return the positions that are valid to be moved to
+     */
+    private static List<Position> addPositionsForOffset(Piece piece, Position currentPosition, int xOffSet, int yOffSet) {
+        List<Position> positionsSet = new ArrayList<>();
+        Position offSetPos = currentPosition.getOffSetPosition(xOffSet, yOffSet);
         Map<String, Tile> tiles = BoardUtils.getInstance().getBoard().getTileMap();
         int tilesCounted = 0;
 
@@ -111,26 +158,27 @@ public class MoveUtils {
             // If the offset tile is occupied by another piece
             if(offSetIsOccupied) {
 
-                // If the piece being moved is a pawn and the direction is forward and not diagonal
-                if (piece instanceof Pawn && xOffSet == 0) {
-                    break;
-                }
-                // Break if the owner of the current tile is the same as owner of the piece being moved
-                else if(piece.getOwner().isSameSide(offSetTile.getPiece().getOwner())) {
+                // Don't allow a pawn to be moved to another pawn's location unless it is a diagonal move
+                // Don't allow a pawn to move diagonally if the pawn on that tile is the same owner
+                if ((piece instanceof Pawn && xOffSet == 0)
+                        || (piece.getOwner().isSameSide(offSetTile.getPiece().getOwner()))) {
                     break;
                 }
 
-            } else { // If the offset tile is not occupied by another piece
+            }
+            // If the offset tile is not occupied by another piece
+            else {
 
-                // If not occupied and we are a pawn, don't allow diagonal movement
-                if(piece instanceof Pawn && (xOffSet != 0 && yOffSet != 0)) {
+                // If not occupied and we are a pawn, don't allow diagonal movement unless en-passant
+                if(piece instanceof Pawn && (xOffSet != 0 && yOffSet != 0)
+                        && !offSetTile.getPosition().equals(GameState.getInstance().getEPSquare())) {
                     break;
                 }
 
             }
 
             // Add our position if it was not occupied or was an opposing piece
-            positionsForOffset.add(offSetPos);
+            positionsSet.add(offSetPos);
 
             // Break if the tile was occupied as we can't go past an occupied tile
             if(offSetIsOccupied) {
@@ -142,122 +190,139 @@ public class MoveUtils {
             tilesCounted++;
         }
 
-        return positionsForOffset;
+        return positionsSet;
     }
 
-    /*
-    * Add positions for a diagonal in given x and y offset direction
-     */
-    private static List<Position> addPositionsForDiagonal(Piece piece, int xOffSet, int yOffSet) {
-        return addPositionsForOffset(piece, xOffSet, yOffSet);
-    }
+    // Determine whether we can move a given piece from 1 tile to another
+    private static boolean canMovePiece(Tile originatingTile, Tile draggedToTile) {
+        // If originating tile or piece are null..
+        // Or if the dragged to tile is null or the same as original, just exit
+        if(originatingTile == null || originatingTile.getPiece() == null
+        || draggedToTile == null || draggedToTile.isSameTile(originatingTile)) {
+            return false;
+        }
 
-    /*
-    * Add positions for a vertical in given y offset direction
-    */
-    private static List<Position> addPositionsForVertical(Piece piece, int yOffSet) {
-        return addPositionsForOffset(piece, 0, yOffSet);
-    }
+        Piece draggedPiece = originatingTile.getPiece();
 
-    /*
-    * Add positions for a horizontal in given x offset direction
-    */
-    private static List<Position> addPositionsForHorizontal(Piece piece, int xOffSet) {
-        return addPositionsForOffset(piece, xOffSet, 0);
+        // Check if the originating piece being moved came from player whose turn it is
+        if(!GameState.getInstance().getPlayerTurn().isSameSide(draggedPiece.getOwner())) {
+            return false;
+        }
+
+        // If the destination tile is occupied by a piece of player who is moving
+        if(draggedToTile.isOccupied()
+        && draggedToTile.getPiece().getOwner().isSameSide(draggedPiece.getOwner())) {
+            return false;
+        }
+
+        // Check whether the given piece on the originating tile has the dragged to tile as a valid tile
+        return draggedPiece.getMoves(originatingTile.getPosition()).contains(draggedToTile.getPosition());
     }
 
     /**
      * Updates the piece displayed on a given tile
-     * @param fromTile the tile the move was executed from
-     * @param tileToUpdate the tile the move will be executed to
+     * This assumes that the move is valid
+     * @param originatingTile the tile the move was executed from
+     * @param targetTile the tile the move will be executed to
      */
-    public static void executeMove(Board board, TileUI fromTile, TileUI tileToUpdate) {
+    public static boolean executeMove(Board board, Tile originatingTile, Tile targetTile) {
 
-        // If no tile provided, break out
-        if(fromTile == null || tileToUpdate == null) {
-            return;
+        // If we can't move the piece just exit
+        if(!canMovePiece(originatingTile, targetTile)) {
+            return false;
         }
 
         // Play our sound move
         // TODO get more sounds / play different sounds depending on the kind of move made
-        // i.e - check, checkmate, castles, captures piece, regular move
+        // TODO i.e - check, checkmate, castles, captures piece, regular move
         SoundUtils.playMoveSound();
 
-        // Remove piece that is being replaced by new piece
-        if(tileToUpdate.getComponents().length > 0) {
-            tileToUpdate.remove(0);
-        }
-
         // Remove dragged piece from previous tile
-        if(fromTile.getComponents().length > 0) {
-            fromTile.remove(0);
+        if(originatingTile.getComponents().length > 0) {
+            originatingTile.remove(0);
         }
 
-        // Need to remove the piece from the backend as well and replace with an empty tile
-        Position origPos = fromTile.getTile().getPosition();
-        Position updatePos = tileToUpdate.getTile().getPosition();
-        String origPosString = origPos.toString();
-        String updatePosString = updatePos.toString();
-        Map<String, Tile> tiles = board.getTileMap();
-
-        // Add the new piece as a component
-        tileToUpdate.add(fromTile.getPieceUI());
-
-        // Update PieceUI pointer for the tile
-        tileToUpdate.setPieceUI(fromTile.getPieceUI());
-
-        // Get piece information and update that
-        Piece piece = fromTile.getPieceUI().getPiece();
-        piece.setPosition(updatePos);
-        piece.setHasMoved(true);
-
-        // Create a new empty tile at original position and replace entry in map
-        EmptyTile newEmpty = new EmptyTile(updatePos);
-        tiles.put(origPosString, newEmpty);
-
-        // Update the tile ui to reference new empty tile
-        fromTile.setTile(newEmpty);
-
-        // Update the tile ui to have no piece
-        fromTile.setPieceUI(null);
-
-        // Update game state
+        // Get our game state
         GameState state = GameState.getInstance();
-        state.setPlayerTurn(piece.getOwner().opposite());
-        state.setFullMoves(state.getFullMoves() + 1);
 
-        // This counter is reset after captures or pawn moves, and incremented otherwise.
-        state.setHalfMoves(0); // TODO Have to implement this still
+        // Add the captured piece to list captured
+        if(targetTile.isOccupied()) {
+            state.addCapturedPiece(targetTile.getPiece());
+        }
 
-        // Sets enpassant square if last move was pawn move
-        if(piece instanceof Pawn && origPos.getOffSetPosition(0, 2).equals(updatePos)) {
-            state.setEnpassantSquare(origPos.getOffSetPosition(0,1));
+        // Perform the piece move
+        Piece draggedPiece = originatingTile.getPiece();
+        performPieceMove(state, board, targetTile, draggedPiece);
+        originatingTile.setPiece(null);
+
+        // Sets en-passant square if last move was pawn move that spanned 2 rows
+        if(draggedPiece instanceof Pawn && BoardUtils.deltaRow(originatingTile, targetTile) == 2) {
+            Position enpassantPosition = originatingTile.getPosition()
+                    .getOffSetPosition(0, ((Pawn) draggedPiece).getEnpassantDirection());
+            state.setEnpassantSquare(enpassantPosition);
         } else {
             state.setEnpassantSquare(null);
         }
 
-        // If the tile was not previously occupied...
-        if(!tiles.get(updatePosString).isOccupied()) {
-
-            // Create a new occupied tile
-            OccupiedTile occupied = new OccupiedTile(updatePos, piece);
-
-            // add the tile to our map
-            tiles.put(updatePosString, occupied);
-
-            // Update our
-            tileToUpdate.setTile(occupied);
-
-        } else { // Otherwise...
-
-            // Update the piece on the tile in our board
-            tiles.get(updatePosString).setPiece(piece);
-
-            // Update the actual piece object itself
-            tileToUpdate.getTile().setPiece(piece);
-        }
+        // Update player turn and full moves
+        state.setPlayerTurn(state.getPlayerTurn().opposite());
+        state.setFullMoves(state.getFullMoves() + 1);
+        // TODO state.setCastlingAbility("");
 
         // Print out the fen after each move
         System.out.println(FenUtils.getFen(board));
+        return true;
+    }
+
+    /**
+     * Perform a piece capture
+     * @param state the game state to update with captured piece
+     * @param board the board we are updating
+     * @param tileToUpdate the tile we dragged the piece to
+     * @param draggedPiece the dragged piece
+     */
+    private static void performPieceMove(GameState state, Board board, Tile tileToUpdate, Piece draggedPiece) {
+
+        // Mark out piece as having been moved
+        draggedPiece.setHasMoved(true);
+
+        // Set our half move
+        boolean isPawnMove = draggedPiece instanceof Pawn;
+        Position targetPosition = tileToUpdate.getPosition();
+        boolean isEnpassantCapture = targetPosition.equals(state.getEPSquare());
+        boolean isRegularCapture = tileToUpdate.isOccupied();
+
+        // This counter is reset after captures or pawn moves, and incremented otherwise
+        state.setHalfMoves(isPawnMove || isRegularCapture ? 0 : state.getHalfMoves() + 1);
+
+        // If the moved piece was a pawn to captured EP square
+        if(isPawnMove && isEnpassantCapture) {
+            // Get the location of the pawn and remove it from the tile
+            Position enpassantLoc = state.getEPSquare().getOffSetPosition(-1 * ((Pawn)draggedPiece).getEnpassantDirection(), 0);
+            System.out.println("enpassant loc: " + enpassantLoc.toString());
+            capturePiece(board, board.getTileMap().get(enpassantLoc.toString()), draggedPiece);
+        }
+        // Perform capture of piece
+        else if(isRegularCapture) {
+            capturePiece(board, tileToUpdate, draggedPiece);
+        }
+
+        tileToUpdate.setPiece(draggedPiece);
+
+        // Add captured piece to content panel
+        // TODO - boardUI.getCapturedPanel().addCaptured(capturedPiece);
+    }
+
+    private static void capturePiece(Board board, Tile tileToCaptureOn, Piece newPiece) {
+        // Remove piece that is being replaced by new piece
+        if(tileToCaptureOn.getComponents().length > 0) {
+            tileToCaptureOn.remove(0);
+        }
+
+        // Add our new piece
+        Position capturePosition = tileToCaptureOn.getPosition();
+        tileToCaptureOn.setPiece(newPiece);
+        // TODO -> remove this print out
+        System.out.println(board.getTileMap().get(capturePosition.toString()).getPiece());
     }
 }

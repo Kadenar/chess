@@ -9,26 +9,25 @@ import java.util.List;
 
 public class Rook extends Piece {
 
-    public Rook(Player color, Position position) {
-        super(color, position);
+    public Rook(Player color) {
+        super(color, "rook.png");
     }
 
     @Override
-    public String getPieceImagePath() {
-        return "images/" + getOwner().toString() + "rook.png";
-    }
-
-    @Override
-    public List<Position> createPossibleMoves() {
+    public List<Position> createPossibleMoves(Position currentPosition) {
         List<Position> validPositions = new ArrayList<>();
 
         // Vertical movement
-        validPositions.addAll(MoveUtils.addPositionsForDirection(this, MoveUtils.Direction.UP, false));
-        validPositions.addAll(MoveUtils.addPositionsForDirection(this, MoveUtils.Direction.DOWN, false));
+        validPositions.addAll(MoveUtils.addPositionsForDirection(this, currentPosition,
+                                                                MoveUtils.Direction.UP, false));
+        validPositions.addAll(MoveUtils.addPositionsForDirection(this, currentPosition,
+                                                                MoveUtils.Direction.DOWN, false));
 
         // Horizontal movement
-        validPositions.addAll(MoveUtils.addPositionsForDirection(this, MoveUtils.Direction.RIGHT, false));
-        validPositions.addAll(MoveUtils.addPositionsForDirection(this, MoveUtils.Direction.LEFT, false));
+        validPositions.addAll(MoveUtils.addPositionsForDirection(this, currentPosition,
+                                                                MoveUtils.Direction.RIGHT, false));
+        validPositions.addAll(MoveUtils.addPositionsForDirection(this, currentPosition,
+                                                                MoveUtils.Direction.LEFT, false));
 
         // Return valid positions that the rook can move to
         return validPositions;

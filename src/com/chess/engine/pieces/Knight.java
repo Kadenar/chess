@@ -8,19 +8,14 @@ import java.util.List;
 
 public class Knight extends Piece {
 
-    public Knight(Player color, Position position) {
-        super(color, position);
+    public Knight(Player color) {
+        super(color, "knight.png");
     }
 
     @Override
-    public String getPieceImagePath() {
-        return "images/" + getOwner().toString() + "knight.png";
-    }
-
-    @Override
-    public List<Position> createPossibleMoves() {
+    public List<Position> createPossibleMoves(Position currentPosition) {
         // Return valid positions that the knight can move to
-        return MoveUtils.addPositionsForKnight(this);
+        return MoveUtils.addPositionsForKnight(this, currentPosition);
     }
 
     @Override
