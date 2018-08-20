@@ -1,7 +1,8 @@
 package com.chess.engine.pieces;
 
+import com.chess.engine.Move;
 import com.chess.engine.board.Player;
-import com.chess.engine.board.Position;
+import com.chess.engine.board.Tile;
 
 import javax.imageio.ImageIO;
 import javax.swing.*;
@@ -40,11 +41,11 @@ public abstract class Piece extends JLabel{
     }
 
     // Methods for override in subclasses
-    abstract public List<Position> createPossibleMoves(Position currentPosition);
+    abstract public List<Move> createPossibleMoves(Tile currentPosition);
     abstract public String toString();
 
     // Check whether this piece has moved
-    boolean hasMoved() {
+    public boolean hasMoved() {
         return this.hasMoved;
     }
 
@@ -62,8 +63,17 @@ public abstract class Piece extends JLabel{
         return this.owner;
     }
 
+    // Whether the given piece is the same color as another
+    public boolean isSameSide(Piece other) {
+        return isSameSide(other.getOwner());
+    }
+
+    public boolean isSameSide(Player owner) {
+        return getOwner() == owner;
+    }
+
     /// Get possible moves
-    public List<Position> getMoves(Position currPosition) {
+    public List<Move> getMoves(Tile currPosition) {
         return createPossibleMoves(currPosition);
     }
 

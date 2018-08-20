@@ -2,9 +2,8 @@ package com.chess.engine.board;
 
 import com.chess.engine.pieces.Piece;
 
-import javax.swing.BorderFactory;
-import javax.swing.JPanel;
-import java.awt.Color;
+import javax.swing.*;
+import java.awt.*;
 
 public class Tile extends JPanel {
 
@@ -18,10 +17,9 @@ public class Tile extends JPanel {
     public Tile(Position pos, Piece piece) {
         super();
         this.coordinate = pos;
+        this.piece = piece;
         setBackground(isLight() ? Color.WHITE : Color.GRAY);
         setBorder(BorderFactory.createLineBorder(Color.YELLOW, 1));
-
-        this.piece = piece;
 
         //add(new JLabel(getPosition() + " - [" + getPosition().getRow() + "," + getPosition().getColumn() + "]"));
         // If the piece isn't null, add it
@@ -55,17 +53,8 @@ public class Tile extends JPanel {
      * Return whether the given tile is a light or dark square
      * @return is this tile light or dark
      */
-    public boolean isLight() {
+    private boolean isLight() {
         return (getPosition().getRow() % 2) == (getPosition().getColumn() % 2);
-    }
-
-    /**
-     * If given tile is the same position as current tile
-     * @param tile the other tile to check
-     * @return true if same position, false otherwise
-     */
-    public boolean isSameTile(Tile tile) {
-        return this.getPosition().equals(tile.getPosition());
     }
 
     /**
@@ -99,6 +88,6 @@ public class Tile extends JPanel {
 
     @Override
     public String toString() {
-        return isOccupied() ? "[ ]" : "[" + this.piece.toString() + "]";
+        return isOccupied() ? "[" + this.piece.toString() + "]" : "[ ]";
     }
 }

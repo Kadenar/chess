@@ -1,7 +1,8 @@
 package com.chess.engine.pieces;
 
+import com.chess.engine.Move;
 import com.chess.engine.board.Player;
-import com.chess.engine.board.Position;
+import com.chess.engine.board.Tile;
 import com.chess.engine.utils.MoveUtils;
 import com.chess.engine.utils.MoveUtils.Direction;
 
@@ -15,7 +16,7 @@ public class Pawn extends Piece {
 
     // Determine direction for enpassant
     public int getEnpassantDirection() {
-        if(getOwner().isSameSide(Player.WHITE)) {
+        if(getOwner().equals(Player.WHITE)) {
             return 1;
         } else {
             return -1;
@@ -23,7 +24,7 @@ public class Pawn extends Piece {
     }
 
     @Override
-    public List<Position> createPossibleMoves(Position currentPosition) {
+    public List<Move> createPossibleMoves(Tile currentPosition) {
         // Vertical movement
         Direction dir  = getOwner().isWhite() ? Direction.UP : Direction.DOWN;
 

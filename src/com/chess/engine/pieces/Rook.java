@@ -1,7 +1,9 @@
 package com.chess.engine.pieces;
 
+import com.chess.engine.Move;
 import com.chess.engine.board.Player;
 import com.chess.engine.board.Position;
+import com.chess.engine.board.Tile;
 import com.chess.engine.utils.MoveUtils;
 
 import java.util.ArrayList;
@@ -14,8 +16,8 @@ public class Rook extends Piece {
     }
 
     @Override
-    public List<Position> createPossibleMoves(Position currentPosition) {
-        List<Position> validPositions = new ArrayList<>();
+    public List<Move> createPossibleMoves(Tile currentPosition) {
+        List<Move> validPositions = new ArrayList<>();
 
         // Vertical movement
         validPositions.addAll(MoveUtils.addPositionsForDirection(this, currentPosition,

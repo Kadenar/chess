@@ -22,15 +22,10 @@ public class Move {
     }
 
     // Don't need to check for promotion for equivalent
-    public boolean equals(Move other) {
-        return this.fromTile == other.fromTile && this.toTile == other.toTile;
-    }
-
-    public Tile getFrom() {
-        return this.fromTile;
-    }
-
-    public Tile getTo() {
-        return this.toTile;
+    @Override
+    public boolean equals(Object other) {
+        if(!(other instanceof Move)) return false;
+        Move mov = (Move) other;
+        return this.fromTile == mov.fromTile && this.toTile == mov.toTile;
     }
 }

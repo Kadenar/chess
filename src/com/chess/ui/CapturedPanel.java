@@ -1,10 +1,8 @@
 package com.chess.ui;
 
 import com.chess.engine.board.Player;
-import com.chess.engine.pieces.Knight;
 import com.chess.engine.pieces.Pawn;
 import com.chess.engine.pieces.Piece;
-import com.chess.engine.pieces.Rook;
 
 import javax.swing.*;
 import javax.swing.border.EtchedBorder;
@@ -27,14 +25,15 @@ class CapturedPanel extends JPanel {
         this.add(whitePieces, BorderLayout.SOUTH);
 
         addCaptured(new Pawn(Player.WHITE));
+        /*addCaptured(new Pawn(Player.WHITE));
         addCaptured(new Pawn(Player.BLACK));
         addCaptured(new Pawn(Player.WHITE));
         addCaptured(new Knight(Player.WHITE));
         addCaptured(new Knight(Player.BLACK));
-        addCaptured(new Rook(Player.WHITE));
+        addCaptured(new Rook(Player.WHITE));*/
     }
 
-    private void addCaptured(Piece piece) {
+    void addCaptured(Piece piece) {
         JLabel scaledImg = piece.getScaledImg();
         // Add black pieces to white panel and white pieces to black panel
         if(piece.getOwner().isWhite()) {

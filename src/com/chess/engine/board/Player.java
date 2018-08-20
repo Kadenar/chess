@@ -18,11 +18,6 @@ public enum Player {
     public List<Piece> getPieces() {
         return pieces;
     }
-
-    public boolean isSameSide(Player p) {
-        return this == p;
-    }
-
     public Player opposite() {
         return isWhite() ? Player.BLACK : Player.WHITE;
     }

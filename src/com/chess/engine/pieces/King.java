@@ -1,7 +1,8 @@
 package com.chess.engine.pieces;
 
+import com.chess.engine.Move;
 import com.chess.engine.board.Player;
-import com.chess.engine.board.Position;
+import com.chess.engine.board.Tile;
 import com.chess.engine.utils.MoveUtils;
 
 import java.util.ArrayList;
@@ -14,8 +15,8 @@ public class King extends Piece {
     }
 
     @Override
-    public List<Position> createPossibleMoves(Position currentPosition) {
-        List<Position> validPositions = new ArrayList<>();
+    public List<Move> createPossibleMoves(Tile currentPosition) {
+        List<Move> validPositions = new ArrayList<>();
 
         // Diagonal movement
         validPositions.addAll(MoveUtils.addPositionsForDirection(this, currentPosition,
@@ -40,7 +41,7 @@ public class King extends Piece {
         // castling ability
         //TODO need to add in ability for the king to castle with either rook
         if(!hasMoved()) {
-
+            validPositions.addAll(MoveUtils.addCastlingPositions(currentPosition));
         }
 
         // Return valid positions that the king can move to

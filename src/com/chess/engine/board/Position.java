@@ -27,15 +27,12 @@ public class Position {
     public Position getOffSetPosition(int x, int y) {
         return new Position(this.getRow() + y, this.getColumn() + x);
     }
-
     public int getColumn() {
         return column;
     }
-
     public int getRow() {
         return row;
     }
-
     public boolean isValidCoord() {
         return this.row >= 0 && this.row < 8 && this.column >= 0 && this.column < 8;
     }

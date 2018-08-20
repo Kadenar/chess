@@ -4,123 +4,63 @@ import com.chess.engine.board.Board;
 import com.chess.engine.board.Position;
 import com.chess.engine.board.Tile;
 import com.chess.engine.pieces.Piece;
-import com.chess.engine.utils.BoardUtils;
-import com.chess.engine.utils.FenUtils;
 import com.chess.engine.utils.MoveUtils;
 
-import javax.swing.JFrame;
-import javax.swing.JLayeredPane;
-import javax.swing.JPanel;
-import javax.swing.WindowConstants;
-import java.awt.BorderLayout;
-import java.awt.Button;
-import java.awt.Dimension;
-import java.awt.GridLayout;
-import java.awt.MouseInfo;
-import java.awt.Point;
+import javax.swing.*;
+import java.awt.*;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
 import java.util.Map;
 
-public class BoardUI extends JFrame {
+public class BoardPanel extends JPanel {
 
     private JLayeredPane layeredPane;
-    private JPanel chessBoard;
     private Board board;
-    private final static int WINDOW_WIDTH = 600;
-    private final static int WINDOW_HEIGHT = 600;
 
-    public BoardUI(Board board) {
-        super("Chess");
+    BoardPanel(Board board) {
+        super();
         this.board = board;
-        initFrame();
-    }
-
-    /**
-     * Initialize the frame object
-     */
-    private void initFrame() {
-        JFrame.setDefaultLookAndFeelDecorated(true);
-        this.setSize(WINDOW_WIDTH, WINDOW_HEIGHT);
-        this.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
-        this.setResizable(true);
-        getContentPane().setLayout(new BorderLayout());
-        // Add file and rank headers
-        getContentPane().add(new FileHeaders(), BorderLayout.SOUTH);
-        getContentPane().add(new RankHeaders(), BorderLayout.WEST);
         initBoardUI();
-        this.setVisible(true);
     }
 
     /**
      * Initialize the game board
-     * - File and rank headers
-     * - History pane
-     * - New game button
      * - All chess tiles
      */
-    private void initBoardUI() {
+    public void initBoardUI() {
         // Create layered pane for dragging purposes
         this.layeredPane = new JLayeredPane();
-        this.layeredPane.setPreferredSize(new Dimension(WINDOW_WIDTH, WINDOW_HEIGHT));
 
-        // Add new game button
-        Button newGame = new Button("New game");
-        getContentPane().add(newGame, BorderLayout.NORTH);
-        newGame.addActionListener(e -> resetGameState());
+        // Set our board's layout to an 8x8 grid
+        this.setLayout(new GridLayout(8, 8));
+        this.setBounds(0, 0, ChessFrame.WINDOW_WIDTH-60, ChessFrame.WINDOW_HEIGHT-60);
 
         // Create the chess tiles
         PieceListener listener = new PieceListener();
-        this.chessBoard = new JPanel();
-        this.chessBoard.setLayout(new GridLayout(8, 8));
-        this.chessBoard.addMouseListener(listener);
-        this.chessBoard.addMouseMotionListener(listener);
-
-        // Prevent mouse from dragging pieces outside of the board
-        this.chessBoard.setBounds(0, 0, WINDOW_WIDTH-20, WINDOW_HEIGHT-60);
+        this.addMouseListener(listener);
+        this.addMouseMotionListener(listener);
 
         // Add all the chess tiles to the UI
         int i = 0;
         for (Map.Entry<String, Tile> entry : board.getTileMap().entrySet()) {
-            this.chessBoard.add(entry.getValue(), i);
+            // Add the individual tiles to the board in the center
+            this.add(entry.getValue(), i);
             i++;
         }
 
-        // Add the individual tiles to the board in the center
-        this.layeredPane.add(chessBoard, JLayeredPane.DEFAULT_LAYER);
-
-        // Add the chess board layered pane in the center
-        getContentPane().add(this.layeredPane, BorderLayout.CENTER);
-    }
-
-    /**
-     * Reset the game state (on click of new game button)
-     */
-    private void resetGameState() {
-
-        // Remove all objects from the frame
-        this.getContentPane().removeAll();
-
-        // Recreate the board object with default position
-        BoardUtils.getInstance().updateBoardWithFen(board, FenUtils.DEFAULT_POSITION);
-
-        // Re-add all UI headers etc
-        initBoardUI();
-
-        // Reload the UI
-        layeredPane.revalidate();
-        layeredPane.repaint();
+        // Add the myself to our layered pane's default layer
+        this.layeredPane.add(this, JLayeredPane.DEFAULT_LAYER);
     }
 
     /*
-    * Mouse coordinates are the inverse of the tile coordinates
-    * So we need to take the absolute value of 8 - mouse coordinate
-    */
+     * Mouse coordinates are the inverse of the tile coordinates
+     * So we need to take the absolute value of 8 - mouse coordinate
+     */
     private Point getTilePositionFromMouse() {
         Point mouse = MouseInfo.getPointerInfo().getLocation();
-        int tile_x_pos = (mouse.x / (this.chessBoard.getWidth() / 8) - 1);
-        int tile_y_pos = mouse.y / (this.chessBoard.getHeight() / 8);
+        int tile_x_pos = (mouse.x / (this.getWidth() / 8) - 1);
+        int tile_y_pos = mouse.y / (this.getHeight() / 8);
         tile_y_pos = Math.abs(8 - tile_y_pos);
         return new Point(tile_x_pos, tile_y_pos);
     }
@@ -142,8 +82,16 @@ public class BoardUI extends JFrame {
         return moved;
     }
 
+    /**
+     * Get the board that we are representing
+     * @return the board object that is being displayed
+     */
     public Board getBoard() {
-        return board;
+        return this.board;
+    }
+
+    public JLayeredPane getLayeredPane() {
+        return this.layeredPane;
     }
 
     /**
