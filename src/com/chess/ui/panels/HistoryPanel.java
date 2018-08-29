@@ -1,4 +1,4 @@
-package com.chess.ui;
+package com.chess.ui.panels;
 
 
 import com.chess.engine.utils.FenUtils;
@@ -6,12 +6,12 @@ import com.chess.engine.utils.FenUtils;
 import javax.swing.*;
 import java.awt.*;
 
-class HistoryPanel extends JPanel{
+public class HistoryPanel extends JPanel{
 
     private JPanel movesPanel;
     private JTextArea moveHistory;
 
-    HistoryPanel() {
+    public HistoryPanel() {
         super(new GridLayout(2, 1));
         movesPanel = new JPanel();
         movesPanel.setLayout(new BoxLayout(movesPanel, BoxLayout.Y_AXIS));

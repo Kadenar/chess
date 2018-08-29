@@ -7,7 +7,11 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 public class Board {
+
+    // All tiles for the current board
     private Map<String, Tile> tileMap = new LinkedHashMap<>();
+
+    // The players for the current board
     private Map<String, Player> players = new HashMap<>();
 
     public Board(String fen) {

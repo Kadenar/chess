@@ -1,57 +1,46 @@
-package com.chess.ui;
+package com.chess.ui.menus;
 
 import com.chess.engine.GameSettings;
 import com.chess.engine.board.Board;
 import com.chess.engine.utils.BoardUtils;
 import com.chess.engine.utils.FenUtils;
+import com.chess.ui.ChessFrame;
 
 import javax.swing.*;
 import java.awt.event.KeyEvent;
 
-public class GameOptionsMenu extends JMenuBar {
+class GameOptionsMenu extends JMenu {
 
     private ChessFrame owningFrame;
-    private JMenu gameOptions;
 
-    public GameOptionsMenu(ChessFrame owningFrame) {
-        super();
+    GameOptionsMenu(ChessFrame owningFrame) {
+        super("Game options");
         this.owningFrame = owningFrame;
-        addGameOptions();
-
-        // TODO Add more menus here later
+        populateMenu();
     }
 
-    private void addGameOptions() {
-        gameOptions = new JMenu("Game options");
-
-        // Add new game button
+    /**
+     * Adds standard game options
+     */
+    private void populateMenu() {
+        // Add new game option
         JMenuItem newGame = new JMenuItem("New Game");
         newGame.setMnemonic(KeyEvent.VK_N);
         newGame.addActionListener(e -> resetGameState());
-        gameOptions.add(newGame);
+        add(newGame);
 
         // Highlight valid moves
         JCheckBoxMenuItem highlighting = new JCheckBoxMenuItem("Highlight valid moves?");
         highlighting.setState(GameSettings.getInstance().isEnableHighlighting());
         highlighting.setMnemonic(KeyEvent.VK_H);
         highlighting.addItemListener(e -> enableHighlighting());
-        gameOptions.add(highlighting);
-
-
-        // Print current FEN
-        JMenuItem printFen = new JMenuItem("Print Fen");
-        printFen.setMnemonic(KeyEvent.VK_P);
-        printFen.addActionListener(e -> printFen());
-        gameOptions.add(printFen);
+        add(highlighting);
 
         // Quit the game
         JMenuItem quit = new JMenuItem("Quit");
         quit.setMnemonic(KeyEvent.VK_Q);
         quit.addActionListener(e -> System.exit(0));
-        gameOptions.add(quit);
-
-        // Add menu to the menu bar
-        add(gameOptions);
+        add(quit);
     }
 
     /**
@@ -63,11 +52,12 @@ public class GameOptionsMenu extends JMenuBar {
         owningFrame.getBoardPanel().getLayeredPane().removeAll();
 
         // Recreate the board object with default position
-        BoardUtils.getInstance().updateBoardFromFen(owningFrame.getBoardPanel().getBoard(), FenUtils.DEFAULT_POSITION);
-
-        owningFrame.getBoardPanel().initBoardUI();
-        owningFrame.revalidate();
-        owningFrame.repaint();
+        Board board = owningFrame.getBoardPanel().getBoard();
+        BoardUtils.getInstance().updateBoardFromFen(board, FenUtils.DEFAULT_POSITION);
+        owningFrame.getBoardPanel().reloadBoard(board);
+        owningFrame.getBoardPanel().getLayeredPane().revalidate();
+        owningFrame.getBoardPanel().getLayeredPane().repaint();
+        owningFrame.getBoardPanel().getLayeredPane().setVisible(true);
     }
 
     /**
@@ -78,12 +68,4 @@ public class GameOptionsMenu extends JMenuBar {
         settings.setEnableHighlighting(!settings.isEnableHighlighting());
     }
 
-    /**
-     * Print the current board state as a FEN string
-     */
-    private void printFen() {
-        Board board = BoardUtils.getInstance().getBoard();
-        System.out.println(FenUtils.getFen(board));
-        System.out.println(board.toString());
-    }
 }

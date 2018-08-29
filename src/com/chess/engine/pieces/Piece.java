@@ -1,5 +1,6 @@
 package com.chess.engine.pieces;
 
+import com.chess.engine.BoardMoves;
 import com.chess.engine.Move;
 import com.chess.engine.board.Player;
 import com.chess.engine.board.Tile;
@@ -11,9 +12,11 @@ import java.awt.Image;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
-public abstract class Piece extends JLabel{
+public abstract class Piece extends JLabel {
 
     private final Player owner;
     private final JLabel scaledImg;
@@ -45,20 +48,20 @@ public abstract class Piece extends JLabel{
     }
 
     /**
-     * The list of possible moves for a given piece
-     * @param currentPosition the current tile the piece resides on
-     * @return list of possible moves
-     */
-    public final List<Move> getMoves(Tile currentPosition) {
-        return createPossibleMoves(currentPosition);
-    }
-
-    /**
      * Create the possible moves for the given piece (to be implemented based on type of piece)
      * @param currentPosition the current position
      * @return list of possible moves that are possible
      */
-    abstract List<Move> createPossibleMoves(Tile currentPosition);
+    public abstract List<Move> createPossibleMoves(Tile currentPosition);
+
+    /**
+     * Get valid moves for this piece
+     * @return get list of valid moves for this piece
+     */
+    public List<Move> getMoves() {
+        Map<Piece, List<Move>> allValidMoves = getOwner().isWhite() ? BoardMoves.getInstance().getWhiteValidMoves() : BoardMoves.getInstance().getBlackValidMoves();
+        return allValidMoves.getOrDefault(this, new ArrayList<>());
+    }
 
     /**
      * Force subclasses to implement toString method

@@ -21,7 +21,7 @@ public class Tile extends JPanel {
         highlightTile(false);
         setBorder(BorderFactory.createLineBorder(Color.YELLOW, 1));
 
-        add(new JLabel(getPosition() + " - [" + getPosition().getRow() + "," + getPosition().getColumn() + "]"));
+        //add(new JLabel(getPosition() + " - [" + getPosition().getRow() + "," + getPosition().getColumn() + "]"));
         // If the piece isn't null, add it
         if(piece != null) {
             add(piece);

@@ -1,5 +1,6 @@
 package com.chess.engine.utils;
 
+import com.chess.engine.BoardMoves;
 import com.chess.engine.board.*;
 import com.chess.engine.pieces.King;
 import com.chess.engine.pieces.Piece;
@@ -108,7 +109,7 @@ public class FenUtils {
         gameState.setCastlingAbility(getCastlingAbility(tokens[2]));
 
         // Set enpassant
-        Position epSq = BoardUtils.sqiToPosition(tokens[3]);
+        Position epSq = BoardUtils.getInstance().sqiToPosition(tokens[3]);
         gameState.setEnpassantSquare(epSq);
 
         // Set half move counter
@@ -116,6 +117,9 @@ public class FenUtils {
 
         // Set full move counter
         gameState.setFullMoves(getFullMove(tokens[5]));
+
+        // Populate moves for current game state
+        BoardMoves.getInstance().populateMoves();
     }
 
     /**
@@ -155,7 +159,7 @@ public class FenUtils {
                 // If the character was a piece, then add it for white or black
                 else {
                     Position piecePosition = new Position(7 - rankCount, filesAddedForRow);
-                    Piece newPiece = BoardUtils.constructPiece(ch);
+                    Piece newPiece = BoardUtils.getInstance().constructPiece(ch);
                     // Need to know the king's position
                     if(ch == 'k' || ch == 'K') {
                         GameState.getInstance().setKingPosition((King) newPiece, piecePosition);

@@ -1,5 +1,6 @@
 package com.chess.engine.utils;
 
+import com.chess.engine.BoardMoves;
 import com.chess.engine.Move;
 import com.chess.engine.board.*;
 import com.chess.engine.pieces.King;
@@ -296,7 +297,7 @@ public class MoveUtils {
         // TODO - Check if move would put the king in check
 
         // Check whether the given piece on the originating tile has the dragged to tile as a valid tile
-        return draggedPiece.getMoves(originatingTile).contains(new Move(originatingTile, draggedToTile));
+        return draggedPiece.getMoves().contains(new Move(originatingTile, draggedToTile));
     }
 
     /**
@@ -315,12 +316,6 @@ public class MoveUtils {
         // Perform the piece move
         updateGameState(board, originatingTile, targetTile);
 
-        // Print out the fen after each move and whether in check
-        System.out.println("White King loc: " + GameState.getInstance().getWhiteKingPosition());
-        System.out.println("Black King loc: " + GameState.getInstance().getBlackKingPosition());
-        System.out.println("White in check? : " + isKingInCheck(Player.WHITE));
-        System.out.println("Black in check? : " + isKingInCheck(Player.BLACK));
-
         return true;
     }
 
@@ -330,34 +325,19 @@ public class MoveUtils {
      * @return true if in check, false if not
      */
     private static boolean isKingInCheck(Player playerToCheck) {
-        Position kingPosition;
-        if(playerToCheck.isWhite()) {
-            kingPosition = GameState.getInstance().getWhiteKingPosition();
-        } else {
-            kingPosition = GameState.getInstance().getBlackKingPosition();
-        }
+        Position kingPosition = playerToCheck.isWhite()
+                ? GameState.getInstance().getWhiteKingPosition() :  GameState.getInstance().getBlackKingPosition();
 
-        // For all tiles on our board
-        Map<String, Tile> tiles = BoardUtils.getInstance().getBoard().getTileMap();
-        for(Map.Entry<String, Tile> tile : tiles.entrySet()) {
-            Tile currentTile = tile.getValue();
+        // For each piece opposite player controls
+        List<Piece> ownerPieces = playerToCheck.opposite().getPieces();
 
-            // If the tile is occupied
-            if(currentTile.isOccupied()) {
-
-                // And the occupying piece is of the opposing color
-                Piece pieceOnTile = currentTile.getPiece();
-                if(pieceOnTile.getOwner().equals(playerToCheck.opposite())) {
-
-                    // Get all valid moves for each piece
-                    List<Move> validMoves = pieceOnTile.getMoves(currentTile);
-                    for (Move move : validMoves) {
-
-                        // If any of the moves destination matches our king position, then we are in check
-                        if (move.getDestination().getPosition().equals(kingPosition)) {
-                            return true;
-                        }
-                    }
+        // For each of that player's pieces
+        // Check if that piece has a move with same location as the king
+        for (Piece piece : ownerPieces) {
+            List<Move> moves = piece.getMoves();
+            for(Move move : moves) {
+                if (move.getDestination().getPosition().equals(kingPosition)) {
+                    return true;
                 }
             }
         }
@@ -378,13 +358,11 @@ public class MoveUtils {
 
         Piece draggedPiece = tileToMoveFrom.getPiece();
         Position targetPosition = tileToUpdate.getPosition();
+        Player currentPlayer = draggedPiece.getOwner();
         boolean isPawnMove = draggedPiece instanceof Pawn;
         boolean isKingMove = draggedPiece instanceof King;
         boolean isEnpassantCapture = targetPosition.equals(state.getEPSquare());
         boolean isRegularCapture = tileToUpdate.isOccupied();
-
-        // Update the user interface
-        updatePiecesOnBoard(board, tileToMoveFrom, tileToUpdate, isPawnMove && isEnpassantCapture);
 
         // This counter is reset after captures or pawn moves, and incremented otherwise
         state.setHalfMoves(isPawnMove || isRegularCapture ? 0 : state.getHalfMoves() + 1);
@@ -395,13 +373,13 @@ public class MoveUtils {
         }
 
         // If king moved > 1 square, update castling and play different sound
-        if(isKingMove && BoardUtils.deltaCol(tileToMoveFrom, tileToUpdate) > 1) {
+        if(isKingMove && BoardUtils.getInstance().deltaCol(tileToMoveFrom, tileToUpdate) > 1) {
             updateCastling(draggedPiece.getOwner().opposite());
             SoundUtils.playMoveSound("castle");
         } else {
             // Add the captured piece to list captured and play capture sound
             if(tileToUpdate.isOccupied()) {
-                state.addCapturedPiece(tileToUpdate.getPiece());
+                currentPlayer.capturePiece(currentPlayer.opposite(), tileToUpdate.getPiece());
                 SoundUtils.playMoveSound("capture2");
             } else {
                 // If check move, play checking sound
@@ -416,7 +394,7 @@ public class MoveUtils {
         }
 
         // Sets en-passant square if last move was pawn move that spanned 2 rows
-        if(isPawnMove && BoardUtils.deltaRow(tileToMoveFrom, tileToUpdate) == 2) {
+        if(isPawnMove && BoardUtils.getInstance().deltaRow(tileToMoveFrom, tileToUpdate) == 2) {
             Position enpassantPosition = tileToMoveFrom.getPosition()
                     .getOffSetPosition(0, ((Pawn) draggedPiece).getEnpassantDirection());
             state.setEnpassantSquare(enpassantPosition);
@@ -425,8 +403,17 @@ public class MoveUtils {
         }
 
         // Update player turn and full moves
-        state.setPlayerTurn(state.getPlayerTurn().opposite());
+        state.setPlayerTurn(currentPlayer.opposite());
         state.setFullMoves(state.getFullMoves() + 1);
+
+        // Populate moves for current game state
+        BoardMoves.getInstance().populateMoves();
+
+        // TODO remove this
+        System.out.println(state.getPlayerTurn() + " in check? : " + isKingInCheck(state.getPlayerTurn()));
+
+        // Update the user interface
+        updatePiecesOnBoard(board, tileToMoveFrom, tileToUpdate, isPawnMove && isEnpassantCapture);
     }
 
     /**

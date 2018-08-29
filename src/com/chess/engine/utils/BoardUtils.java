@@ -10,9 +10,8 @@ import com.chess.engine.utils.FenUtils.FenException;
 import java.util.Map;
 
 public class BoardUtils {
-
-    private static final BoardUtils INSTANCE = getInstance();
     private Board board;
+    private static final BoardUtils INSTANCE = getInstance();
 
     public static BoardUtils getInstance() {
         if(INSTANCE == null) {
@@ -37,9 +36,10 @@ public class BoardUtils {
     public void updateBoardFromFen(Board board, String fen) {
         this.board = board;
 
-        // Clear each player's pieces
+        // Clear each player's pieces / captured pieces
         for (Map.Entry<String, Player> entry : board.getPlayers().entrySet()) {
             entry.getValue().getPieces().clear();
+            entry.getValue().getCapturedPieces().clear();
         }
 
         // Clear tiles on the board
@@ -56,7 +56,7 @@ public class BoardUtils {
     /*
     * Return a position given a square index such as A8
     */
-    public static Position sqiToPosition(final String sqi) {
+    Position sqiToPosition(final String sqi) {
         if("-".equals(sqi)) {
             return null;
         }
@@ -71,21 +71,21 @@ public class BoardUtils {
     /*
     * Get difference in rows
     */
-    public static int deltaRow(final Tile pos1, final Tile pos2) {
+    int deltaRow(final Tile pos1, final Tile pos2) {
         return Math.abs(pos1.getPosition().getRow() - pos2.getPosition().getRow());
     }
 
     /*
      * Get difference in cols
      */
-    public static int deltaCol(final Tile pos1, final Tile pos2) {
+    int deltaCol(final Tile pos1, final Tile pos2) {
         return Math.abs(pos1.getPosition().getColumn() - pos2.getPosition().getColumn());
     }
 
     /*
     * Construct a game piece at the given position
     */
-    protected static Piece constructPiece(final char ch) {
+    Piece constructPiece(final char ch) {
         Piece piece = null;
 
         // Determine the color this piece belongs to

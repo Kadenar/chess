@@ -40,6 +40,6 @@ public class Move {
 
     @Override
     public String toString() {
-        return "Can move to: " + getDestination().toString();
+        return getDestination().getPosition().toString();
     }
 }

@@ -122,32 +122,4 @@ public class GameState {
     public boolean canCastleQueenSide(Player player) {
         return player.isWhite() ? castling.contains("Q") : castling.contains("q");
     }
-
-    /**
-     * Add a piece to capture pieces
-     * @param piece the piece that was captured
-     */
-    public void addCapturedPiece(Piece piece) {
-        if(piece.getOwner().isWhite()) {
-            whiteCaptured.add(piece);
-        } else {
-            blackCaptured.add(piece);
-        }
-    }
-
-    /**
-     * Get pieces that have been captured by black
-     * @return white pieces that have been captured
-     */
-    public List<Piece> getWhiteCaptured() {
-        return whiteCaptured;
-    }
-
-    /**
-     * Get pieces that have been captured by white
-     * @return black pieces that have been captured
-     */
-    public List<Piece> getBlackCaptured() {
-        return blackCaptured;
-    }
 }

@@ -1,4 +1,4 @@
-package com.chess.ui;
+package com.chess.ui.panels;
 
 import com.chess.engine.GameSettings;
 import com.chess.engine.Move;
@@ -9,6 +9,7 @@ import com.chess.engine.board.Tile;
 import com.chess.engine.pieces.Piece;
 import com.chess.engine.utils.MoveUtils;
 import com.chess.engine.utils.SoundUtils;
+import com.chess.ui.ChessFrame;
 
 import javax.swing.*;
 import javax.swing.border.Border;
@@ -22,20 +23,12 @@ import java.util.Map;
 
 public class BoardPanel extends JPanel {
 
-    private JLayeredPane layeredPane;
+    private final JLayeredPane layeredPane;
     private Board board;
 
-    BoardPanel(Board board) {
+    public BoardPanel(Board board) {
         super();
-        this.board = board;
-        initBoardUI();
-    }
 
-    /**
-     * Initialize the game board
-     * - All chess tiles
-     */
-    public void initBoardUI() {
         // Create layered pane for dragging purposes
         this.layeredPane = new JLayeredPane();
         // TODO need to figure out how to add layout here for resizing
@@ -56,6 +49,20 @@ public class BoardPanel extends JPanel {
         this.addMouseListener(listener);
         this.addMouseMotionListener(listener);
 
+        // Reload the tiles
+        reloadBoard(board);
+
+        // Add the myself to our layered pane's default layer
+        this.layeredPane.add(this, JLayeredPane.DEFAULT_LAYER);
+    }
+
+    /**
+     * Initialize the game board
+     * - All chess tiles
+     */
+    public void reloadBoard(Board board) {
+        this.board = board;
+
         // Add all the chess tiles to the UI
         int i = 0;
         for (Map.Entry<String, Tile> entry : board.getTileMap().entrySet()) {
@@ -64,10 +71,7 @@ public class BoardPanel extends JPanel {
             i++;
         }
 
-        // Add the myself to our layered pane's default layer
-        this.layeredPane.add(this, JLayeredPane.DEFAULT_LAYER);
         SoundUtils.playMoveSound("startGame");
-
     }
 
     /*
@@ -75,21 +79,12 @@ public class BoardPanel extends JPanel {
      * So we need to take the absolute value of 8 - mouse coordinate
      */
     private Point getTilePositionFromMouse(MouseEvent evt) {
-        //Point mouse = MouseInfo.getPointerInfo().getLocation();
-        Point mouse = evt.getLocationOnScreen();
+        //Point mouse = evt.getPoint();
+        Point mouse = MouseInfo.getPointerInfo().getLocation();
+        SwingUtilities.convertPointFromScreen(mouse, this);
         int tile_x_pos = (mouse.x / (this.getWidth() / 8) - 1);
         int tile_y_pos = mouse.y / (this.getHeight() / 8);
         tile_y_pos = Math.abs(8 - tile_y_pos);
-
-        System.out.println("Pane Width: " + getLayeredPane().getWidth());
-        System.out.println("Pane Height: " + getLayeredPane().getHeight());
-
-        System.out.println("Board Width: " + this.getWidth());
-        System.out.println("Board Height: " + this.getHeight());
-
-        System.out.println("Mouse pos: [" + mouse.getX() + ", " + mouse.getY() + "]");
-        System.out.println("Tile pos: [" + tile_y_pos + ", " + tile_x_pos + "]");
-
         return new Point(tile_x_pos, tile_y_pos);
     }
 
@@ -126,13 +121,20 @@ public class BoardPanel extends JPanel {
         private Piece originatingPiece = null;
         private int xAdjustment, yAdjustment;
         private List<Tile> targetMoveTiles = new ArrayList<>();
+        JPanel printOut = new JPanel();
+        JLabel label = new JLabel();
+
+        PieceListener() {
+            super();
+            layeredPane.add(printOut, JLayeredPane.DRAG_LAYER);
+        }
 
         /**
          * Add indicators to the UI for tiles we can move to
          */
         private void addIndicators() {
             if(GameSettings.getInstance().isEnableHighlighting()) {
-                List<Move> validMoves = originatingPiece.getMoves(originatingTile);
+                List<Move> validMoves = originatingPiece.getMoves();
 
                 for (Move validMove : validMoves) {
                     Tile destination = validMove.getDestination();
@@ -158,7 +160,7 @@ public class BoardPanel extends JPanel {
 
         /**
          * Prevent player from moving a piece if it is not their turn
-         * @return
+         * @return whether the player can pickup a given piece
          */
         private boolean canPickupPiece() {
             return originatingPiece != null && originatingPiece.getOwner().equals(GameState.getInstance().getPlayerTurn());
@@ -171,7 +173,9 @@ public class BoardPanel extends JPanel {
             // Clear out lists
             targetMoveTiles.clear();
 
-            this.originatingTile = board.getTileMap().getOrDefault(new Position(getTilePositionFromMouse(evt)).toString(), null);
+            // Get mouse press location in tile coordinate system
+            Position mousePressPosition = new Position(getTilePositionFromMouse(evt));
+            this.originatingTile = board.getTileMap().getOrDefault(mousePressPosition.toString(), null);
 
             // If user clicked on a piece
             if(this.originatingTile != null) {
@@ -182,11 +186,12 @@ public class BoardPanel extends JPanel {
                 // If we have a piece, add it to our layered pane to drag it around
                 if(canPickupPiece()) {
                     Point origLoc = originatingTile.getLocation();
-                    xAdjustment = origLoc.x - evt.getX();
-                    yAdjustment = origLoc.y - evt.getY();
                     originatingPiece.setLocation(origLoc.x + 2, origLoc.y - 2);
                     layeredPane.add(originatingPiece, JLayeredPane.DRAG_LAYER);
 
+                    // Set adjustments for user when dragging
+                    xAdjustment = origLoc.x - evt.getX();
+                    yAdjustment = origLoc.y - evt.getY();
 
                     // Add indicators for possible moves
                     addIndicators();
@@ -249,13 +254,11 @@ public class BoardPanel extends JPanel {
 
         @Override
         public void mouseMoved(MouseEvent evt) {
-            JPanel printOut = new JPanel();
-            JLabel label = new JLabel();
-            label.setText(getTilePositionFromMouse(evt).x + " " + getTilePositionFromMouse(evt).y);
+            label.setText("<html>Mouse pos: [" + evt.getX() + ", " + evt.getY() + "]"
+                    + "<br/>" + "Tile pos: [y: " + getTilePositionFromMouse(evt).y + ", x: " + getTilePositionFromMouse(evt).x + "]</html>");
             printOut.add(label);
-            printOut.setBounds(0,0, 10, 10);
-            layeredPane.add(printOut, JLayeredPane.DRAG_LAYER);
-            layeredPane.revalidate();
+            printOut.setBounds(0,0, 200, 50);
+            printOut.setLocation(evt.getX(), evt.getY());
             layeredPane.repaint();
         }
 

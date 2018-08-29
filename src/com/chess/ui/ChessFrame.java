@@ -1,14 +1,20 @@
 package com.chess.ui;
 
 import com.chess.engine.board.Board;
+import com.chess.ui.menus.ChessMenuBar;
+import com.chess.ui.menus.GameOptionsMenu;
+import com.chess.ui.panels.BoardPanel;
+import com.chess.ui.panels.HistoryPanel;
 
-import javax.swing.*;
-import java.awt.*;
+import javax.swing.JFrame;
+import javax.swing.WindowConstants;
+import java.awt.BorderLayout;
+import java.awt.Dimension;
 
 public class ChessFrame extends JFrame {
 
-    final static int WINDOW_WIDTH = 750;
-    final static int WINDOW_HEIGHT = 750;
+    public final static int WINDOW_WIDTH = 750;
+    public final static int WINDOW_HEIGHT = 750;
 
     private BoardPanel boardPanel;
 
@@ -19,17 +25,24 @@ public class ChessFrame extends JFrame {
         this.setSize(WINDOW_WIDTH, WINDOW_HEIGHT);
         this.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
         this.setResizable(true);
+
+        // Initialize 8x8 grid containing representation of our board
         this.boardPanel = new BoardPanel(board);
 
+        // Add game options menu
         addMenuBar();
 
         // Add all headers and panels to the frame
         addHeadersAndPanels();
         this.setVisible(true);
+        boardPanel.setSize(boardPanel.getLayeredPane().getSize());
     }
 
+    /**
+     * Add Game Options Menu
+     */
     private void addMenuBar() {
-        setJMenuBar(new GameOptionsMenu(this));
+        setJMenuBar(new ChessMenuBar(this));
     }
 
     /**
@@ -49,7 +62,7 @@ public class ChessFrame extends JFrame {
      * Get our board panel
      * @return the board to reload
      */
-    BoardPanel getBoardPanel() {
+    public BoardPanel getBoardPanel() {
         return boardPanel;
     }
 }
