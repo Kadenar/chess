@@ -19,7 +19,7 @@ class HistoryPanel extends JPanel{
         moveHistory.setEditable(false);
         moveHistory.setText(FenUtils.DEFAULT_POSITION);
         moveHistory.setLineWrap(true);
-        this.setSize(20, 20);
+        //this.setSize(20, 20);
         movesPanel.add(new JLabel("Moves"));
         movesPanel.add(moveHistory);
 

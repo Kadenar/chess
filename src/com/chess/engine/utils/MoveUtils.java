@@ -316,9 +316,6 @@ public class MoveUtils {
         updateGameState(board, originatingTile, targetTile);
 
         // Print out the fen after each move and whether in check
-        // TODO remove this eventually
-        System.out.println(FenUtils.getFen(board));
-        System.out.println(board.toString());
         System.out.println("White King loc: " + GameState.getInstance().getWhiteKingPosition());
         System.out.println("Black King loc: " + GameState.getInstance().getBlackKingPosition());
         System.out.println("White in check? : " + isKingInCheck(Player.WHITE));

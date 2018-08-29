@@ -81,7 +81,7 @@ public class BoardUI extends JFrame {
         //layeredPane.setLayout(new FlowLayout());
         border = BorderFactory.createLineBorder(Color.BLUE, 5);
         this.layeredPane.setBorder(border);
-        this.layeredPane.setBounds(0, 0, WINDOW_WIDTH-10, WINDOW_HEIGHT-70);
+        //this.layeredPane.setBounds(0, 0, WINDOW_WIDTH-10, WINDOW_HEIGHT-70);
 
         // Add all the chess tiles to the UI
         int i = 0;
@@ -191,6 +191,7 @@ public class BoardUI extends JFrame {
             targetMoveTiles.clear();
 
             this.originatingTile = board.getTileMap().getOrDefault(new Position(getTilePositionFromMouse()).toString(), null);
+            originatingTile.highlightTile(true);
 
             // If user clicked on a piece
             if(this.originatingTile != null) {
@@ -208,7 +209,7 @@ public class BoardUI extends JFrame {
                     layeredPane.add(originatingPiece, JLayeredPane.DRAG_LAYER);
 
                     // Add indicators for possible moves
-                    addIndicators();
+                    //addIndicators();
                 }
             }
         }
@@ -225,6 +226,7 @@ public class BoardUI extends JFrame {
 
             // Remove the indicators from tiles
             removeIndicators();
+            originatingTile.highlightTile(false);
 
             // If the piece was not moved, then restore it to previous position
             if(originatingPiece != null && !attemptPieceMove(this.originatingTile)) {
@@ -275,7 +277,11 @@ public class BoardUI extends JFrame {
         public void mouseClicked(MouseEvent e) {}
 
         @Override
-        public void mouseMoved(MouseEvent e) { }
+        public void mouseMoved(MouseEvent e) {
+            JLabel label = new JLabel();
+            label.setText(getTilePositionFromMouse().x + " " + getTilePositionFromMouse().y);
+            layeredPane.add(label, JLayeredPane.DRAG_LAYER);
+        }
 
         @Override
         public void mouseEntered(MouseEvent e) { }

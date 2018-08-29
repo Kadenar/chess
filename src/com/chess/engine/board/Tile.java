@@ -18,11 +18,10 @@ public class Tile extends JPanel {
         super();
         this.coordinate = pos;
         this.piece = piece;
-        //setBackground(isLight() ? Color.WHITE : Color.GRAY);
         highlightTile(false);
         setBorder(BorderFactory.createLineBorder(Color.YELLOW, 1));
 
-        //add(new JLabel(getPosition() + " - [" + getPosition().getRow() + "," + getPosition().getColumn() + "]"));
+        add(new JLabel(getPosition() + " - [" + getPosition().getRow() + "," + getPosition().getColumn() + "]"));
         // If the piece isn't null, add it
         if(piece != null) {
             add(piece);
