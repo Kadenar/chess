@@ -1,5 +1,6 @@
 package com.chess.engine.board;
 
+import com.chess.engine.pieces.King;
 import com.chess.engine.pieces.Piece;
 
 import java.util.ArrayList;
@@ -16,6 +17,9 @@ public class GameState {
 
     // Which player's turn it is
     private Player playerTurn;
+
+    private Position whiteKingPos;
+    private Position blackKingPos;
 
     // State of castling / enPassant
     private String castling;
@@ -41,7 +45,7 @@ public class GameState {
 
     /**
      * Game state instance to hold game specific information
-     * @param turn
+     * @param turn which player's turn it is
      */
     private GameState(Player turn) {
         this.playerTurn = turn;
@@ -71,6 +75,53 @@ public class GameState {
     public void setEnpassantSquare(Position enpassantSquare) { this.enPassant = enpassantSquare; }
     public void setHalfMoves(int halfMoves) { this.halfMoves = halfMoves; }
     public void setFullMoves(int fullMoves) { this.fullMoves = fullMoves; }
+
+    /**
+     * Update the position if the king piece with new position
+     * @param kingPiece the king piece to update
+     * @param newPosition the new position of the king
+     */
+    public void setKingPosition(King kingPiece, Position newPosition) {
+        if(kingPiece.getOwner().isWhite()) {
+            whiteKingPos = newPosition;
+        } else {
+            blackKingPos = newPosition;
+        }
+    }
+
+    /**
+     * Get the white king's current position
+     * @return the positino of the white king
+     */
+    public Position getWhiteKingPosition() {
+        return whiteKingPos;
+    }
+
+    /**
+     * Get the black king's current position
+     * @return the position of the black king
+     */
+    public Position getBlackKingPosition() {
+        return blackKingPos;
+    }
+
+    /**
+     * Check whether given player can king side castle
+     * @param player the player to check
+     * @return true if can king side castle, false if not
+     */
+    public boolean canCastleKingSide(Player player) {
+        return player.isWhite() ? castling.contains("K") : castling.contains("k");
+    }
+
+    /**
+     * Check whether given player can queen side castle
+     * @param player the player to check
+     * @return true if can queen side castle, false if not
+     */
+    public boolean canCastleQueenSide(Player player) {
+        return player.isWhite() ? castling.contains("Q") : castling.contains("q");
+    }
 
     /**
      * Add a piece to capture pieces

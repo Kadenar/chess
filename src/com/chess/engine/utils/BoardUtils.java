@@ -34,7 +34,7 @@ public class BoardUtils {
      * @param board the game board to be created
      * @param fen the fen string to update the board with
      */
-    public void updateBoardWithFen(Board board, String fen) {
+    public void updateBoardFromFen(Board board, String fen) {
         this.board = board;
 
         // Clear each player's pieces
@@ -49,15 +49,14 @@ public class BoardUtils {
         try {
             FenUtils.loadFen(board, fen);
         } catch (FenException e) {
-            System.out.println(e.getMessage());
-            e.printStackTrace();
+            System.err.println(e.getMessage());
         }
     }
 
     /*
     * Return a position given a square index such as A8
     */
-    public static Position  sqiToPosition(final String sqi) {
+    public static Position sqiToPosition(final String sqi) {
         if("-".equals(sqi)) {
             return null;
         }
@@ -74,6 +73,13 @@ public class BoardUtils {
     */
     public static int deltaRow(final Tile pos1, final Tile pos2) {
         return Math.abs(pos1.getPosition().getRow() - pos2.getPosition().getRow());
+    }
+
+    /*
+     * Get difference in cols
+     */
+    public static int deltaCol(final Tile pos1, final Tile pos2) {
+        return Math.abs(pos1.getPosition().getColumn() - pos2.getPosition().getColumn());
     }
 
     /*

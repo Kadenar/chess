@@ -11,18 +11,28 @@ public class Board {
     private Map<String, Player> players = new HashMap<>();
 
     public Board(String fen) {
-        // Add both players
         this.players.put(Player.WHITE.toString(), Player.WHITE);
         this.players.put(Player.BLACK.toString(), Player.BLACK);
-
-        // Load in the default position
-        BoardUtils.getInstance().updateBoardWithFen(this, fen);
+        BoardUtils.getInstance().updateBoardFromFen(this, fen);
     }
 
     // GETTERS
     public Map<String, Tile> getTileMap() { return this.tileMap; }
     public Map<String, Player> getPlayers() { return this.players; }
 
+    /**
+     * String representation of the board
+     * 8 [r] [n] [b] [q] [k] [b] [n] [r]
+     * 7 [p] [p] [p] [p] [p] [p] [p] [p]
+     * 6 [ ] [ ] [ ] [ ] [ ] [ ] [ ] [ ]
+     * 5 [ ] [ ] [ ] [ ] [ ] [ ] [ ] [ ]
+     * 4 [ ] [ ] [ ] [ ] [ ] [ ] [ ] [ ]
+     * 3 [ ] [ ] [ ] [ ] [ ] [ ] [ ] [ ]
+     * 2 [P] [P] [P] [P] [P] [P] [P] [P]
+     * 1 [R] [N] [B] [Q] [K] [N] [B] [R]
+     *    a   b   c   d   e   f   g   h
+     * @return can be used to print out the board in a string representation
+     */
     @Override
     public String toString() {
         final StringBuilder builder = new StringBuilder();

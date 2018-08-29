@@ -1,5 +1,6 @@
 package com.chess.ui;
 
+import com.chess.engine.Move;
 import com.chess.engine.board.Board;
 import com.chess.engine.board.Position;
 import com.chess.engine.board.Tile;
@@ -7,20 +8,16 @@ import com.chess.engine.pieces.Piece;
 import com.chess.engine.utils.BoardUtils;
 import com.chess.engine.utils.FenUtils;
 import com.chess.engine.utils.MoveUtils;
+import com.chess.engine.utils.SoundUtils;
 
-import javax.swing.JFrame;
-import javax.swing.JLayeredPane;
-import javax.swing.JPanel;
-import javax.swing.WindowConstants;
-import java.awt.BorderLayout;
-import java.awt.Button;
-import java.awt.Dimension;
-import java.awt.GridLayout;
-import java.awt.MouseInfo;
-import java.awt.Point;
+import javax.swing.*;
+import javax.swing.border.Border;
+import java.awt.*;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 public class BoardUI extends JFrame {
@@ -42,7 +39,7 @@ public class BoardUI extends JFrame {
      */
     private void initFrame() {
         JFrame.setDefaultLookAndFeelDecorated(true);
-        this.setSize(WINDOW_WIDTH, WINDOW_HEIGHT);
+        this.setMinimumSize(new Dimension(WINDOW_WIDTH, WINDOW_HEIGHT));
         this.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
         this.setResizable(true);
         getContentPane().setLayout(new BorderLayout());
@@ -51,6 +48,7 @@ public class BoardUI extends JFrame {
         getContentPane().add(new RankHeaders(), BorderLayout.WEST);
         initBoardUI();
         this.setVisible(true);
+        SoundUtils.playMoveSound("startGame");
     }
 
     /**
@@ -61,10 +59,6 @@ public class BoardUI extends JFrame {
      * - All chess tiles
      */
     private void initBoardUI() {
-        // Create layered pane for dragging purposes
-        this.layeredPane = new JLayeredPane();
-        this.layeredPane.setPreferredSize(new Dimension(WINDOW_WIDTH, WINDOW_HEIGHT));
-
         // Add new game button
         Button newGame = new Button("New game");
         getContentPane().add(newGame, BorderLayout.NORTH);
@@ -72,13 +66,22 @@ public class BoardUI extends JFrame {
 
         // Create the chess tiles
         PieceListener listener = new PieceListener();
-        this.chessBoard = new JPanel();
-        this.chessBoard.setLayout(new GridLayout(8, 8));
+        this.chessBoard = new JPanel(new GridLayout(8, 8));
         this.chessBoard.addMouseListener(listener);
         this.chessBoard.addMouseMotionListener(listener);
+        // TODO Remove border
+        Border border = BorderFactory.createLineBorder(Color.RED, 5);
+        this.chessBoard.setBorder(border);
+        // Set bounds for the chessboard when adding it to layered pane
+        this.chessBoard.setBounds(0, 0, WINDOW_WIDTH-10, WINDOW_HEIGHT-70);
 
-        // Prevent mouse from dragging pieces outside of the board
-        this.chessBoard.setBounds(0, 0, WINDOW_WIDTH-20, WINDOW_HEIGHT-60);
+        // Create layered pane for dragging purposes
+        this.layeredPane = new JLayeredPane();
+        // TODO need to figure out how to add layout here for resizing
+        //layeredPane.setLayout(new FlowLayout());
+        border = BorderFactory.createLineBorder(Color.BLUE, 5);
+        this.layeredPane.setBorder(border);
+        this.layeredPane.setBounds(0, 0, WINDOW_WIDTH-10, WINDOW_HEIGHT-70);
 
         // Add all the chess tiles to the UI
         int i = 0;
@@ -103,7 +106,7 @@ public class BoardUI extends JFrame {
         this.getContentPane().removeAll();
 
         // Recreate the board object with default position
-        BoardUtils.getInstance().updateBoardWithFen(board, FenUtils.DEFAULT_POSITION);
+        BoardUtils.getInstance().updateBoardFromFen(board, FenUtils.DEFAULT_POSITION);
 
         // Re-add all UI headers etc
         initBoardUI();
@@ -135,11 +138,7 @@ public class BoardUI extends JFrame {
         Tile draggedToTile = board.getTileMap().getOrDefault(draggedToPosition.toString(), null);
 
         // Attempt to move the piece on the originating tile to the new tile
-        boolean moved = MoveUtils.executeMove(this.getBoard(), originatingTile, draggedToTile);
-        layeredPane.revalidate();
-        layeredPane.repaint();
-
-        return moved;
+        return MoveUtils.executeMove(this.getBoard(), originatingTile, draggedToTile);
     }
 
     public Board getBoard() {
@@ -153,9 +152,44 @@ public class BoardUI extends JFrame {
         private Tile originatingTile = null;
         private Piece originatingPiece = null;
         private int xAdjustment, yAdjustment;
+        private List<Tile> targetMoveTiles = new ArrayList<>();
 
+        /**
+         * Add indicators to the UI for tiles we can move to
+         */
+        private void addIndicators() {
+            List<Move> validMoves = originatingPiece.getMoves(originatingTile);
+
+            for (Move validMove : validMoves) {
+                Tile destination = validMove.getDestination();
+                targetMoveTiles.add(destination);
+                destination.highlightTile(true);
+            }
+
+            layeredPane.revalidate();
+            layeredPane.repaint();
+        }
+
+        /**
+         * Remove all indicators from the layered pane
+         */
+        private void removeIndicators() {
+            for (Tile targetTile : targetMoveTiles) {
+                targetTile.highlightTile(false);
+            }
+        }
+
+        /**
+         * When pressing the mouse, figure out which tile we are on
+         * Check whether there is a piece and if so, start holding it
+         * Also highlight tiles that are available to move to
+         * @param evt the mouse event that occurred
+         */
         @Override
-        public void mousePressed(MouseEvent e) {
+        public void mousePressed(MouseEvent evt) {
+            // Clear out lists
+            targetMoveTiles.clear();
+
             this.originatingTile = board.getTileMap().getOrDefault(new Position(getTilePositionFromMouse()).toString(), null);
 
             // If user clicked on a piece
@@ -165,17 +199,32 @@ public class BoardUI extends JFrame {
 
                 // If we have a piece, add it to our layered pane to drag it around
                 if(originatingPiece != null) {
+
+                    // Calculate original location to add piece we are dragging into drag layer
                     Point origLoc = originatingTile.getLocation();
-                    xAdjustment = origLoc.x - e.getX();
-                    yAdjustment = origLoc.y - e.getY();
+                    xAdjustment = origLoc.x - evt.getX();
+                    yAdjustment = origLoc.y - evt.getY();
                     originatingPiece.setLocation(origLoc.x + 2, origLoc.y - 2);
                     layeredPane.add(originatingPiece, JLayeredPane.DRAG_LAYER);
+
+                    // Add indicators for possible moves
+                    addIndicators();
                 }
             }
         }
 
+        /**
+         * When releasing the mouse:
+         * - Remove highlighting of tiles
+         * - Attempt to move the piece we dragged
+         * - If piece could not be moved, restore it
+         * @param evt the mouse release event
+         */
         @Override
-        public void mouseReleased(MouseEvent e) {
+        public void mouseReleased(MouseEvent evt) {
+
+            // Remove the indicators from tiles
+            removeIndicators();
 
             // If the piece was not moved, then restore it to previous position
             if(originatingPiece != null && !attemptPieceMove(this.originatingTile)) {
@@ -186,21 +235,29 @@ public class BoardUI extends JFrame {
                 originatingTile.add(originatingPiece);
                 originatingPiece.setVisible(true);
             }
+
+            // revalidate and repaint
+            layeredPane.revalidate();
+            layeredPane.repaint();
         }
 
+        /**
+         * While dragging, move the piece with us
+         * @param evt the mouse drag event
+         */
         @Override
-        public void mouseDragged(MouseEvent e) {
+        public void mouseDragged(MouseEvent evt) {
 
             // If we have a piece, then drag it with the mouse
             if(originatingPiece != null) {
                 // Calculate x-coords - prevent going too far left or right
-                int xLoc = e.getX() + xAdjustment;
+                int xLoc = evt.getX() + xAdjustment;
                 int xMax = layeredPane.getWidth() - originatingPiece.getWidth();
                 xLoc = Math.min(xLoc, xMax);
                 xLoc = Math.max(xLoc, 0);
 
                 // Calculate y-coords - prevent going too far up or down
-                int yLoc = e.getY() + yAdjustment;
+                int yLoc = evt.getY() + yAdjustment;
                 int yMax = layeredPane.getHeight() - originatingPiece.getHeight();
                 yLoc = Math.min(yLoc, yMax);
                 yLoc = Math.max(yLoc, 0);
@@ -209,6 +266,10 @@ public class BoardUI extends JFrame {
                 originatingPiece.setLocation(xLoc, yLoc);
             }
         }
+
+        /*
+         * No other mouse events necessary
+         */
 
         @Override
         public void mouseClicked(MouseEvent e) {}

@@ -2,7 +2,6 @@ package com.chess.engine.pieces;
 
 import com.chess.engine.Move;
 import com.chess.engine.board.Player;
-import com.chess.engine.board.Position;
 import com.chess.engine.board.Tile;
 import com.chess.engine.utils.MoveUtils;
 import com.chess.engine.utils.MoveUtils.Direction;
@@ -16,6 +15,11 @@ public class Queen extends Piece {
         super(color, "queen.png");
     }
 
+    /**
+     * A queen can move in all directions
+     * @param currentPosition the current tile the queen is located on
+     * @return list of valid moves the queen can make
+     */
     @Override
     public List<Move> createPossibleMoves(Tile currentPosition) {
         List<Move> validPositions = new ArrayList<>();

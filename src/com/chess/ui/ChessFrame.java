@@ -58,7 +58,7 @@ public class ChessFrame extends JFrame {
         boardPanel.getLayeredPane().removeAll();
 
         // Recreate the board object with default position
-        BoardUtils.getInstance().updateBoardWithFen(boardPanel.getBoard(), FenUtils.DEFAULT_POSITION);
+        BoardUtils.getInstance().updateBoardFromFen(boardPanel.getBoard(), FenUtils.DEFAULT_POSITION);
 
         boardPanel.initBoardUI();
         boardPanel.getLayeredPane().invalidate();

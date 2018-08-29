@@ -18,13 +18,26 @@ public class Tile extends JPanel {
         super();
         this.coordinate = pos;
         this.piece = piece;
-        setBackground(isLight() ? Color.WHITE : Color.GRAY);
+        //setBackground(isLight() ? Color.WHITE : Color.GRAY);
+        highlightTile(false);
         setBorder(BorderFactory.createLineBorder(Color.YELLOW, 1));
 
         //add(new JLabel(getPosition() + " - [" + getPosition().getRow() + "," + getPosition().getColumn() + "]"));
         // If the piece isn't null, add it
         if(piece != null) {
             add(piece);
+        }
+    }
+
+    /**
+     * Highlight the given tile
+     * @param highlight whether the tile should be highlighted
+     */
+    public void highlightTile(boolean highlight) {
+        if(highlight) {
+            setBackground(Color.MAGENTA);
+        } else {
+            setBackground(isLight() ? Color.WHITE : Color.GRAY);
         }
     }
 
@@ -88,6 +101,6 @@ public class Tile extends JPanel {
 
     @Override
     public String toString() {
-        return isOccupied() ? "[" + this.piece.toString() + "]" : "[ ]";
+        return isOccupied() ? "[" + getPiece().toString() + "]" : "[ ]";
     }
 }

@@ -14,6 +14,11 @@ public class Bishop extends Piece {
         super(color, "bishop.png");
     }
 
+    /**
+     * A bishop can move in a diagonal direction of the same color tile it is on
+     * @param currentPosition the current tile the bishop is located on
+     * @return list of valid moves the bishop can make
+     */
     @Override
     public List<Move> createPossibleMoves(Tile currentPosition) {
         List<Move> validPositions = new ArrayList<>();

@@ -10,11 +10,9 @@ public enum Player {
     BLACK;
 
     private List<Piece> pieces = new ArrayList<>();
-
     public void addPiece(Piece p) {
         pieces.add(p);
     }
-
     public List<Piece> getPieces() {
         return pieces;
     }
@@ -25,6 +23,7 @@ public enum Player {
         return this == WHITE;
     }
 
+    @Override
     public String toString() {
         return isWhite() ? "w" : "b";
     }

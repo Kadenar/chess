@@ -1,6 +1,7 @@
 package com.chess.engine.pieces;
 
 import com.chess.engine.Move;
+import com.chess.engine.board.GameState;
 import com.chess.engine.board.Player;
 import com.chess.engine.board.Tile;
 import com.chess.engine.utils.MoveUtils;
@@ -14,6 +15,11 @@ public class King extends Piece {
         super(color, "king.png");
     }
 
+    /**
+     * A king can move in all directions 1 square unless castling
+     * @param currentPosition the current tile the king is located on
+     * @return list of valid moves the king can make
+     */
     @Override
     public List<Move> createPossibleMoves(Tile currentPosition) {
         List<Move> validPositions = new ArrayList<>();
@@ -38,16 +44,24 @@ public class King extends Piece {
         validPositions.addAll(MoveUtils.addPositionsForDirection(this, currentPosition,
                                                                 MoveUtils.Direction.LEFT, false));
 
-        // castling ability
-        //TODO need to add in ability for the king to castle with either rook
-        if(!hasMoved()) {
-            validPositions.addAll(MoveUtils.addCastlingPositions(currentPosition));
+        // castling ability king side
+        if(GameState.getInstance().canCastleKingSide(getOwner())) {
+            validPositions.addAll(MoveUtils.addKingSideCastlePosition(currentPosition));
+        }
+
+        // castling ability queen side
+        if(GameState.getInstance().canCastleQueenSide(getOwner())) {
+            validPositions.addAll(MoveUtils.addQueenSideCastlePosition(currentPosition));
         }
 
         // Return valid positions that the king can move to
         return validPositions;
     }
 
+    /**
+     * A king can only move 1 square at a time
+     * @return 1
+     */
     @Override
     public int getMaxSpacesMoved() {
         return 1;

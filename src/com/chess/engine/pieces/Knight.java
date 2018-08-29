@@ -13,12 +13,25 @@ public class Knight extends Piece {
         super(color, "knight.png");
     }
 
+    /**
+     * A knight can move in an L pattern:
+     * - up two and over 1
+     * - down 2 and over 1
+     * - up 1 and over 2
+     * - down 1 and over 2
+     * @param currentPosition the current tile the knight is located on
+     * @return list of valid moves the knight can make
+     */
     @Override
     public List<Move> createPossibleMoves(Tile currentPosition) {
         // Return valid positions that the knight can move to
         return MoveUtils.addPositionsForKnight(this, currentPosition);
     }
 
+    /**
+     * The maximum number of times to check offsets for a knight
+     * @return 1
+     */
     @Override
     public int getMaxSpacesMoved() {
         return 1;

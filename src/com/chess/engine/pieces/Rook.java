@@ -2,7 +2,6 @@ package com.chess.engine.pieces;
 
 import com.chess.engine.Move;
 import com.chess.engine.board.Player;
-import com.chess.engine.board.Position;
 import com.chess.engine.board.Tile;
 import com.chess.engine.utils.MoveUtils;
 
@@ -15,6 +14,11 @@ public class Rook extends Piece {
         super(color, "rook.png");
     }
 
+    /**
+     * A rook can move vertically and horizontally
+     * @param currentPosition the current tile the rook is located on
+     * @return list of valid moves the rook can make
+     */
     @Override
     public List<Move> createPossibleMoves(Tile currentPosition) {
         List<Move> validPositions = new ArrayList<>();

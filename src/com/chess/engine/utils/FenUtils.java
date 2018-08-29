@@ -1,6 +1,7 @@
 package com.chess.engine.utils;
 
 import com.chess.engine.board.*;
+import com.chess.engine.pieces.King;
 import com.chess.engine.pieces.Piece;
 
 import java.util.Map;
@@ -31,6 +32,11 @@ public class FenUtils {
         setGameState(board, fen);
     }
 
+    /**
+     * Retrieve the fen string based on the current board
+     * @param board the board to parse
+     * @return the fen string representation of the current board state
+     */
     public static String getFen(final Board board) {
         StringBuilder sb = new StringBuilder();
 
@@ -64,7 +70,7 @@ public class FenUtils {
 
         /*========== 3rd field : castles ==========*/
         sb.append(' ');
-        sb.append(state.getCastles()); // TODO needs to be more robust
+        sb.append(state.getCastles());
 
         /*========== 4th field : ep square ==========*/
         sb.append(' ');
@@ -141,15 +147,19 @@ public class FenUtils {
                     int numFiles = Integer.parseInt(ch + "");
                     int tempFile = filesAddedForRow;
                     for (int i = tempFile; i < (numFiles + tempFile); i++) {
-                        Position pos = new Position(7-rankCount, i);
-                        board.getTileMap().put(pos.toString(), new Tile(pos));
+                        Position emptyTilePos = new Position(7 - rankCount, i);
+                        board.getTileMap().put(emptyTilePos.toString(), new Tile(emptyTilePos));
                         filesAddedForRow++;
                     }
                 }
                 // If the character was a piece, then add it for white or black
                 else {
-                    Piece newPiece = BoardUtils.constructPiece(ch);
                     Position piecePosition = new Position(7 - rankCount, filesAddedForRow);
+                    Piece newPiece = BoardUtils.constructPiece(ch);
+                    // Need to know the king's position
+                    if(ch == 'k' || ch == 'K') {
+                        GameState.getInstance().setKingPosition((King) newPiece, piecePosition);
+                    }
                     board.getTileMap().put(piecePosition.toString(), new Tile(piecePosition, newPiece));
                     filesAddedForRow++;
                 }

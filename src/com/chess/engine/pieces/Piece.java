@@ -5,8 +5,9 @@ import com.chess.engine.board.Player;
 import com.chess.engine.board.Tile;
 
 import javax.imageio.ImageIO;
-import javax.swing.*;
-import java.awt.*;
+import javax.swing.ImageIcon;
+import javax.swing.JLabel;
+import java.awt.Image;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
@@ -15,12 +16,11 @@ import java.util.List;
 public abstract class Piece extends JLabel{
 
     private final Player owner;
-    private boolean hasMoved;
     private final JLabel scaledImg;
 
     public Piece(Player color, String pieceImagePath) {
+        super();
         this.owner = color;
-        this.hasMoved = false;
         JLabel testImg = null;
 
         try {
@@ -36,48 +36,57 @@ public abstract class Piece extends JLabel{
         scaledImg = testImg;
     }
 
-    public JLabel getScaledImg() {
+    /**
+     * Scaled down image of the piece
+     * @return the scaled down image as a JLabel for the given piece
+     */
+    public final JLabel getScaledImg() {
         return scaledImg;
     }
 
-    // Methods for override in subclasses
-    abstract public List<Move> createPossibleMoves(Tile currentPosition);
+    /**
+     * The list of possible moves for a given piece
+     * @param currentPosition the current tile the piece resides on
+     * @return list of possible moves
+     */
+    public final List<Move> getMoves(Tile currentPosition) {
+        return createPossibleMoves(currentPosition);
+    }
+
+    /**
+     * Create the possible moves for the given piece (to be implemented based on type of piece)
+     * @param currentPosition the current position
+     * @return list of possible moves that are possible
+     */
+    abstract List<Move> createPossibleMoves(Tile currentPosition);
+
+    /**
+     * Force subclasses to implement toString method
+     * @return the string representation of this piece
+     */
     abstract public String toString();
 
-    // Check whether this piece has moved
-    public boolean hasMoved() {
-        return this.hasMoved;
-    }
-
-    // Set whether this piece has moved
-    public void setHasMoved(boolean moved) {
-        if(this.hasMoved) {
-            return; // Don't allow setting back to false for now...
-        }
-
-        this.hasMoved = moved;
-    }
-
-    // Get owner of the piece (White or Black)
-    public Player getOwner() {
+    /**
+     * Get the owner of the piece
+     * @return White or Black
+     */
+    public final Player getOwner() {
         return this.owner;
     }
 
-    // Whether the given piece is the same color as another
-    public boolean isSameSide(Piece other) {
-        return isSameSide(other.getOwner());
+    /**
+     * Whether a piece is on the same side as another piece
+     * @return true if same player, false if not
+     */
+    public boolean sameSide(Piece piece) {
+        return piece.getOwner().equals(getOwner());
     }
 
-    public boolean isSameSide(Player owner) {
-        return getOwner() == owner;
-    }
-
-    /// Get possible moves
-    public List<Move> getMoves(Tile currPosition) {
-        return createPossibleMoves(currPosition);
-    }
-
-    // Overridden for pawn, knight and king
+    /**
+     * The standard maximum number of spaces
+     * a piece can move by default unless overridden
+     * @return 8 spaces
+     */
     public int getMaxSpacesMoved() {
         return 8;
     }

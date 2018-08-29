@@ -14,15 +14,21 @@ public class Pawn extends Piece {
         super(color, "pawn.png");
     }
 
-    // Determine direction for enpassant
+    /**
+     * Return the direction for enpassant depending on player color
+     * @return 1 or -1 depending on player color
+     */
     public int getEnpassantDirection() {
-        if(getOwner().equals(Player.WHITE)) {
-            return 1;
-        } else {
-            return -1;
-        }
+        return getOwner().equals(Player.WHITE) ? 1 : -1;
     }
 
+    /**
+     * A pawn can only move forward
+     * - If first move, it can move 2 tiles, otherwise only 1 at a time
+     * - It can move diagonally to capture a piece
+     * @param currentPosition the current tile the king is located on
+     * @return list of valid moves the king can make
+     */
     @Override
     public List<Move> createPossibleMoves(Tile currentPosition) {
         // Vertical movement
@@ -32,9 +38,13 @@ public class Pawn extends Piece {
         return MoveUtils.addPositionsForPawn(this, currentPosition, dir);
     }
 
+    /**
+     * The maximum number of spaces a pawn can move
+     * @return 2
+     */
     @Override
     public int getMaxSpacesMoved() {
-        return hasMoved() ? 1 : 2;
+        return 2;
     }
 
     @Override
