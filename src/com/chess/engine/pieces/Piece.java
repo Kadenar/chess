@@ -1,8 +1,8 @@
 package com.chess.engine.pieces;
 
-import com.chess.engine.BoardMoves;
-import com.chess.engine.Move;
-import com.chess.engine.board.Player;
+import com.chess.engine.moves.Move;
+import com.chess.engine.Player;
+import com.chess.engine.board.Board;
 import com.chess.engine.board.Tile;
 
 import javax.imageio.ImageIO;
@@ -49,17 +49,17 @@ public abstract class Piece extends JLabel {
 
     /**
      * Create the possible moves for the given piece (to be implemented based on type of piece)
-     * @param currentPosition the current position
+     * @param currentTile the current tile of the piece
      * @return list of possible moves that are possible
      */
-    public abstract List<Move> createPossibleMoves(Tile currentPosition);
+    public abstract List<Move> generateValidMoves(Board board, Tile currentTile);
 
     /**
      * Get valid moves for this piece
      * @return get list of valid moves for this piece
      */
     public List<Move> getMoves() {
-        Map<Piece, List<Move>> allValidMoves = getOwner().isWhite() ? BoardMoves.getInstance().getWhiteValidMoves() : BoardMoves.getInstance().getBlackValidMoves();
+        Map<Piece, List<Move>> allValidMoves = getOwner().isWhite() ? Player.WHITE.getAllValidMoves() : Player.BLACK.getAllValidMoves();
         return allValidMoves.getOrDefault(this, new ArrayList<>());
     }
 

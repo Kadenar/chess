@@ -1,7 +1,7 @@
-package com.chess.engine.utils;
+package com.chess.engine.board;
 
-import com.chess.engine.BoardMoves;
-import com.chess.engine.board.*;
+import com.chess.engine.Player;
+import com.chess.engine.Position;
 import com.chess.engine.pieces.King;
 import com.chess.engine.pieces.Piece;
 
@@ -42,31 +42,31 @@ public class FenUtils {
         StringBuilder sb = new StringBuilder();
 
         /*========== 1st field : pieces ==========*/
-        int row = 7, col = 0;
-        int blanks = 0;
-        for(Map.Entry<String, Tile> entry : board.getTileMap().entrySet()) {
-            Tile t = entry.getValue();
-            if(!t.isOccupied()) {
-                blanks++;
+        final int[] row = {7};
+        final int[] col = {0};
+        final int[] blanks = {0};
+        board.getTileMap().values().forEach( tile -> {
+            if(!tile.isOccupied()) {
+                blanks[0]++;
             } else {
-                if(blanks > 0) {
-                    sb.append(blanks); blanks = 0;
+                if(blanks[0] > 0) {
+                    sb.append(blanks[0]); blanks[0] = 0;
                 }
-                sb.append(t.getPiece().toString());
+                sb.append(tile.getPiece().toString());
             }
 
-            col++;
-            if (col > 7) {
-                if (blanks > 0) {
-                    sb.append(blanks);
+            col[0]++;
+            if (col[0] > 7) {
+                if (blanks[0] > 0) {
+                    sb.append(blanks[0]);
                 }
-                row--; col = 0; blanks = 0;
-                if (row >= 0) sb.append('/');
+                row[0]--; col[0] = 0; blanks[0] = 0;
+                if (row[0] >= 0) sb.append('/');
             }
-        }
+        });
 
         /*========== 2nd field : to play ==========*/
-        GameState state = GameState.getInstance();
+        GameState state = board.getGameState();
         sb.append(' ').append(state.getPlayerTurn().toString());
 
         /*========== 3rd field : castles ==========*/
@@ -90,9 +90,12 @@ public class FenUtils {
         return sb.toString();
     }
 
-    /*
-    * Sets the game state from fen string
-    */
+    /**
+     * Set the game state for given board from fen string
+     * @param board the board to update with fen string
+     * @param fen the fen string to parse
+     * @throws FenException appropriate exception if parsing failed
+     */
     private static void setGameState(Board board, final String fen) throws FenException {
         String[] tokens = fen.split(" ");
         if(tokens.length != 6) throw new FenException("Invalid fen string");
@@ -100,7 +103,7 @@ public class FenUtils {
         // Add game pieces
         buildBoardFromFEN(board, tokens[0]);
 
-        GameState gameState = GameState.getInstance();
+        GameState gameState = board.getGameState();
 
         // Set player's move
         gameState.setPlayerTurn(getPlayerTurn(tokens[1]));
@@ -109,8 +112,7 @@ public class FenUtils {
         gameState.setCastlingAbility(getCastlingAbility(tokens[2]));
 
         // Set enpassant
-        Position epSq = BoardUtils.getInstance().sqiToPosition(tokens[3]);
-        gameState.setEnpassantSquare(epSq);
+        gameState.setEnpassantSquare(BoardUtils.sqiToPosition(tokens[3]));
 
         // Set half move counter
         gameState.setHalfMoves(getHalfMove(tokens[4]));
@@ -119,7 +121,8 @@ public class FenUtils {
         gameState.setFullMoves(getFullMove(tokens[5]));
 
         // Populate moves for current game state
-        BoardMoves.getInstance().populateMoves();
+        Player.WHITE.populateMoves(board);
+        Player.BLACK.populateMoves(board);
     }
 
     /**
@@ -159,10 +162,10 @@ public class FenUtils {
                 // If the character was a piece, then add it for white or black
                 else {
                     Position piecePosition = new Position(7 - rankCount, filesAddedForRow);
-                    Piece newPiece = BoardUtils.getInstance().constructPiece(ch);
+                    Piece newPiece = BoardUtils.constructPiece(ch);
                     // Need to know the king's position
                     if(ch == 'k' || ch == 'K') {
-                        GameState.getInstance().setKingPosition((King) newPiece, piecePosition);
+                        board.setKingPosition((King) newPiece, piecePosition);
                     }
                     board.getTileMap().put(piecePosition.toString(), new Tile(piecePosition, newPiece));
                     filesAddedForRow++;

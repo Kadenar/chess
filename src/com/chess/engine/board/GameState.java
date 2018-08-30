@@ -1,25 +1,15 @@
 package com.chess.engine.board;
 
-import com.chess.engine.pieces.King;
-import com.chess.engine.pieces.Piece;
-
-import java.util.ArrayList;
-import java.util.List;
+import com.chess.engine.Player;
+import com.chess.engine.Position;
 
 public class GameState {
-
-    // Lists of white / black captured pieces
-    private List<Piece> whiteCaptured;
-    private List<Piece> blackCaptured;
 
     // Is the game over?
     private boolean gameOver;
 
     // Which player's turn it is
     private Player playerTurn;
-
-    private Position whiteKingPos;
-    private Position blackKingPos;
 
     // State of castling / enPassant
     private String castling;
@@ -28,30 +18,13 @@ public class GameState {
     // Number of halfmoves / full moves
     private int halfMoves, fullMoves;
 
-    // Initialize singleton instance
-    private static final GameState INSTANCE = getInstance();
-
-    /**
-     * Get the current game state of a game
-     * @return the current game state of a given game
-     */
-    public static GameState getInstance() {
-        if(INSTANCE == null) {
-            return new GameState(Player.WHITE);
-        }
-
-        return INSTANCE;
-    }
-
     /**
      * Game state instance to hold game specific information
      * @param turn which player's turn it is
      */
-    private GameState(Player turn) {
+    public GameState(Player turn) {
         this.playerTurn = turn;
         gameOver = false;
-        whiteCaptured = new ArrayList<>();
-        blackCaptured = new ArrayList<>();
 
         // TODO - time controls
 
@@ -75,35 +48,6 @@ public class GameState {
     public void setEnpassantSquare(Position enpassantSquare) { this.enPassant = enpassantSquare; }
     public void setHalfMoves(int halfMoves) { this.halfMoves = halfMoves; }
     public void setFullMoves(int fullMoves) { this.fullMoves = fullMoves; }
-
-    /**
-     * Update the position if the king piece with new position
-     * @param kingPiece the king piece to update
-     * @param newPosition the new position of the king
-     */
-    public void setKingPosition(King kingPiece, Position newPosition) {
-        if(kingPiece.getOwner().isWhite()) {
-            whiteKingPos = newPosition;
-        } else {
-            blackKingPos = newPosition;
-        }
-    }
-
-    /**
-     * Get the white king's current position
-     * @return the positino of the white king
-     */
-    public Position getWhiteKingPosition() {
-        return whiteKingPos;
-    }
-
-    /**
-     * Get the black king's current position
-     * @return the position of the black king
-     */
-    public Position getBlackKingPosition() {
-        return blackKingPos;
-    }
 
     /**
      * Check whether given player can king side castle

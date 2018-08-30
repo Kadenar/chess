@@ -1,8 +1,8 @@
 package com.chess.ui;
 
 import com.chess.engine.board.Board;
+import com.chess.engine.sound.SoundUtils;
 import com.chess.ui.menus.ChessMenuBar;
-import com.chess.ui.menus.GameOptionsMenu;
 import com.chess.ui.panels.BoardPanel;
 import com.chess.ui.panels.HistoryPanel;
 
@@ -36,6 +36,7 @@ public class ChessFrame extends JFrame {
         addHeadersAndPanels();
         this.setVisible(true);
         boardPanel.setSize(boardPanel.getLayeredPane().getSize());
+        SoundUtils.playMoveSound("startGame");
     }
 
     /**

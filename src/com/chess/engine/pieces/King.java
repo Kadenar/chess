@@ -1,10 +1,12 @@
 package com.chess.engine.pieces;
 
-import com.chess.engine.Move;
-import com.chess.engine.board.GameState;
-import com.chess.engine.board.Player;
+import com.chess.engine.moves.Direction;
+import com.chess.engine.moves.Move;
+import com.chess.engine.board.Board;
+import com.chess.engine.Player;
 import com.chess.engine.board.Tile;
-import com.chess.engine.utils.MoveUtils;
+import com.chess.engine.moves.MovePositions;
+import com.chess.engine.moves.MoveUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -21,37 +23,37 @@ public class King extends Piece {
      * @return list of valid moves the king can make
      */
     @Override
-    public List<Move> createPossibleMoves(Tile currentPosition) {
+    public List<Move> generateValidMoves(Board board, Tile currentPosition) {
         List<Move> validPositions = new ArrayList<>();
 
         // Diagonal movement
-        validPositions.addAll(MoveUtils.addPositionsForDirection(this, currentPosition,
-                                                                MoveUtils.Direction.UP, true));
-        validPositions.addAll(MoveUtils.addPositionsForDirection(this, currentPosition,
-                                                                MoveUtils.Direction.DOWN, true));
+        validPositions.addAll(MovePositions.addPositionsForDirection(board, this, currentPosition,
+                                                                Direction.UP, true));
+        validPositions.addAll(MovePositions.addPositionsForDirection(board, this, currentPosition,
+                                                                Direction.DOWN, true));
 
         // Vertical movement
-        validPositions.addAll(MoveUtils.addPositionsForDirection(this, currentPosition,
-                                                                MoveUtils.Direction.UP, false));
-        validPositions.addAll(MoveUtils.addPositionsForDirection(this, currentPosition,
-                                                                MoveUtils.Direction.DOWN, false));
+        validPositions.addAll(MovePositions.addPositionsForDirection(board, this, currentPosition,
+                                                                Direction.UP, false));
+        validPositions.addAll(MovePositions.addPositionsForDirection(board, this, currentPosition,
+                                                                Direction.DOWN, false));
 
         // Right
-        validPositions.addAll(MoveUtils.addPositionsForDirection(this, currentPosition,
-                                                                MoveUtils.Direction.RIGHT, false));
+        validPositions.addAll(MovePositions.addPositionsForDirection(board, this, currentPosition,
+                                                                Direction.RIGHT, false));
 
         // Left
-        validPositions.addAll(MoveUtils.addPositionsForDirection(this, currentPosition,
-                                                                MoveUtils.Direction.LEFT, false));
+        validPositions.addAll(MovePositions.addPositionsForDirection(board, this, currentPosition,
+                                                                Direction.LEFT, false));
 
         // castling ability king side
-        if(GameState.getInstance().canCastleKingSide(getOwner())) {
-            validPositions.addAll(MoveUtils.addKingSideCastlePosition(currentPosition));
+        if(board.getGameState().canCastleKingSide(getOwner())) {
+            validPositions.addAll(MovePositions.addKingSideCastlePosition(board, currentPosition));
         }
 
         // castling ability queen side
-        if(GameState.getInstance().canCastleQueenSide(getOwner())) {
-            validPositions.addAll(MoveUtils.addQueenSideCastlePosition(currentPosition));
+        if(board.getGameState().canCastleQueenSide(getOwner())) {
+            validPositions.addAll(MovePositions.addQueenSideCastlePosition(board, currentPosition));
         }
 
         // Return valid positions that the king can move to

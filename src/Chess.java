@@ -1,5 +1,4 @@
 import com.chess.engine.board.Board;
-import com.chess.engine.utils.FenUtils;
 import com.chess.ui.ChessFrame;
 
 import javax.swing.*;

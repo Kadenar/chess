@@ -1,4 +1,4 @@
-package com.chess.engine.utils;
+package com.chess.engine.sound;
 
 import javax.sound.sampled.*;
 import java.io.File;

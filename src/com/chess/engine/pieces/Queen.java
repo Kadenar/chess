@@ -1,10 +1,11 @@
 package com.chess.engine.pieces;
 
-import com.chess.engine.Move;
-import com.chess.engine.board.Player;
+import com.chess.engine.moves.Direction;
+import com.chess.engine.moves.Move;
+import com.chess.engine.Player;
+import com.chess.engine.board.Board;
 import com.chess.engine.board.Tile;
-import com.chess.engine.utils.MoveUtils;
-import com.chess.engine.utils.MoveUtils.Direction;
+import com.chess.engine.moves.MovePositions;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -21,27 +22,27 @@ public class Queen extends Piece {
      * @return list of valid moves the queen can make
      */
     @Override
-    public List<Move> createPossibleMoves(Tile currentPosition) {
+    public List<Move> generateValidMoves(Board board, Tile currentPosition) {
         List<Move> validPositions = new ArrayList<>();
 
         // Diagonal movement
-        validPositions.addAll(MoveUtils.addPositionsForDirection(this, currentPosition,
+        validPositions.addAll(MovePositions.addPositionsForDirection(board, this, currentPosition,
                                                                 Direction.UP, true));
-        validPositions.addAll(MoveUtils.addPositionsForDirection(this, currentPosition,
+        validPositions.addAll(MovePositions.addPositionsForDirection(board, this, currentPosition,
                                                                 Direction.DOWN, true));
 
         // Vertical movement
-        validPositions.addAll(MoveUtils.addPositionsForDirection(this, currentPosition,
+        validPositions.addAll(MovePositions.addPositionsForDirection(board, this, currentPosition,
                                                                 Direction.UP, false));
-        validPositions.addAll(MoveUtils.addPositionsForDirection(this, currentPosition,
+        validPositions.addAll(MovePositions.addPositionsForDirection(board, this, currentPosition,
                                                                 Direction.DOWN, false));
 
         // Right
-        validPositions.addAll(MoveUtils.addPositionsForDirection(this, currentPosition,
+        validPositions.addAll(MovePositions.addPositionsForDirection(board, this, currentPosition,
                                                                 Direction.RIGHT, false));
 
         // Left
-        validPositions.addAll(MoveUtils.addPositionsForDirection(this, currentPosition,
+        validPositions.addAll(MovePositions.addPositionsForDirection(board, this, currentPosition,
                                                                 Direction.LEFT, false));
 
         // Return valid positions that the queen can move to

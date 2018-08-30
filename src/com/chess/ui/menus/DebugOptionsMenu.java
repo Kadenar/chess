@@ -1,20 +1,20 @@
 package com.chess.ui.menus;
 
-import com.chess.engine.BoardMoves;
+import com.chess.engine.GameSettings;
 import com.chess.engine.board.Board;
-import com.chess.engine.board.GameState;
-import com.chess.engine.board.Player;
-import com.chess.engine.utils.BoardUtils;
-import com.chess.engine.utils.FenUtils;
+import com.chess.engine.Player;
+import com.chess.engine.board.FenUtils;
 
-import javax.swing.JMenu;
-import javax.swing.JMenuItem;
+import javax.swing.*;
 import java.util.Map;
 
 class DebugOptionsMenu extends JMenu {
 
-    DebugOptionsMenu() {
+    private Board board;
+
+    DebugOptionsMenu(Board board) {
         super("Debug options");
+        this.board = board;
         populateMenu();
     }
 
@@ -22,7 +22,14 @@ class DebugOptionsMenu extends JMenu {
      * Adds standard debug options
      */
     private void populateMenu() {
-        // Print current FEN
+
+        // Enable or disable debugging
+        JCheckBoxMenuItem enableDebugging = new JCheckBoxMenuItem("Enable debugging?");
+        enableDebugging.setState(GameSettings.getInstance().isEnableDebugging());
+        enableDebugging.addItemListener(e -> enableDebugging());
+        add(enableDebugging);
+
+        // Print out current FEN
         JMenuItem printFen = new JMenuItem("Print Fen");
         printFen.addActionListener(e -> printFen());
         add(printFen);
@@ -39,10 +46,18 @@ class DebugOptionsMenu extends JMenu {
     }
 
     /**
+     * Toggle whether to enable highlighting
+     */
+    private void enableDebugging() {
+        GameSettings settings = GameSettings.getInstance();
+        settings.setEnableDebugging(!settings.isEnableDebugging());
+
+    }
+
+    /**
      * Print the current board state as a FEN string
      */
     private void printFen() {
-        Board board = BoardUtils.getInstance().getBoard();
         System.out.println(FenUtils.getFen(board));
         System.out.println(board.toString());
     }
@@ -51,9 +66,8 @@ class DebugOptionsMenu extends JMenu {
      * Print the current game state in terms of pieces
      */
     private void printPieces() {
-        Map<String, Player> players = BoardUtils.getInstance().getBoard().getPlayers();
-        for(Map.Entry<String, Player> entry : players.entrySet()) {
-            Player player = entry.getValue();
+        Map<String, Player> players = board.getPlayers();
+        for(Player player : players.values()) {
             System.out.println(player + " pieces:");
             System.out.println("Controlled: " + player.getPieces());
             System.out.println("Captured: " + player.getCapturedPieces());
@@ -64,6 +78,6 @@ class DebugOptionsMenu extends JMenu {
      * Print out all game moves available currently
      */
     private void printGameMoves() {
-        System.out.println(GameState.getInstance().getPlayerTurn().isWhite() ? BoardMoves.getInstance().getWhiteValidMoves() : BoardMoves.getInstance().getBlackValidMoves());
+        System.out.println(board.getGameState().getPlayerTurn().isWhite() ? Player.WHITE.getAllValidMoves() : Player.BLACK.getAllValidMoves());
     }
 }

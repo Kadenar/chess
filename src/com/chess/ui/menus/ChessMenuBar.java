@@ -8,7 +8,7 @@ public class ChessMenuBar extends JMenuBar {
     public ChessMenuBar(ChessFrame owningFrame) {
         super();
         add(new GameOptionsMenu(owningFrame));
-        add(new DebugOptionsMenu());
+        add(new DebugOptionsMenu(owningFrame.getBoardPanel().getBoard()));
         // TODO Add more menus here later
     }
 }

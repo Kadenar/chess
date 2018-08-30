@@ -1,4 +1,4 @@
-package com.chess.engine;
+package com.chess.engine.moves;
 
 import com.chess.engine.board.Tile;
 

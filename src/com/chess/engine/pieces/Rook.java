@@ -1,9 +1,11 @@
 package com.chess.engine.pieces;
 
-import com.chess.engine.Move;
-import com.chess.engine.board.Player;
+import com.chess.engine.moves.Direction;
+import com.chess.engine.moves.Move;
+import com.chess.engine.Player;
+import com.chess.engine.board.Board;
 import com.chess.engine.board.Tile;
-import com.chess.engine.utils.MoveUtils;
+import com.chess.engine.moves.MovePositions;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -20,20 +22,20 @@ public class Rook extends Piece {
      * @return list of valid moves the rook can make
      */
     @Override
-    public List<Move> createPossibleMoves(Tile currentPosition) {
+    public List<Move> generateValidMoves(Board board, Tile currentPosition) {
         List<Move> validPositions = new ArrayList<>();
 
         // Vertical movement
-        validPositions.addAll(MoveUtils.addPositionsForDirection(this, currentPosition,
-                                                                MoveUtils.Direction.UP, false));
-        validPositions.addAll(MoveUtils.addPositionsForDirection(this, currentPosition,
-                                                                MoveUtils.Direction.DOWN, false));
+        validPositions.addAll(MovePositions.addPositionsForDirection(board, this, currentPosition,
+                                                                Direction.UP, false));
+        validPositions.addAll(MovePositions.addPositionsForDirection(board, this, currentPosition,
+                                                                Direction.DOWN, false));
 
         // Horizontal movement
-        validPositions.addAll(MoveUtils.addPositionsForDirection(this, currentPosition,
-                                                                MoveUtils.Direction.RIGHT, false));
-        validPositions.addAll(MoveUtils.addPositionsForDirection(this, currentPosition,
-                                                                MoveUtils.Direction.LEFT, false));
+        validPositions.addAll(MovePositions.addPositionsForDirection(board, this, currentPosition,
+                                                                Direction.RIGHT, false));
+        validPositions.addAll(MovePositions.addPositionsForDirection(board, this, currentPosition,
+                                                                Direction.LEFT, false));
 
         // Return valid positions that the rook can move to
         return validPositions;

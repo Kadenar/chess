@@ -1,19 +1,25 @@
 package com.chess.ui.panels;
 
 import com.chess.engine.GameSettings;
-import com.chess.engine.Move;
+import com.chess.engine.moves.Move;
 import com.chess.engine.board.Board;
-import com.chess.engine.board.GameState;
-import com.chess.engine.board.Position;
+import com.chess.engine.Position;
 import com.chess.engine.board.Tile;
 import com.chess.engine.pieces.Piece;
-import com.chess.engine.utils.MoveUtils;
-import com.chess.engine.utils.SoundUtils;
+import com.chess.engine.moves.MoveUtils;
+import com.chess.engine.sound.SoundUtils;
 import com.chess.ui.ChessFrame;
 
-import javax.swing.*;
+import javax.swing.BorderFactory;
+import javax.swing.JLabel;
+import javax.swing.JLayeredPane;
+import javax.swing.JPanel;
+import javax.swing.SwingUtilities;
 import javax.swing.border.Border;
-import java.awt.*;
+import java.awt.Color;
+import java.awt.GridLayout;
+import java.awt.MouseInfo;
+import java.awt.Point;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
@@ -38,7 +44,7 @@ public class BoardPanel extends JPanel {
 
         // Set our board's layout to an 8x8 grid
         this.setLayout(new GridLayout(8, 8));
-        this.setBounds(0, 0, ChessFrame.WINDOW_HEIGHT-60, ChessFrame.WINDOW_HEIGHT-80);
+        this.setBounds(0, 0, ChessFrame.WINDOW_WIDTH-60, ChessFrame.WINDOW_HEIGHT-80);
 
         // TODO Remove border
         border = BorderFactory.createLineBorder(Color.RED, 5);
@@ -64,14 +70,12 @@ public class BoardPanel extends JPanel {
         this.board = board;
 
         // Add all the chess tiles to the UI
-        int i = 0;
-        for (Map.Entry<String, Tile> entry : board.getTileMap().entrySet()) {
-            // Add the individual tiles to the board in the center
-            this.add(entry.getValue(), i);
-            i++;
-        }
+        final int[] i = {0};
+        board.getTileMap().values().forEach(e -> {
+            this.add(e, i[0]);
+            i[0]++;
+        });
 
-        SoundUtils.playMoveSound("startGame");
     }
 
     /*
@@ -109,6 +113,10 @@ public class BoardPanel extends JPanel {
         return this.board;
     }
 
+    /**
+     * Get the layered pane object which we use to drag pieces around on
+     * @return the layered pane which our chessboard exists within
+     */
     public JLayeredPane getLayeredPane() {
         return this.layeredPane;
     }
@@ -121,13 +129,10 @@ public class BoardPanel extends JPanel {
         private Piece originatingPiece = null;
         private int xAdjustment, yAdjustment;
         private List<Tile> targetMoveTiles = new ArrayList<>();
+
+        // Debugging
         JPanel printOut = new JPanel();
         JLabel label = new JLabel();
-
-        PieceListener() {
-            super();
-            layeredPane.add(printOut, JLayeredPane.DRAG_LAYER);
-        }
 
         /**
          * Add indicators to the UI for tiles we can move to
@@ -163,7 +168,7 @@ public class BoardPanel extends JPanel {
          * @return whether the player can pickup a given piece
          */
         private boolean canPickupPiece() {
-            return originatingPiece != null && originatingPiece.getOwner().equals(GameState.getInstance().getPlayerTurn());
+            return originatingPiece != null && originatingPiece.getOwner().equals(board.getGameState().getPlayerTurn());
         }
 
 
@@ -254,12 +259,17 @@ public class BoardPanel extends JPanel {
 
         @Override
         public void mouseMoved(MouseEvent evt) {
-            label.setText("<html>Mouse pos: [" + evt.getX() + ", " + evt.getY() + "]"
-                    + "<br/>" + "Tile pos: [y: " + getTilePositionFromMouse(evt).y + ", x: " + getTilePositionFromMouse(evt).x + "]</html>");
-            printOut.add(label);
-            printOut.setBounds(0,0, 200, 50);
-            printOut.setLocation(evt.getX(), evt.getY());
-            layeredPane.repaint();
+
+            if(GameSettings.getInstance().isEnableDebugging()) {
+                layeredPane.remove(printOut);
+                layeredPane.add(printOut, JLayeredPane.DRAG_LAYER);
+                label.setText("<html>Mouse pos: [" + evt.getX() + ", " + evt.getY() + "]"
+                        + "<br/>" + "Tile pos: [y: " + getTilePositionFromMouse(evt).y + ", x: " + getTilePositionFromMouse(evt).x + "]</html>");
+                printOut.add(label);
+                printOut.setBounds(0, 0, 200, 50);
+                printOut.setLocation(evt.getX(), evt.getY());
+                layeredPane.repaint();
+            }
         }
 
         @Override

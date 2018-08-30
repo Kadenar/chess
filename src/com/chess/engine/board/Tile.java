@@ -1,5 +1,6 @@
 package com.chess.engine.board;
 
+import com.chess.engine.Position;
 import com.chess.engine.pieces.Piece;
 
 import javax.swing.*;

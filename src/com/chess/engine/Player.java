@@ -1,13 +1,15 @@
-package com.chess.engine.board;
+package com.chess.engine;
 
-import com.chess.engine.Move;
+import com.chess.engine.board.Board;
+import com.chess.engine.board.Tile;
+import com.chess.engine.moves.Move;
 import com.chess.engine.pieces.Piece;
-import com.chess.engine.utils.BoardUtils;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 public enum Player {
     WHITE,
@@ -15,6 +17,7 @@ public enum Player {
 
     private List<Piece> pieces = new ArrayList<>();
     private List<Piece> capturedPieces = new ArrayList<>();
+    private Map<Piece, List<Move>> allValidMoves = new HashMap<>();
 
     /**
      * Add a piece for the player
@@ -48,6 +51,29 @@ public enum Player {
      */
     public List<Piece> getPieces() {
         return pieces;
+    }
+
+    /**
+     * Populate all possible moves given the current game state
+     * NOTE - This should be called whenever performing a move or initializing the game
+     */
+    public void populateMoves(Board board) {
+        // Clear out valid moves
+        allValidMoves.clear();
+
+        Map<String, Tile> tiles = board.getTileMap();
+        tiles.values().stream()
+        .filter(Tile::isOccupied) // Filter out unoccupied tiles
+        .filter(tile -> tile.getPiece().getOwner().equals(this)) // Filter out pieces not owned by me
+        .forEach(tile -> allValidMoves.put(tile.getPiece(), tile.getPiece().generateValidMoves(board, tile)));
+    }
+
+    /**
+     * Get valid moves for given player
+     * @return all valid moves for this player given current board state
+     */
+    public Map<Piece, List<Move>> getAllValidMoves() {
+        return allValidMoves;
     }
 
     /**

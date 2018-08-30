@@ -1,10 +1,11 @@
 package com.chess.engine.pieces;
 
-import com.chess.engine.Move;
-import com.chess.engine.board.Player;
+import com.chess.engine.moves.Direction;
+import com.chess.engine.moves.Move;
+import com.chess.engine.Player;
+import com.chess.engine.board.Board;
 import com.chess.engine.board.Tile;
-import com.chess.engine.utils.MoveUtils;
-import com.chess.engine.utils.MoveUtils.Direction;
+import com.chess.engine.moves.MovePositions;
 
 import java.util.List;
 
@@ -30,17 +31,17 @@ public class Pawn extends Piece {
      * @return list of valid moves the king can make
      */
     @Override
-    public List<Move> createPossibleMoves(Tile currentPosition) {
-        // Vertical movement
+    public List<Move> generateValidMoves(Board board, Tile currentPosition) {
+        // Vertical movement based on color
         Direction dir  = getOwner().isWhite() ? Direction.UP : Direction.DOWN;
 
         // Return valid positions that the pawn can move to
-        return MoveUtils.addPositionsForPawn(this, currentPosition, dir);
+        return MovePositions.addPositionsForPawn(board, this, currentPosition, dir);
     }
 
     /**
      * The maximum number of spaces a pawn can move
-     * @return 2
+     * @return 2 is the max spaces a pawn can move (assuming on home row)
      */
     @Override
     public int getMaxSpacesMoved() {

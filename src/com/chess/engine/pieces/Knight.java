@@ -1,9 +1,11 @@
 package com.chess.engine.pieces;
 
-import com.chess.engine.Move;
-import com.chess.engine.board.Player;
+import com.chess.engine.moves.Move;
+import com.chess.engine.Player;
+import com.chess.engine.board.Board;
 import com.chess.engine.board.Tile;
-import com.chess.engine.utils.MoveUtils;
+import com.chess.engine.moves.MovePositions;
+import com.chess.engine.moves.MoveUtils;
 
 import java.util.List;
 
@@ -23,9 +25,9 @@ public class Knight extends Piece {
      * @return list of valid moves the knight can make
      */
     @Override
-    public List<Move> createPossibleMoves(Tile currentPosition) {
+    public List<Move> generateValidMoves(Board board, Tile currentPosition) {
         // Return valid positions that the knight can move to
-        return MoveUtils.addPositionsForKnight(this, currentPosition);
+        return MovePositions.addPositionsForKnight(board, this, currentPosition);
     }
 
     /**

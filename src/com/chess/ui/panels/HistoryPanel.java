@@ -1,7 +1,7 @@
 package com.chess.ui.panels;
 
 
-import com.chess.engine.utils.FenUtils;
+import com.chess.engine.board.FenUtils;
 
 import javax.swing.*;
 import java.awt.*;
