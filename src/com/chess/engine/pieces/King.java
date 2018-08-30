@@ -28,32 +28,32 @@ public class King extends Piece {
 
         // Diagonal movement
         validPositions.addAll(MovePositions.addPositionsForDirection(board, this, currentPosition,
-                                                                Direction.UP, true));
+                Direction.UP, true));
         validPositions.addAll(MovePositions.addPositionsForDirection(board, this, currentPosition,
-                                                                Direction.DOWN, true));
+                Direction.DOWN, true));
 
         // Vertical movement
         validPositions.addAll(MovePositions.addPositionsForDirection(board, this, currentPosition,
-                                                                Direction.UP, false));
+                Direction.UP, false));
         validPositions.addAll(MovePositions.addPositionsForDirection(board, this, currentPosition,
-                                                                Direction.DOWN, false));
+                Direction.DOWN, false));
 
         // Right
         validPositions.addAll(MovePositions.addPositionsForDirection(board, this, currentPosition,
-                                                                Direction.RIGHT, false));
+                Direction.RIGHT, false));
 
         // Left
         validPositions.addAll(MovePositions.addPositionsForDirection(board, this, currentPosition,
-                                                                Direction.LEFT, false));
+                Direction.LEFT, false));
 
         // castling ability king side
         if(board.getGameState().canCastleKingSide(getOwner())) {
-            validPositions.addAll(MovePositions.addKingSideCastlePosition(board, currentPosition));
+            validPositions.addAll(MovePositions.addKingSideCastlePosition(board, this));
         }
 
         // castling ability queen side
         if(board.getGameState().canCastleQueenSide(getOwner())) {
-            validPositions.addAll(MovePositions.addQueenSideCastlePosition(board, currentPosition));
+            validPositions.addAll(MovePositions.addQueenSideCastlePosition(board, this));
         }
 
         // Return valid positions that the king can move to

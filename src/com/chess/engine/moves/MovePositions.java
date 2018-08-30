@@ -1,9 +1,9 @@
 package com.chess.engine.moves;
 
-import com.chess.engine.Player;
 import com.chess.engine.Position;
 import com.chess.engine.board.Board;
 import com.chess.engine.board.Tile;
+import com.chess.engine.pieces.King;
 import com.chess.engine.pieces.Pawn;
 import com.chess.engine.pieces.Piece;
 import com.chess.engine.pieces.Rook;
@@ -40,24 +40,38 @@ public class MovePositions {
 
     /**
      * King side castle location (assumes that you can king side castle)
-     * @param currentTile the current tile of the king
+     * @param board the current board
+     * @param piece the king
      * @return king side castle location
      */
-    public static List<Move> addKingSideCastlePosition(Board board, Tile currentTile) {
+    public static List<Move> addKingSideCastlePosition(Board board, Piece piece) {
         List<Move> validPositions = new ArrayList<>();
-        int kingColumn = currentTile.getPosition().getColumn();
-        for(int i = kingColumn+1; i < 8; i++) {
-            Position offSetPosition = new Position(currentTile.getPosition().getRow(), i);
-            Map<String, Tile> tiles = board.getTileMap();
+
+        if(!(piece instanceof King)) {
+            return validPositions;
+        }
+
+        Position kingPosition = piece.getOwner().isWhite() ? board.getWhiteKingPosition() : board.getBlackKingPosition();
+        int kingColumn = kingPosition.getColumn();
+
+        // Check each tile in between current location and king side rook
+        Map<String, Tile> tiles = board.getTileMap();
+        for(int i = kingColumn + 1; i < 8; i++) {
+            Position offSetPosition = kingPosition.getOffSetPosition(i - kingColumn, 0);
+
+            // If the tile is targeted, castling is not allowed
+            if(MoveUtils.isTileTargeted(piece.getOwner(), offSetPosition)) {
+                break;
+            }
 
             // If the tile is occupied...
             Tile offsetTile = tiles.get(offSetPosition.toString());
             if(offsetTile.isOccupied()) {
-
                 // If the piece is a rook and has not moved
                 Piece occupyingPiece = offsetTile.getPiece();
                 if(occupyingPiece instanceof Rook) {
-                    Tile kingCastleLoc = tiles.get(new Position(currentTile.getPosition().getRow(), i-1).toString());
+                    Tile currentTile = board.getTileMap().get(kingPosition.toString());
+                    Tile kingCastleLoc = tiles.get(kingPosition.getOffSetPosition(2, 0).toString());
                     validPositions.add(new Move(currentTile, kingCastleLoc));
                 } else {
                     break;
@@ -69,24 +83,32 @@ public class MovePositions {
 
     /**
      * Add queen side castle position for the king (assumes that you can queen side castle)
-     * @param currentTile the current tile of the king
+     * @param board the current board
+     * @param piece the king
      * @return queen side castle location
      */
-    public static List<Move> addQueenSideCastlePosition(Board board, Tile currentTile) {
+    public static List<Move> addQueenSideCastlePosition(Board board, Piece piece) {
         List<Move> validPositions = new ArrayList<>();
-        int kingColumn = currentTile.getPosition().getColumn();
+        Position kingPosition = piece.getOwner().isWhite() ? board.getWhiteKingPosition() : board.getBlackKingPosition();
+        int kingColumn = kingPosition.getColumn();
+        Map<String, Tile> tiles = board.getTileMap();
+
         for(int i = kingColumn-1; i >= 0; i--) {
-            Position offSetPosition = new Position(currentTile.getPosition().getRow(), i);
-            Map<String, Tile> tiles = board.getTileMap();
+            Position offSetPosition = kingPosition.getOffSetPosition(i - kingColumn, 0);
+
+            // If the tile is targeted, castling is not allowed
+            if(MoveUtils.isTileTargeted(piece.getOwner(), offSetPosition)) {
+                break;
+            }
 
             // If the tile is occupied...
             Tile offsetTile = tiles.get(offSetPosition.toString());
             if(offsetTile.isOccupied()) {
-
                 // If the piece is a rook and has not moved
                 Piece occupyingPiece = offsetTile.getPiece();
                 if(occupyingPiece instanceof Rook) {
-                    Tile kingCastleLoc = tiles.get(new Position(currentTile.getPosition().getRow(), i+2).toString());
+                    Tile currentTile = board.getTileMap().get(kingPosition.toString());
+                    Tile kingCastleLoc = tiles.get(kingPosition.getOffSetPosition(-2, 0).toString());
                     validPositions.add(new Move(currentTile, kingCastleLoc));
                 } else {
                     break;
@@ -94,6 +116,10 @@ public class MovePositions {
             }
         }
         return validPositions;
+    }
+
+    private static void checkCastlingDirection() {
+
     }
 
     /**
@@ -241,6 +267,12 @@ public class MovePositions {
                 }
 
             }
+
+            // Check if the move would put the king in check / does not remove check
+            if(!MoveUtils.performTestMove(board, currentTile, offSetTile)) {
+                //break;
+            }
+
 
             // Add our position if it was not occupied or was an opposing piece and does not cause check
             positionsSet.add(new Move(currentTile, offSetTile));
