@@ -42,58 +42,43 @@ public class MovePositions {
      * King side castle location (assumes that you can king side castle)
      * @param board the current board
      * @param piece the king
+     * @param currentPosition the current position of the king
      * @return king side castle location
      */
-    public static List<Move> addKingSideCastlePosition(Board board, Piece piece) {
-        List<Move> validPositions = new ArrayList<>();
-
-        if(!(piece instanceof King)) {
-            return validPositions;
-        }
-
-        Position kingPosition = piece.getOwner().isWhite() ? board.getWhiteKingPosition() : board.getBlackKingPosition();
-        int kingColumn = kingPosition.getColumn();
-
-        // Check each tile in between current location and king side rook
-        Map<String, Tile> tiles = board.getTileMap();
-        for(int i = kingColumn + 1; i < 8; i++) {
-            Position offSetPosition = kingPosition.getOffSetPosition(i - kingColumn, 0);
-
-            // If the tile is targeted, castling is not allowed
-            if(MoveUtils.isTileTargeted(piece.getOwner(), offSetPosition)) {
-                break;
-            }
-
-            // If the tile is occupied...
-            Tile offsetTile = tiles.get(offSetPosition.toString());
-            if(offsetTile.isOccupied()) {
-                // If the piece is a rook and has not moved
-                Piece occupyingPiece = offsetTile.getPiece();
-                if(occupyingPiece instanceof Rook) {
-                    Tile currentTile = board.getTileMap().get(kingPosition.toString());
-                    Tile kingCastleLoc = tiles.get(kingPosition.getOffSetPosition(2, 0).toString());
-                    validPositions.add(new Move(currentTile, kingCastleLoc));
-                } else {
-                    break;
-                }
-            }
-        }
-        return validPositions;
+    public static List<Move> addKingSideCastlePosition(Board board, Piece piece, Position currentPosition) {
+        return checkCastlingDirection(board, piece, currentPosition, currentPosition.getOffSetPosition(3, 0));
     }
 
     /**
      * Add queen side castle position for the king (assumes that you can queen side castle)
      * @param board the current board
      * @param piece the king
+     * @param currentPosition the current position of the king
      * @return queen side castle location
      */
-    public static List<Move> addQueenSideCastlePosition(Board board, Piece piece) {
-        List<Move> validPositions = new ArrayList<>();
-        Position kingPosition = piece.getOwner().isWhite() ? board.getWhiteKingPosition() : board.getBlackKingPosition();
-        int kingColumn = kingPosition.getColumn();
-        Map<String, Tile> tiles = board.getTileMap();
+    public static List<Move> addQueenSideCastlePosition(Board board, Piece piece, Position currentPosition) {
+        return checkCastlingDirection(board, piece, currentPosition, currentPosition.getOffSetPosition(-4, 0));
+    }
 
-        for(int i = kingColumn-1; i >= 0; i--) {
+    /**
+     * Check a given end position for castling (either king side or queen side)
+     * @param board the current board state
+     * @param piece the piece to move
+     * @param endPosition
+     * @return
+     */
+    private static List<Move> checkCastlingDirection(Board board, Piece piece, Position kingPosition, Position endPosition) {
+        List<Move> validPositions = new ArrayList<>();
+
+        // If this piece is not a king or if the current king position is targeted, castling is not allowed
+        if(!(piece instanceof King) || MoveUtils.isTileTargeted(piece.getOwner(), kingPosition)) {
+            return validPositions;
+        }
+
+        Map<String, Tile> tiles = board.getTileMap();
+        int kingColumn = kingPosition.getColumn();
+        int increment = kingPosition.getColumn() > endPosition.getColumn() ? -1 : 1;
+        for(int i = kingColumn + increment; i >= 0 && i < 8; i = i + increment) {
             Position offSetPosition = kingPosition.getOffSetPosition(i - kingColumn, 0);
 
             // If the tile is targeted, castling is not allowed
@@ -108,7 +93,7 @@ public class MovePositions {
                 Piece occupyingPiece = offsetTile.getPiece();
                 if(occupyingPiece instanceof Rook) {
                     Tile currentTile = board.getTileMap().get(kingPosition.toString());
-                    Tile kingCastleLoc = tiles.get(kingPosition.getOffSetPosition(-2, 0).toString());
+                    Tile kingCastleLoc = tiles.get(kingPosition.getOffSetPosition(increment * 2, 0).toString());
                     validPositions.add(new Move(currentTile, kingCastleLoc));
                 } else {
                     break;
@@ -116,10 +101,6 @@ public class MovePositions {
             }
         }
         return validPositions;
-    }
-
-    private static void checkCastlingDirection() {
-
     }
 
     /**

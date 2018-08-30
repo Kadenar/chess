@@ -9,6 +9,7 @@ import com.chess.engine.board.Tile;
 import com.chess.engine.pieces.King;
 import com.chess.engine.pieces.Pawn;
 import com.chess.engine.pieces.Piece;
+import com.chess.engine.pieces.Rook;
 import com.chess.engine.sound.SoundUtils;
 
 import java.util.Collection;
@@ -65,7 +66,10 @@ public class MoveUtils {
         // If we moved the king, update the king position
         if(isKingMove) {
             testBoard.setKingPosition((King)draggedPiece, mockTargetTile.getPosition());
+            updateCastling(state, draggedPiece.getOwner().opposite());
         }
+
+        // TODO -> If rook moved, then castling is no longer allowed for that side
 
         // If king moved > 1 square, update castling and play different sound
         if(isKingMove && BoardUtils.deltaCol(mockOriginatingTile, mockTargetTile) > 1) {
@@ -75,7 +79,6 @@ public class MoveUtils {
             Tile newRookTile = testBoard.getTileMap().get(targetPosition.getOffSetPosition(queenSideCastle ? 1 : -1, 0).toString());
             newRookTile.setPiece(rookTile.getPiece());
             rookTile.setPiece(null);
-            updateCastling(state, draggedPiece.getOwner().opposite());
         }
         // Add the captured piece to list captured
         else if(targetTile.isOccupied()) {
@@ -173,7 +176,13 @@ public class MoveUtils {
         // If we moved the king, update the king position
         if(isKingMove) {
             board.setKingPosition((King)draggedPiece, tileToUpdate.getPosition());
+            updateCastling(state, draggedPiece.getOwner().opposite());
         }
+        // TODO -> If moving rook, determine which side and don't allow castling to that side anymore
+        else if(draggedPiece instanceof Rook) {
+            updateCastling(state, draggedPiece.getOwner().opposite());
+        }
+
 
         // If king moved > 1 square, update castling and play different sound
         if(isKingMove && BoardUtils.deltaCol(tileToMoveFrom, tileToUpdate) > 1) {
@@ -183,7 +192,6 @@ public class MoveUtils {
             Tile newRookTile = board.getTileMap().get(targetPosition.getOffSetPosition(queenSideCastle ? 1 : -1, 0).toString());
             newRookTile.setPiece(rookTile.getPiece());
             rookTile.setPiece(null);
-            updateCastling(state, draggedPiece.getOwner().opposite());
             typeOfMove = MoveType.CASTLE;
         }
         // Add the captured piece to list captured and play capture sound
