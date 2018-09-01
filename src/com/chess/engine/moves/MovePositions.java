@@ -1,5 +1,6 @@
 package com.chess.engine.moves;
 
+import com.chess.engine.Player;
 import com.chess.engine.Position;
 import com.chess.engine.board.Board;
 import com.chess.engine.board.Tile;
@@ -8,9 +9,9 @@ import com.chess.engine.pieces.Pawn;
 import com.chess.engine.pieces.Piece;
 import com.chess.engine.pieces.Rook;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 public class MovePositions {
 
@@ -20,8 +21,8 @@ public class MovePositions {
      * @param currentTile the current position of the knight
      * @return the positions that are valid to be moved to
      */
-    public static List<Move> addPositionsForKnight(Board board, Piece piece, Tile currentTile) {
-        List<Move> positions = new ArrayList<>();
+    public static Set<Move> addPositionsForKnight(Board board, Piece piece, Tile currentTile) {
+        Set<Move> positions = new HashSet<>();
 
         // Over 1 up and down 2
         positions.addAll(addPositionsForOffset(board, piece, currentTile, 1, -2));
@@ -45,7 +46,7 @@ public class MovePositions {
      * @param currentPosition the current position of the king
      * @return king side castle location
      */
-    public static List<Move> addKingSideCastlePosition(Board board, Piece piece, Position currentPosition) {
+    public static Set<Move> addKingSideCastlePosition(Board board, Piece piece, Position currentPosition) {
         return checkCastlingDirection(board, piece, currentPosition, currentPosition.getOffSetPosition(3, 0));
     }
 
@@ -56,7 +57,7 @@ public class MovePositions {
      * @param currentPosition the current position of the king
      * @return queen side castle location
      */
-    public static List<Move> addQueenSideCastlePosition(Board board, Piece piece, Position currentPosition) {
+    public static Set<Move> addQueenSideCastlePosition(Board board, Piece piece, Position currentPosition) {
         return checkCastlingDirection(board, piece, currentPosition, currentPosition.getOffSetPosition(-4, 0));
     }
 
@@ -64,42 +65,59 @@ public class MovePositions {
      * Check a given end position for castling (either king side or queen side)
      * @param board the current board state
      * @param piece the piece to move
-     * @param endPosition
-     * @return
+     * @param endPosition the end position
+     * @return the castling move if it is valid
      */
-    private static List<Move> checkCastlingDirection(Board board, Piece piece, Position kingPosition, Position endPosition) {
-        List<Move> validPositions = new ArrayList<>();
+    private static Set<Move> checkCastlingDirection(Board board, Piece piece, Position kingPosition, Position endPosition) {
+        Set<Move> validPositions = new HashSet<>();
+        Player opposingPlayer = piece.getOwner().opposite(board); // TODO WTF?
 
+        System.out.println("-----");
+        System.out.println("Targeting player = : " + opposingPlayer);
+        System.out.println("Checking king position");
         // If this piece is not a king or if the current king position is targeted, castling is not allowed
-        if(!(piece instanceof King) || MoveUtils.isTileTargeted(piece.getOwner(), kingPosition)) {
+        if(!(piece instanceof King) || MoveUtils.isTileTargeted(opposingPlayer, kingPosition)) {
+            System.out.println("King's tile was targeted!");
             return validPositions;
         }
 
+        System.out.println("-----");
+
+        System.out.println("Checking offsets");
         Map<String, Tile> tiles = board.getTileMap();
         int kingColumn = kingPosition.getColumn();
-        int increment = kingPosition.getColumn() > endPosition.getColumn() ? -1 : 1;
+        int increment = kingColumn > endPosition.getColumn() ? -1 : 1;
         for(int i = kingColumn + increment; i >= 0 && i < 8; i = i + increment) {
             Position offSetPosition = kingPosition.getOffSetPosition(i - kingColumn, 0);
+            System.out.println("i: " + (i-kingColumn));
+            System.out.println("offset pos " + offSetPosition);
+            // If the tile is occupied...
+            Tile offsetTile = tiles.get(offSetPosition.toString());
+            System.out.println("tile pos:  " + offsetTile.getPosition());
 
-            // If the tile is targeted, castling is not allowed
-            if(MoveUtils.isTileTargeted(piece.getOwner(), offSetPosition)) {
+            if(offsetTile.isOccupied()) {
+                // If the piece is a rook and has not moved
+                Piece pieceAtOffset = offsetTile.getPiece();
+                if(pieceAtOffset instanceof Rook
+                        /*&& board.getMoveHistory().getMoveHistoryForPlayer(piece.getOwner())
+                            .stream().anyMatch(move -> move.getMovedPiece().equals(pieceAtOffset))*/) {
+                    // TODO Disabled until can figure out how to get it working
+                    Tile currentTile = board.getTileMap().get(kingPosition.toString());
+                    Tile kingCastleLoc = tiles.get(kingPosition.getOffSetPosition(increment * 2, 0).toString());
+                    validPositions.add(new Move(piece, currentTile, kingCastleLoc));
+                }
+
+                // If we reached an occupied tile, we are done
                 break;
             }
 
-            // If the tile is occupied...
-            Tile offsetTile = tiles.get(offSetPosition.toString());
-            if(offsetTile.isOccupied()) {
-                // If the piece is a rook and has not moved
-                Piece occupyingPiece = offsetTile.getPiece();
-                if(occupyingPiece instanceof Rook) {
-                    Tile currentTile = board.getTileMap().get(kingPosition.toString());
-                    Tile kingCastleLoc = tiles.get(kingPosition.getOffSetPosition(increment * 2, 0).toString());
-                    validPositions.add(new Move(currentTile, kingCastleLoc));
-                } else {
-                    break;
-                }
+            // If the tile is targeted, castling is not allowed
+            if(MoveUtils.isTileTargeted(opposingPlayer, offSetPosition)) {
+                System.out.println("Offset tile was targeted!");
+                break;
             }
         }
+
         return validPositions;
     }
 
@@ -110,8 +128,8 @@ public class MovePositions {
      * @param dir the direction
      * @return the positions that are valid to be moved to
      */
-    public static List<Move> addPositionsForPawn(Board board, Piece piece, Tile currentTile, Direction dir) {
-        List<Move> validPositions = new ArrayList<>();
+    public static Set<Move> addPositionsForPawn(Board board, Piece piece, Tile currentTile, Direction dir) {
+        Set<Move> validPositions = new HashSet<>();
 
         // Only allow this to be called for pawns
         if(!(piece instanceof Pawn)) return validPositions;
@@ -133,16 +151,16 @@ public class MovePositions {
     }
 
     /**
-     * Movement for Bishop, Rook, Queen
+     * Movement for all available directions (Up, Down, Left, Right, Diagonal Up, Diagonal Down)
      * @param piece the piece
      * @param currentTile the current position of the piece
      * @param dir the direction of movement (up, down, left, right)
      * @param isDiagonal whether diagonal movement
      * @return the positions that are valid to be moved to
      */
-    public static List<Move> addPositionsForDirection(Board board, Piece piece, Tile currentTile,
+    public static Set<Move> addPositionsForDirection(Board board, Piece piece, Tile currentTile,
                                                       Direction dir, boolean isDiagonal) {
-        List<Move> positions = new ArrayList<>();
+        Set<Move> positions = new HashSet<>();
         if(isDiagonal) {
             int rowOffset = dir == Direction.UP ? 1 : -1;
             positions.addAll(addPositionsForDiagonal(board, piece, currentTile, 1, rowOffset));
@@ -168,7 +186,7 @@ public class MovePositions {
      * @param rowOffset the row offset (up and down)
      * @return the positions that are valid to be moved to
      */
-    private static List<Move> addPositionsForDiagonal(Board board, Piece piece, Tile currentTile,
+    private static Set<Move> addPositionsForDiagonal(Board board, Piece piece, Tile currentTile,
                                                       int colOffset, int rowOffset) {
         return addPositionsForOffset(board, piece, currentTile, colOffset, rowOffset);
     }
@@ -180,18 +198,18 @@ public class MovePositions {
      * @param rowOffset the row offset (up and down)
      * @return the positions that are valid to be moved to
      */
-    private static List<Move> addPositionsForVertical(Board board, Piece piece, Tile currentTile, int rowOffset) {
+    private static Set<Move> addPositionsForVertical(Board board, Piece piece, Tile currentTile, int rowOffset) {
         return addPositionsForOffset(board, piece, currentTile, 0, rowOffset);
     }
 
     /**
-     * Add positions for a horizontal in given x offset direction
+     * Add positions for a horizontal in given column offset direction
      * @param piece the piece
      * @param currentTile the current position of the piece
      * @param colOffset the column offset (left and right)
      * @return the positions that are valid to be moved to
      */
-    private static List<Move> addPositionsForHorizontal(Board board, Piece piece, Tile currentTile, int colOffset) {
+    private static Set<Move> addPositionsForHorizontal(Board board, Piece piece, Tile currentTile, int colOffset) {
         return addPositionsForOffset(board, piece, currentTile, colOffset, 0);
     }
 
@@ -203,9 +221,9 @@ public class MovePositions {
      * @param rowOffSet the row offset (up and down movement)
      * @return the positions that are valid to be moved to
      */
-    private static List<Move> addPositionsForOffset(Board board, Piece piece, Tile currentTile,
+    private static Set<Move> addPositionsForOffset(Board board, Piece piece, Tile currentTile,
                                                     int colOffset, int rowOffSet) {
-        List<Move> positionsSet = new ArrayList<>();
+        Set<Move> positionsSet = new HashSet<>();
         Position currentPosition = currentTile.getPosition();
         Position offSetPos = currentPosition.getOffSetPosition(colOffset, rowOffSet);
         Map<String, Tile> tiles = board.getTileMap();
@@ -249,14 +267,8 @@ public class MovePositions {
 
             }
 
-            // Check if the move would put the king in check / does not remove check
-            if(!MoveUtils.performTestMove(board, currentTile, offSetTile)) {
-                //break;
-            }
-
-
             // Add our position if it was not occupied or was an opposing piece and does not cause check
-            positionsSet.add(new Move(currentTile, offSetTile));
+            positionsSet.add(new Move(piece, currentTile, offSetTile));
 
             // Break if the tile was occupied as we can't go past an occupied tile
             if(offSetTileIsOccupied) {

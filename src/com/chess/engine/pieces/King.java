@@ -1,15 +1,14 @@
 package com.chess.engine.pieces;
 
+import com.chess.engine.Player;
+import com.chess.engine.board.Board;
+import com.chess.engine.board.Tile;
 import com.chess.engine.moves.Direction;
 import com.chess.engine.moves.Move;
-import com.chess.engine.board.Board;
-import com.chess.engine.Player;
-import com.chess.engine.board.Tile;
 import com.chess.engine.moves.MovePositions;
-import com.chess.engine.moves.MoveUtils;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
 
 public class King extends Piece {
 
@@ -23,8 +22,8 @@ public class King extends Piece {
      * @return list of valid moves the king can make
      */
     @Override
-    public List<Move> generateValidMoves(Board board, Tile currentTile) {
-        List<Move> validPositions = new ArrayList<>();
+    public Set<Move> generateMoves(Board board, Tile currentTile) {
+        Set<Move> validPositions = new HashSet<>();
 
         // Diagonal movement
         validPositions.addAll(MovePositions.addPositionsForDirection(board, this, currentTile,
@@ -38,20 +37,18 @@ public class King extends Piece {
         validPositions.addAll(MovePositions.addPositionsForDirection(board, this, currentTile,
                 Direction.DOWN, false));
 
-        // Right
+        // Horizontal movement
         validPositions.addAll(MovePositions.addPositionsForDirection(board, this, currentTile,
                 Direction.RIGHT, false));
-
-        // Left
         validPositions.addAll(MovePositions.addPositionsForDirection(board, this, currentTile,
                 Direction.LEFT, false));
 
-        // castling ability king side
+        // castling king side
         if(board.getGameState().canCastleKingSide(getOwner())) {
             validPositions.addAll(MovePositions.addKingSideCastlePosition(board, this, currentTile.getPosition()));
         }
 
-        // castling ability queen side
+        // castling queen side
         if(board.getGameState().canCastleQueenSide(getOwner())) {
             validPositions.addAll(MovePositions.addQueenSideCastlePosition(board, this, currentTile.getPosition()));
         }
@@ -61,7 +58,7 @@ public class King extends Piece {
     }
 
     /**
-     * A king can only move 1 square at a time
+     * A king can only move 1 square at a time unless castling
      * @return 1
      */
     @Override

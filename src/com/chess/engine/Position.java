@@ -1,6 +1,6 @@
 package com.chess.engine;
 
-import java.awt.*;
+import java.awt.Point;
 
 /*
  * Represents a piece position on the chessboard
@@ -56,6 +56,12 @@ public class Position {
      */
     public boolean isValidCoord() {
         return this.row >= 0 && this.row < 8 && this.column >= 0 && this.column < 8;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = 17;
+        return 31 * result + (row + column);
     }
 
     /**

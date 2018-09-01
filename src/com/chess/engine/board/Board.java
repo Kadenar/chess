@@ -2,6 +2,7 @@ package com.chess.engine.board;
 
 import com.chess.engine.Player;
 import com.chess.engine.Position;
+import com.chess.engine.moves.MoveHistory;
 import com.chess.engine.pieces.King;
 
 import java.util.HashMap;
@@ -11,13 +12,14 @@ import java.util.Map;
 public class Board {
 
     // All tiles for the current board
-    private Map<String, Tile> tileMap = new LinkedHashMap<>(64);
+    private Map<String, Tile> tileMap;
 
     // The players for the current board
-    private Map<String, Player> players = new HashMap<>(2);
+    private Map<Player.Color, Player> players;
 
     // The current game state
     private GameState gameState;
+    private MoveHistory moveHistory;
 
     // This is set when loading board from FEN string
     private Position whiteKingPos;
@@ -28,9 +30,14 @@ public class Board {
      * @param fen the fen string to present on a chessboard
      */
     public Board(String fen) {
-        this.players.put(Player.WHITE.toString(), Player.WHITE);
-        this.players.put(Player.BLACK.toString(), Player.BLACK);
-        this.gameState = new GameState(Player.WHITE);
+        Player white = new Player(Player.Color.WHITE);
+        Player black = new Player(Player.Color.BLACK);
+        tileMap = new LinkedHashMap<>(64);
+        players = new HashMap<>(2);
+        this.players.put(Player.Color.WHITE, white);
+        this.players.put(Player.Color.BLACK, black);
+        this.gameState = new GameState(white);
+        this.moveHistory = new MoveHistory();
         BoardUtils.updateBoardFromFen(this, fen);
     }
 
@@ -39,19 +46,21 @@ public class Board {
      * @param otherBoard the board to clone
      */
     public Board(Board otherBoard) {
-        //this(FenUtils.getFen(otherBoard));
+        this(FenUtils.getFen(otherBoard));
         // TODO remove this
-        this.players = otherBoard.players;
+        /*this.players = otherBoard.players;
         this.gameState = otherBoard.gameState;
+        this.moveHistory = otherBoard.moveHistory;
         this.tileMap = otherBoard.tileMap;
         this.whiteKingPos = otherBoard.whiteKingPos;
-        this.blackKingPos = otherBoard.blackKingPos;
+        this.blackKingPos = otherBoard.blackKingPos;*/
     }
 
     // GETTERS
     public Map<String, Tile> getTileMap() { return this.tileMap; }
-    public Map<String, Player> getPlayers() { return this.players; }
+    public Map<Player.Color, Player> getPlayers() { return this.players; }
     public GameState getGameState() { return this.gameState; }
+    public MoveHistory getMoveHistory() { return this.moveHistory; }
 
     /**
      * Update the position if the king piece with new position
@@ -81,6 +90,7 @@ public class Board {
     public Position getBlackKingPosition() {
         return blackKingPos;
     }
+
     /**
      * String representation of the board
      * 8 [r] [n] [b] [q] [k] [b] [n] [r]

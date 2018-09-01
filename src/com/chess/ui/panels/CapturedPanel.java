@@ -1,11 +1,12 @@
 package com.chess.ui.panels;
 
-import com.chess.engine.board.Board;
 import com.chess.engine.pieces.Piece;
 
-import javax.swing.*;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
 import javax.swing.border.EtchedBorder;
-import java.awt.*;
+import java.awt.BorderLayout;
+import java.awt.GridLayout;
 
 public class CapturedPanel extends JPanel {
 

@@ -2,6 +2,7 @@ package com.chess.engine.board;
 
 import com.chess.engine.Player;
 import com.chess.engine.Position;
+import com.chess.engine.board.FenUtils.FenException;
 import com.chess.engine.pieces.Bishop;
 import com.chess.engine.pieces.King;
 import com.chess.engine.pieces.Knight;
@@ -9,9 +10,6 @@ import com.chess.engine.pieces.Pawn;
 import com.chess.engine.pieces.Piece;
 import com.chess.engine.pieces.Queen;
 import com.chess.engine.pieces.Rook;
-import com.chess.engine.board.FenUtils.FenException;
-
-import java.util.Map;
 
 public class BoardUtils {
 
@@ -73,11 +71,12 @@ public class BoardUtils {
     /*
     * Construct a game piece at the given position
     */
-    static Piece constructPiece(final char ch) {
+    static Piece constructPiece(final Board board, final char ch) {
         Piece piece = null;
 
         // Determine the color this piece belongs to
-        Player color = Character.isUpperCase(ch) ? Player.WHITE : Player.BLACK;
+        Player color = Character.isUpperCase(ch)
+                ? board.getPlayers().get(Player.Color.WHITE) : board.getPlayers().get(Player.Color.BLACK);
 
         // Determine the type of piece
         switch(Character.toLowerCase(ch)) {

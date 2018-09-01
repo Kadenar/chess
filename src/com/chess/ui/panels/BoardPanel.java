@@ -1,13 +1,12 @@
 package com.chess.ui.panels;
 
 import com.chess.engine.GameSettings;
-import com.chess.engine.moves.Move;
-import com.chess.engine.board.Board;
 import com.chess.engine.Position;
+import com.chess.engine.board.Board;
 import com.chess.engine.board.Tile;
-import com.chess.engine.pieces.Piece;
+import com.chess.engine.moves.Move;
 import com.chess.engine.moves.MoveUtils;
-import com.chess.engine.sound.SoundUtils;
+import com.chess.engine.pieces.Piece;
 import com.chess.ui.ChessFrame;
 
 import javax.swing.BorderFactory;
@@ -25,7 +24,7 @@ import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
+import java.util.Set;
 
 public class BoardPanel extends JPanel {
 
@@ -55,8 +54,8 @@ public class BoardPanel extends JPanel {
         this.addMouseListener(listener);
         this.addMouseMotionListener(listener);
 
-        // Reload the tiles
-        reloadBoard(board);
+        // Display the pieces on the board
+        displayBoard(board);
 
         // Add the myself to our layered pane's default layer
         this.layeredPane.add(this, JLayeredPane.DEFAULT_LAYER);
@@ -66,16 +65,38 @@ public class BoardPanel extends JPanel {
      * Initialize the game board
      * - All chess tiles
      */
-    public void reloadBoard(Board board) {
+    public void displayBoard(Board board) {
+
+        // Update our board reference
         this.board = board;
 
-        // Add all the chess tiles to the UI
+        // Remove all tiles
+        this.removeAll();
+
+        // Add all of our tiles to the chess panel
         final int[] i = {0};
-        board.getTileMap().values().forEach(e -> {
-            this.add(e, i[0]);
+        board.getTileMap().values().forEach(tile -> {
+
+            tile.removeAll();
+
+            // If debugging, display tile positions too
+            if(GameSettings.getInstance().isEnableDebugging()) {
+                Position tilePos = tile.getPosition();
+                JLabel locationText = new JLabel(tilePos + " - [" + tilePos.getRow() + "," + tilePos.getColumn() + "]");
+                tile.add(locationText);
+            }
+
+            // If tile is occupied, then display it
+            if(tile.isOccupied()) {
+                tile.add(tile.getPiece());
+            }
+
+            this.add(tile, i[0]);
             i[0]++;
         });
 
+        layeredPane.revalidate();
+        layeredPane.repaint();
     }
 
     /*
@@ -139,7 +160,7 @@ public class BoardPanel extends JPanel {
          */
         private void addIndicators() {
             if(GameSettings.getInstance().isEnableHighlighting()) {
-                List<Move> validMoves = originatingPiece.getMoves();
+                Set<Move> validMoves = originatingPiece.getValidMoves(board);
 
                 for (Move validMove : validMoves) {
                     Tile destination = validMove.getDestination();
@@ -164,8 +185,8 @@ public class BoardPanel extends JPanel {
         }
 
         /**
-         * Prevent player from moving a piece if it is not their turn
-         * @return whether the player can pickup a given piece
+         * Prevent Player from moving a piece if it is not their turn
+         * @return whether the Player can pickup a given piece
          */
         private boolean canPickupPiece() {
             return originatingPiece != null && originatingPiece.getOwner().equals(board.getGameState().getPlayerTurn());
@@ -214,18 +235,23 @@ public class BoardPanel extends JPanel {
             if(originatingTile != null)
                 originatingTile.highlightTile(false);
 
-            // If the piece was not moved, then restore it to previous position
-            if(canPickupPiece() && !attemptPieceMove(evt, this.originatingTile)) {
-                // If we had a piece that we attempted to move from a tile
-                // Remove it from our layered pane and add it back to the originating tile
-                originatingPiece.setVisible(false);
-                layeredPane.remove(originatingPiece);
-                originatingTile.add(originatingPiece);
-                originatingPiece.setVisible(true);
-            }
+            if(canPickupPiece()) {
 
-            layeredPane.revalidate();
-            layeredPane.repaint();
+                // If the piece was not moved, then restore it to previous position
+                if (!attemptPieceMove(evt, this.originatingTile)) {
+                    // If we had a piece that we attempted to move from a tile
+                    // Remove it from our layered pane and add it back to the originating tile
+                    originatingPiece.setVisible(false);
+                    layeredPane.remove(originatingPiece);
+                    originatingTile.add(originatingPiece);
+                    originatingPiece.setVisible(true);
+                } else {
+                    // Update game history
+                    ChessFrame frame = (ChessFrame) SwingUtilities.getAncestorOfClass(ChessFrame.class, layeredPane);
+                    frame.getHistoryPanel().updateHistory();
+                    displayBoard(board);
+                }
+            }
         }
 
         @Override

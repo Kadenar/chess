@@ -1,13 +1,13 @@
 package com.chess.engine.pieces;
 
-import com.chess.engine.moves.Direction;
-import com.chess.engine.moves.Move;
 import com.chess.engine.Player;
 import com.chess.engine.board.Board;
 import com.chess.engine.board.Tile;
+import com.chess.engine.moves.Direction;
+import com.chess.engine.moves.Move;
 import com.chess.engine.moves.MovePositions;
 
-import java.util.List;
+import java.util.Set;
 
 public class Pawn extends Piece {
 
@@ -16,11 +16,11 @@ public class Pawn extends Piece {
     }
 
     /**
-     * Return the direction for enpassant depending on player color
-     * @return 1 or -1 depending on player color
+     * Return the direction for enpassant depending on Player color
+     * @return 1 or -1 depending on Player color
      */
     public int getEnpassantDirection() {
-        return getOwner().equals(Player.WHITE) ? 1 : -1;
+        return getOwner().equals(Player.Color.WHITE) ? 1 : -1;
     }
 
     /**
@@ -31,7 +31,7 @@ public class Pawn extends Piece {
      * @return list of valid moves the king can make
      */
     @Override
-    public List<Move> generateValidMoves(Board board, Tile currentPosition) {
+    public Set<Move> generateMoves(Board board, Tile currentPosition) {
         // Vertical movement based on color
         Direction dir  = getOwner().isWhite() ? Direction.UP : Direction.DOWN;
 

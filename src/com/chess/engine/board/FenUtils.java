@@ -5,8 +5,6 @@ import com.chess.engine.Position;
 import com.chess.engine.pieces.King;
 import com.chess.engine.pieces.Piece;
 
-import java.util.Map;
-
 public class FenUtils {
 
     // The default starting position for a chess game
@@ -106,7 +104,7 @@ public class FenUtils {
         GameState gameState = board.getGameState();
 
         // Set player's move
-        gameState.setPlayerTurn(getPlayerTurn(tokens[1]));
+        gameState.setPlayerTurn(getPlayerTurn(board, tokens[1]));
 
         // Set castling
         gameState.setCastlingAbility(getCastlingAbility(tokens[2]));
@@ -121,8 +119,7 @@ public class FenUtils {
         gameState.setFullMoves(getFullMove(tokens[5]));
 
         // Populate moves for current game state
-        Player.WHITE.populateMoves(board);
-        Player.BLACK.populateMoves(board);
+        board.getPlayers().values().forEach(player -> player.populateMoves(board));
     }
 
     /**
@@ -162,7 +159,7 @@ public class FenUtils {
                 // If the character was a piece, then add it for white or black
                 else {
                     Position piecePosition = new Position(7 - rankCount, filesAddedForRow);
-                    Piece newPiece = BoardUtils.constructPiece(ch);
+                    Piece newPiece = BoardUtils.constructPiece(board, ch);
                     // Need to know the king's position
                     if(ch == 'k' || ch == 'K') {
                         board.setKingPosition((King) newPiece, piecePosition);
@@ -175,11 +172,11 @@ public class FenUtils {
     }
 
     // Whose turn it is White or Black
-    private static Player getPlayerTurn(final String turn) throws FenException {
-        if(Player.WHITE.toString().equals(turn)) {
-            return Player.WHITE;
-        } else if(Player.BLACK.toString().equals(turn)) {
-            return Player.BLACK;
+    private static Player getPlayerTurn(Board board, final String turn) throws FenException {
+        if(Player.Color.WHITE.toString().equals(turn)) {
+            return board.getPlayers().get(Player.Color.WHITE);
+        } else if(Player.Color.BLACK.toString().equals(turn)) {
+            return board.getPlayers().get(Player.Color.BLACK);
         } else {
             throw new FenException("Malformed fen string: expected 'to play' as second field but found " + turn);
         }

@@ -1,12 +1,14 @@
-package com.chess.ui;
+package com.chess.ui.headers;
 
-import javax.swing.*;
-import java.awt.*;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.SwingConstants;
+import java.awt.GridLayout;
 
-class FileHeaders extends JPanel{
+public class FileHeaders extends JPanel{
     private static final String[] headers = {"a", "b", "c", "d", "e", "f", "g", "h" };
 
-    FileHeaders() {
+    public FileHeaders() {
         setLayout(new GridLayout(1, 8));
 
         for(String h : headers) {

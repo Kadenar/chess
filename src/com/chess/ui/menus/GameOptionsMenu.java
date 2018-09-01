@@ -5,18 +5,17 @@ import com.chess.engine.board.Board;
 import com.chess.engine.board.BoardUtils;
 import com.chess.engine.board.FenUtils;
 import com.chess.ui.ChessFrame;
+import com.chess.ui.panels.BoardPanel;
 
 import javax.swing.JCheckBoxMenuItem;
 import javax.swing.JMenu;
 import javax.swing.JMenuItem;
+import javax.swing.SwingUtilities;
 
-class GameOptionsMenu extends JMenu {
+public class GameOptionsMenu extends JMenu {
 
-    private ChessFrame owningFrame;
-
-    GameOptionsMenu(ChessFrame owningFrame) {
+    public GameOptionsMenu() {
         super("Game options");
-        this.owningFrame = owningFrame;
         populateMenu();
     }
 
@@ -45,16 +44,14 @@ class GameOptionsMenu extends JMenu {
      * Reset the game state (on click of new game button)
      */
     private void resetGameState() {
-
-        // Remove all objects from the frame
-        owningFrame.getBoardPanel().getLayeredPane().removeAll();
-
         // Recreate the board object with default position
-        Board board = owningFrame.getBoardPanel().getBoard();
+        ChessFrame frame = (ChessFrame) SwingUtilities.getRoot(this);
+        BoardPanel boardPanel = frame.getBoardPanel();
+        Board board = boardPanel.getBoard();
         BoardUtils.updateBoardFromFen(board, FenUtils.DEFAULT_POSITION);
-        owningFrame.getBoardPanel().reloadBoard(board);
-        owningFrame.getBoardPanel().getLayeredPane().revalidate();
-        owningFrame.getBoardPanel().getLayeredPane().repaint();
+        board.getMoveHistory().getAllMoves().clear();
+        frame.getHistoryPanel().updateHistory();
+        boardPanel.displayBoard(board);
     }
 
     /**

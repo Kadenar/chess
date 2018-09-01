@@ -4,7 +4,7 @@ public class GameSettings {
 
     // Configurable settings
     private boolean enableHighlighting = true;
-    private boolean enableDebugging = true;
+    private boolean enableDebugging = false;
 
     private static final GameSettings INSTANCE = getInstance();
 

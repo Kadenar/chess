@@ -1,20 +1,26 @@
 package com.chess.ui.menus;
 
 import com.chess.engine.GameSettings;
-import com.chess.engine.board.Board;
 import com.chess.engine.Player;
+import com.chess.engine.Position;
+import com.chess.engine.board.Board;
 import com.chess.engine.board.FenUtils;
+import com.chess.engine.board.Tile;
+import com.chess.engine.moves.MoveUtils;
+import com.chess.ui.ChessFrame;
+import com.chess.ui.panels.BoardPanel;
 
-import javax.swing.*;
+import javax.swing.JCheckBoxMenuItem;
+import javax.swing.JMenu;
+import javax.swing.JMenuItem;
+import javax.swing.JOptionPane;
+import javax.swing.SwingUtilities;
 import java.util.Map;
 
-class DebugOptionsMenu extends JMenu {
+public class DebugOptionsMenu extends JMenu {
 
-    private Board board;
-
-    DebugOptionsMenu(Board board) {
+    public DebugOptionsMenu() {
         super("Debug options");
-        this.board = board;
         populateMenu();
     }
 
@@ -51,13 +57,13 @@ class DebugOptionsMenu extends JMenu {
     private void enableDebugging() {
         GameSettings settings = GameSettings.getInstance();
         settings.setEnableDebugging(!settings.isEnableDebugging());
-
     }
 
     /**
      * Print the current board state as a FEN string
      */
     private void printFen() {
+        Board board = getBoard();
         System.out.println(FenUtils.getFen(board));
         System.out.println(board.toString());
     }
@@ -66,7 +72,7 @@ class DebugOptionsMenu extends JMenu {
      * Print the current game state in terms of pieces
      */
     private void printPieces() {
-        Map<String, Player> players = board.getPlayers();
+        Map<Player.Color, Player> players = getBoard().getPlayers();
         for(Player player : players.values()) {
             System.out.println(player + " pieces:");
             System.out.println("Controlled: " + player.getPieces());
@@ -78,6 +84,12 @@ class DebugOptionsMenu extends JMenu {
      * Print out all game moves available currently
      */
     private void printGameMoves() {
-        System.out.println(board.getGameState().getPlayerTurn().isWhite() ? Player.WHITE.getAllValidMoves() : Player.BLACK.getAllValidMoves());
+        System.out.println(getBoard().getGameState().getPlayerTurn().getMovesForPieces());
+    }
+
+    private Board getBoard() {
+        ChessFrame frame = (ChessFrame) SwingUtilities.getRoot(this);
+        BoardPanel boardPanel = frame.getBoardPanel();
+        return boardPanel.getBoard();
     }
 }

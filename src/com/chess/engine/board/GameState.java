@@ -28,9 +28,9 @@ public class GameState {
 
         // TODO - time controls
 
-        // TODO player in check
+        // TODO Player in check
 
-        // TODO player in checkmate
+        // TODO Player in checkmate
 
         // TODO stalemate
     }
@@ -50,8 +50,8 @@ public class GameState {
     public void setFullMoves(int fullMoves) { this.fullMoves = fullMoves; }
 
     /**
-     * Check whether given player can king side castle
-     * @param player the player to check
+     * Check whether given Player can king side castle
+     * @param player the Player to check
      * @return true if can king side castle, false if not
      */
     public boolean canCastleKingSide(Player player) {
@@ -59,8 +59,8 @@ public class GameState {
     }
 
     /**
-     * Check whether given player can queen side castle
-     * @param player the player to check
+     * Check whether given Player can queen side castle
+     * @param player the Player to check
      * @return true if can queen side castle, false if not
      */
     public boolean canCastleQueenSide(Player player) {

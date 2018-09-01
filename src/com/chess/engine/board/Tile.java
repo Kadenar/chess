@@ -3,8 +3,9 @@ package com.chess.engine.board;
 import com.chess.engine.Position;
 import com.chess.engine.pieces.Piece;
 
-import javax.swing.*;
-import java.awt.*;
+import javax.swing.BorderFactory;
+import javax.swing.JPanel;
+import java.awt.Color;
 
 public class Tile extends JPanel {
 
@@ -18,15 +19,9 @@ public class Tile extends JPanel {
     public Tile(Position pos, Piece piece) {
         super();
         this.coordinate = pos;
-        this.piece = piece;
         highlightTile(false);
         setBorder(BorderFactory.createLineBorder(Color.YELLOW, 1));
-
-        //add(new JLabel(getPosition() + " - [" + getPosition().getRow() + "," + getPosition().getColumn() + "]"));
-        // If the piece isn't null, add it
-        if(piece != null) {
-            add(piece);
-        }
+        setPiece(piece);
     }
 
     /**
@@ -47,19 +42,6 @@ public class Tile extends JPanel {
      */
     public Position getPosition() {
         return this.coordinate;
-    }
-
-    /**
-     * Returns if given tile is the same as passed in tile
-     * @param tile the tile to check
-     * @return true if same tile, false if not
-     */
-
-    @Override
-    public boolean equals(Object tile) {
-        if(!(tile instanceof  Tile)) return false;
-        Tile t = (Tile) tile;
-        return this.getPosition().equals(t.getPosition());
     }
 
     /**
@@ -92,13 +74,30 @@ public class Tile extends JPanel {
      */
     public void setPiece(Piece piece) {
         this.piece = piece;
-
-        // If we are putting a piece on the tile, add it to the UI as well as the backend tile
-        if(piece != null) {
-            this.add(piece);
-        }
     }
 
+    @Override
+    public int hashCode() {
+        int result = 17;
+        return 31 * result + coordinate.hashCode();
+    }
+
+    /**
+     * Returns if given tile is the same as passed in tile
+     * @param other the other tile to check
+     * @return true if same tile, false if not
+     */
+    @Override
+    public boolean equals(Object other) {
+        if(!(other instanceof  Tile)) return false;
+        Tile tile = (Tile) other;
+        return this.getPosition().equals(tile.getPosition());
+    }
+
+    /**
+     * The piece on the tile or just empty brackets if not occupied
+     * @return string representation of this tile
+     */
     @Override
     public String toString() {
         return isOccupied() ? "[" + getPiece().toString() + "]" : "[ ]";

@@ -1,14 +1,14 @@
 package com.chess.engine.pieces;
 
-import com.chess.engine.moves.Direction;
-import com.chess.engine.moves.Move;
 import com.chess.engine.Player;
 import com.chess.engine.board.Board;
 import com.chess.engine.board.Tile;
+import com.chess.engine.moves.Direction;
+import com.chess.engine.moves.Move;
 import com.chess.engine.moves.MovePositions;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
 
 public class Rook extends Piece {
 
@@ -22,8 +22,8 @@ public class Rook extends Piece {
      * @return list of valid moves the rook can make
      */
     @Override
-    public List<Move> generateValidMoves(Board board, Tile currentPosition) {
-        List<Move> validPositions = new ArrayList<>();
+    public Set<Move> generateMoves(Board board, Tile currentPosition) {
+        Set<Move> validPositions = new HashSet<>();
 
         // Vertical movement
         validPositions.addAll(MovePositions.addPositionsForDirection(board, this, currentPosition,
