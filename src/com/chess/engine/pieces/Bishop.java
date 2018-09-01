@@ -5,7 +5,6 @@ import com.chess.engine.board.Board;
 import com.chess.engine.board.Tile;
 import com.chess.engine.moves.Direction;
 import com.chess.engine.moves.Move;
-import com.chess.engine.moves.MovePositions;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -26,11 +25,11 @@ public class Bishop extends Piece {
         Set<Move> validPositions = new HashSet<>();
 
         // Up 1, over 1
-        validPositions.addAll(MovePositions.addPositionsForDirection(board, this, currentPosition,
+        validPositions.addAll(addPositionsForDirection(board, this, currentPosition,
                                                                 Direction.UP, true));
 
         // Down 1, over 1
-        validPositions.addAll(MovePositions.addPositionsForDirection(board, this, currentPosition,
+        validPositions.addAll(addPositionsForDirection(board, this, currentPosition,
                                                                 Direction.DOWN, true));
 
         // Return valid positions that the bishop can move to

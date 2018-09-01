@@ -272,9 +272,9 @@ public class Board extends JPanel {
                 if(GameSettings.getInstance().isEnableHighlighting()) {
                     if(piece.getOwner() == getGameState().getPlayerTurn()
                         && piece.getValidMoves(this).size() > 0) {
-                        System.out.println("Piece: " + piece);
-                        System.out.println("Owner: " + piece.getOwner());
-                        System.out.println("Position: " + tile.getPosition());
+                        //System.out.println("Piece: " + piece);
+                        //System.out.println("Owner: " + piece.getOwner());
+                        //System.out.println("Position: " + tile.getPosition());
                         tile.setBackground(Color.RED);
                     } else {
                         tile.highlightTile(false);

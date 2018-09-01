@@ -5,8 +5,8 @@ import com.chess.engine.board.Board;
 import com.chess.engine.board.Tile;
 import com.chess.engine.moves.Direction;
 import com.chess.engine.moves.Move;
-import com.chess.engine.moves.MovePositions;
 
+import java.util.HashSet;
 import java.util.Set;
 
 public class Pawn extends Piece {
@@ -36,7 +36,36 @@ public class Pawn extends Piece {
         Direction dir  = getOwner().isWhite() ? Direction.UP : Direction.DOWN;
 
         // Return valid positions that the pawn can move to
-        return MovePositions.addPositionsForPawn(board, this, currentPosition, dir);
+        return addPositionsForPawn(board, this, currentPosition, dir);
+    }
+
+    /**
+     * Movement for the pawn
+     * @param piece the pawn piece
+     * @param currentTile the current position of the pawn
+     * @param dir the direction
+     * @return the positions that are valid to be moved to
+     */
+    private Set<Move> addPositionsForPawn(Board board, Piece piece, Tile currentTile, Direction dir) {
+        Set<Move> validPositions = new HashSet<>();
+
+        // Only allow this to be called for pawns
+        if(!(piece instanceof Pawn)) return validPositions;
+
+        int rowOffSet = 0;
+        if(dir == Direction.UP) {
+            rowOffSet = 1;
+        } else if(dir == Direction.DOWN) {
+            rowOffSet = -1;
+        }
+
+        // First check if the pawn can move in the forward direction
+        validPositions.addAll(addPositionsForOffset(board, piece, currentTile, 0, rowOffSet));
+
+        // Next check if the pawn can move in the diagonal direction
+        validPositions.addAll(addPositionsForDirection(board, piece, currentTile, dir, true));
+
+        return validPositions;
     }
 
     /**

@@ -5,7 +5,6 @@ import com.chess.engine.board.Board;
 import com.chess.engine.board.Tile;
 import com.chess.engine.moves.Direction;
 import com.chess.engine.moves.Move;
-import com.chess.engine.moves.MovePositions;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -26,16 +25,12 @@ public class Rook extends Piece {
         Set<Move> validPositions = new HashSet<>();
 
         // Vertical movement
-        validPositions.addAll(MovePositions.addPositionsForDirection(board, this, currentPosition,
-                                                                Direction.UP, false));
-        validPositions.addAll(MovePositions.addPositionsForDirection(board, this, currentPosition,
-                                                                Direction.DOWN, false));
+        validPositions.addAll(addPositionsForDirection(board, this, currentPosition, Direction.UP, false));
+        validPositions.addAll(addPositionsForDirection(board, this, currentPosition, Direction.DOWN, false));
 
         // Horizontal movement
-        validPositions.addAll(MovePositions.addPositionsForDirection(board, this, currentPosition,
-                                                                Direction.RIGHT, false));
-        validPositions.addAll(MovePositions.addPositionsForDirection(board, this, currentPosition,
-                                                                Direction.LEFT, false));
+        validPositions.addAll(addPositionsForDirection(board, this, currentPosition, Direction.RIGHT, false));
+        validPositions.addAll(addPositionsForDirection(board, this, currentPosition, Direction.LEFT, false));
 
         // Return valid positions that the rook can move to
         return validPositions;
