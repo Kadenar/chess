@@ -78,8 +78,7 @@ public class Tile extends JPanel {
 
     @Override
     public int hashCode() {
-        int result = 17;
-        return 31 * result + coordinate.hashCode();
+        return coordinate.hashCode();
     }
 
     /**

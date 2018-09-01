@@ -3,6 +3,7 @@ package com.chess.ui.headers;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.SwingConstants;
+import java.awt.Dimension;
 import java.awt.GridLayout;
 
 public class RankHeaders extends JPanel {
@@ -11,7 +12,7 @@ public class RankHeaders extends JPanel {
 
     public RankHeaders() {
         setLayout(new GridLayout(8, 1));
-        setSize(20, 20);
+        setPreferredSize(new Dimension(20, 20));
         for(String h : headers) {
             JLabel header = new JLabel();
             header.setText(h);

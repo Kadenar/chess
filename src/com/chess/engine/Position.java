@@ -1,6 +1,7 @@
 package com.chess.engine;
 
 import java.awt.Point;
+import java.util.Objects;
 
 /*
  * Represents a piece position on the chessboard
@@ -22,16 +23,6 @@ public class Position {
     public Position(Point point) {
         this.row = point.y;
         this.column = point.x;
-    }
-
-    /**
-     * Get a position with given row and column offset
-     * @param colOffset how many columns (left or right)
-     * @param rowOffset how many rows (up or down)
-     * @return the position with given offset
-     */
-    public Position getOffSetPosition(int colOffset, int rowOffset) {
-        return new Position(this.getRow() + rowOffset, this.getColumn() + colOffset);
     }
 
     /**
@@ -58,10 +49,24 @@ public class Position {
         return this.row >= 0 && this.row < 8 && this.column >= 0 && this.column < 8;
     }
 
+    /**
+     * Whether a given position is a promotion square. Used for pawns.
+     * @param player the player to check for
+     * @return true if a promotion square, false if not
+     */
+    public boolean isPromotionSquare(Player player) {
+
+        // If player is white, promotion row is 8
+        if(player.isWhite()) {
+            return getRow() == 7;
+        }
+
+        return getRow() == 0;
+    }
+
     @Override
     public int hashCode() {
-        int result = 17;
-        return 31 * result + (row + column);
+        return Objects.hash(row, column);
     }
 
     /**

@@ -3,6 +3,8 @@ package com.chess.engine.moves;
 import com.chess.engine.board.Tile;
 import com.chess.engine.pieces.Piece;
 
+import java.util.Objects;
+
 public class Move {
 
     private final Piece piece;
@@ -43,8 +45,7 @@ public class Move {
 
     @Override
     public int hashCode() {
-        int result = 17;
-        return 31 * result + (fromTile.hashCode() + toTile.hashCode());
+        return Objects.hash(fromTile.hashCode(), toTile.hashCode());
     }
 
     /**

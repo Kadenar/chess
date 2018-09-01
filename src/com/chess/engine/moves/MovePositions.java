@@ -3,6 +3,7 @@ package com.chess.engine.moves;
 import com.chess.engine.Player;
 import com.chess.engine.Position;
 import com.chess.engine.board.Board;
+import com.chess.engine.board.BoardUtils;
 import com.chess.engine.board.Tile;
 import com.chess.engine.pieces.King;
 import com.chess.engine.pieces.Pawn;
@@ -47,7 +48,7 @@ public class MovePositions {
      * @return king side castle location
      */
     public static Set<Move> addKingSideCastlePosition(Board board, Piece piece, Position currentPosition) {
-        return checkCastlingDirection(board, piece, currentPosition, currentPosition.getOffSetPosition(3, 0));
+        return checkCastlingDirection(board, piece, currentPosition, BoardUtils.getOffSetPosition(currentPosition, 3, 0));
     }
 
     /**
@@ -58,7 +59,7 @@ public class MovePositions {
      * @return queen side castle location
      */
     public static Set<Move> addQueenSideCastlePosition(Board board, Piece piece, Position currentPosition) {
-        return checkCastlingDirection(board, piece, currentPosition, currentPosition.getOffSetPosition(-4, 0));
+        return checkCastlingDirection(board, piece, currentPosition, BoardUtils.getOffSetPosition(currentPosition, -4, 0));
     }
 
     /**
@@ -70,31 +71,20 @@ public class MovePositions {
      */
     private static Set<Move> checkCastlingDirection(Board board, Piece piece, Position kingPosition, Position endPosition) {
         Set<Move> validPositions = new HashSet<>();
-        Player opposingPlayer = piece.getOwner().opposite(board); // TODO WTF?
+        Player opposingPlayer = piece.getOwner().opposite(board);
 
-        System.out.println("-----");
-        System.out.println("Targeting player = : " + opposingPlayer);
-        System.out.println("Checking king position");
         // If this piece is not a king or if the current king position is targeted, castling is not allowed
-        if(!(piece instanceof King) || MoveUtils.isTileTargeted(opposingPlayer, kingPosition)) {
-            System.out.println("King's tile was targeted!");
+        if(!(piece instanceof King) || MoveUtils.isTileTargeted(opposingPlayer, kingPosition) != null) {
             return validPositions;
         }
 
-        System.out.println("-----");
-
-        System.out.println("Checking offsets");
         Map<String, Tile> tiles = board.getTileMap();
         int kingColumn = kingPosition.getColumn();
         int increment = kingColumn > endPosition.getColumn() ? -1 : 1;
         for(int i = kingColumn + increment; i >= 0 && i < 8; i = i + increment) {
-            Position offSetPosition = kingPosition.getOffSetPosition(i - kingColumn, 0);
-            System.out.println("i: " + (i-kingColumn));
-            System.out.println("offset pos " + offSetPosition);
+            Position offSetPosition = BoardUtils.getOffSetPosition(kingPosition, i - kingColumn, 0);
             // If the tile is occupied...
             Tile offsetTile = tiles.get(offSetPosition.toString());
-            System.out.println("tile pos:  " + offsetTile.getPosition());
-
             if(offsetTile.isOccupied()) {
                 // If the piece is a rook and has not moved
                 Piece pieceAtOffset = offsetTile.getPiece();
@@ -103,7 +93,7 @@ public class MovePositions {
                             .stream().anyMatch(move -> move.getMovedPiece().equals(pieceAtOffset))*/) {
                     // TODO Disabled until can figure out how to get it working
                     Tile currentTile = board.getTileMap().get(kingPosition.toString());
-                    Tile kingCastleLoc = tiles.get(kingPosition.getOffSetPosition(increment * 2, 0).toString());
+                    Tile kingCastleLoc = tiles.get(BoardUtils.getOffSetPosition(kingPosition, increment * 2, 0).toString());
                     validPositions.add(new Move(piece, currentTile, kingCastleLoc));
                 }
 
@@ -112,8 +102,7 @@ public class MovePositions {
             }
 
             // If the tile is targeted, castling is not allowed
-            if(MoveUtils.isTileTargeted(opposingPlayer, offSetPosition)) {
-                System.out.println("Offset tile was targeted!");
+            if(MoveUtils.isTileTargeted(opposingPlayer, offSetPosition) != null) {
                 break;
             }
         }
@@ -222,11 +211,8 @@ public class MovePositions {
      * @return the positions that are valid to be moved to
      */
     private static Set<Move> addPositionsForOffset(Board board, Piece piece, Tile currentTile,
-                                                    int colOffset, int rowOffSet) {
-        Set<Move> positionsSet = new HashSet<>();
+                                                   int colOffset, int rowOffSet) {
         Position currentPosition = currentTile.getPosition();
-        Position offSetPos = currentPosition.getOffSetPosition(colOffset, rowOffSet);
-        Map<String, Tile> tiles = board.getTileMap();
         boolean isPawn = piece instanceof Pawn;
         int maxSpacesMoved = piece.getMaxSpacesMoved();
 
@@ -236,6 +222,9 @@ public class MovePositions {
         }
 
         // While we haven't checked the max spaces allowed by this piece
+        Set<Move> positionsSet = new HashSet<>();
+        Map<String, Tile> tiles = board.getTileMap();
+        Position offSetPos = BoardUtils.getOffSetPosition(currentPosition, colOffset, rowOffSet);
         for(int tilesCounted = 0; tilesCounted < maxSpacesMoved; tilesCounted++) {
 
             // Ensure offset position is a valid coordinate
@@ -268,7 +257,12 @@ public class MovePositions {
             }
 
             // Add our position if it was not occupied or was an opposing piece and does not cause check
-            positionsSet.add(new Move(piece, currentTile, offSetTile));
+            if(isPawn && offSetPos.isPromotionSquare(piece.getOwner())) {
+                positionsSet.add(new Move(piece, currentTile, offSetTile, true));
+            } else {
+                positionsSet.add(new Move(piece, currentTile, offSetTile));
+            }
+
 
             // Break if the tile was occupied as we can't go past an occupied tile
             if(offSetTileIsOccupied) {
@@ -276,7 +270,7 @@ public class MovePositions {
             }
 
             // Get our next position based on our offset
-            offSetPos = offSetPos.getOffSetPosition(colOffset, rowOffSet);
+            offSetPos = BoardUtils.getOffSetPosition(offSetPos, colOffset, rowOffSet);
         }
 
         return positionsSet;

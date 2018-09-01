@@ -2,18 +2,13 @@ package com.chess.ui.menus;
 
 import com.chess.engine.GameSettings;
 import com.chess.engine.Player;
-import com.chess.engine.Position;
 import com.chess.engine.board.Board;
 import com.chess.engine.board.FenUtils;
-import com.chess.engine.board.Tile;
-import com.chess.engine.moves.MoveUtils;
 import com.chess.ui.ChessFrame;
-import com.chess.ui.panels.BoardPanel;
 
 import javax.swing.JCheckBoxMenuItem;
 import javax.swing.JMenu;
 import javax.swing.JMenuItem;
-import javax.swing.JOptionPane;
 import javax.swing.SwingUtilities;
 import java.util.Map;
 
@@ -89,7 +84,6 @@ public class DebugOptionsMenu extends JMenu {
 
     private Board getBoard() {
         ChessFrame frame = (ChessFrame) SwingUtilities.getRoot(this);
-        BoardPanel boardPanel = frame.getBoardPanel();
-        return boardPanel.getBoard();
+        return frame.getBoardPanel();
     }
 }

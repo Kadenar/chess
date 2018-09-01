@@ -2,10 +2,8 @@ package com.chess.ui.menus;
 
 import com.chess.engine.GameSettings;
 import com.chess.engine.board.Board;
-import com.chess.engine.board.BoardUtils;
 import com.chess.engine.board.FenUtils;
 import com.chess.ui.ChessFrame;
-import com.chess.ui.panels.BoardPanel;
 
 import javax.swing.JCheckBoxMenuItem;
 import javax.swing.JMenu;
@@ -46,12 +44,11 @@ public class GameOptionsMenu extends JMenu {
     private void resetGameState() {
         // Recreate the board object with default position
         ChessFrame frame = (ChessFrame) SwingUtilities.getRoot(this);
-        BoardPanel boardPanel = frame.getBoardPanel();
-        Board board = boardPanel.getBoard();
-        BoardUtils.updateBoardFromFen(board, FenUtils.DEFAULT_POSITION);
+        Board board = frame.getBoardPanel();
+        board.updateBoardFromFen(FenUtils.DEFAULT_POSITION);
         board.getMoveHistory().getAllMoves().clear();
         frame.getHistoryPanel().updateHistory();
-        boardPanel.displayBoard(board);
+        board.displayBoard();
     }
 
     /**

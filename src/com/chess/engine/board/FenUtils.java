@@ -159,7 +159,7 @@ public class FenUtils {
                 // If the character was a piece, then add it for white or black
                 else {
                     Position piecePosition = new Position(7 - rankCount, filesAddedForRow);
-                    Piece newPiece = BoardUtils.constructPiece(board, ch);
+                    Piece newPiece = board.constructPiece(ch);
                     // Need to know the king's position
                     if(ch == 'k' || ch == 'K') {
                         board.setKingPosition((King) newPiece, piecePosition);
@@ -197,6 +197,7 @@ public class FenUtils {
         return Integer.valueOf(fullMoves);
     }
 
+    // Custom exception parsing fen string
     static class FenException extends Exception {
         FenException(String message) {
             super(message);

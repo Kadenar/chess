@@ -68,10 +68,9 @@ public abstract class Piece extends JLabel {
      * @return the list of valid moves for this piece
      */
     public Set<Move> getValidMoves(Board board) {
-        // TODO -> Reenable this once fixing castling
-        return getMoves()/*.stream()
+        return getMoves().stream()
             .filter(move -> MoveUtils.performTestMove(board, move.getOrigin(), move.getDestination()))
-            .collect(Collectors.toSet())*/;
+            .collect(Collectors.toSet());
     }
 
     /**
