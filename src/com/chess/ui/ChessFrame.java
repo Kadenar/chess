@@ -7,7 +7,6 @@ import com.chess.ui.headers.FileHeaders;
 import com.chess.ui.headers.RankHeaders;
 import com.chess.ui.menus.DebugOptionsMenu;
 import com.chess.ui.menus.GameOptionsMenu;
-import com.chess.ui.panels.CapturedPanel;
 import com.chess.ui.panels.HistoryPanel;
 
 import javax.swing.*;

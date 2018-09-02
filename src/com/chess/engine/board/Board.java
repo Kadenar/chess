@@ -6,31 +6,17 @@ import com.chess.engine.Position;
 import com.chess.engine.moves.Move;
 import com.chess.engine.moves.MoveHistory;
 import com.chess.engine.moves.MoveUtils;
-import com.chess.engine.pieces.Bishop;
-import com.chess.engine.pieces.King;
-import com.chess.engine.pieces.Knight;
-import com.chess.engine.pieces.Pawn;
-import com.chess.engine.pieces.Piece;
-import com.chess.engine.pieces.Queen;
-import com.chess.engine.pieces.Rook;
+import com.chess.engine.pieces.*;
 import com.chess.ui.ChessFrame;
 import com.chess.ui.UIConstants;
 
-import javax.swing.JLabel;
-import javax.swing.JLayeredPane;
-import javax.swing.JPanel;
-import javax.swing.SwingUtilities;
+import javax.swing.*;
 import java.awt.*;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
+import java.util.*;
 import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.function.Predicate;
 
 public class Board extends JPanel {
 
@@ -226,8 +212,10 @@ public class Board extends JPanel {
         // Remove all tiles
         this.removeAll();
 
-        // Un-highlight all tiles that were previously highlighted
-        highlightedTiles.entrySet().stream().filter(Map.Entry::getValue).forEach(tile -> tile.getKey().highlightTile(false));
+        highlightedTiles.entrySet().stream().filter(Map.Entry::getValue).forEach(entry -> {
+            entry.setValue(false);
+            entry.getKey().highlightTile(false);
+        });
 
         // Add all of our tiles to the chess panel
         getTileMap().values().forEach(tile -> {
@@ -248,9 +236,10 @@ public class Board extends JPanel {
                 tile.add(piece);
 
                 // Highlight tiles containing pieces with valid moves
-                if(GameSettings.getInstance().isEnableHighlighting()) {
-                    if(piece.getOwner() == getGameState().getPlayerTurn()
-                        && piece.getMoves().size() > 0) {
+                if(GameSettings.getInstance().isEnableHighlighting() && piece.getOwner() == getGameState().getPlayerTurn()) {
+
+                    // As long as the piece has moves, highlight it
+                    if(piece.getValidMoves(this).size() > 0) {
                         tile.setBackground(Color.RED);
                         highlightedTiles.replace(tile, true);
                     }
@@ -282,10 +271,6 @@ public class Board extends JPanel {
         private int xAdjustment, yAdjustment;
         private List<Tile> targetMoveTiles = new ArrayList<>();
 
-        // Debugging
-        JPanel printOut = new JPanel();
-        JLabel label = new JLabel();
-
         /**
          * Add indicators to the UI for tiles we can move to
          */
@@ -298,9 +283,6 @@ public class Board extends JPanel {
                     targetMoveTiles.add(destination);
                     destination.highlightTile(true);
                 }
-
-                layeredPane.revalidate();
-                layeredPane.repaint();
             }
         }
 
@@ -347,6 +329,11 @@ public class Board extends JPanel {
             return MoveUtils.executeMove(Board.this, originatingTile, draggedToTile);
         }
 
+        /**
+         * When the mouse is pressed, determine the originating tile of the click
+         * Then check if a piece is present and if so, ensure it is my turn
+         * If it is my turn, add indicators for where I can move to
+         */
         @Override
         public void mousePressed(MouseEvent evt) {
 
@@ -377,33 +364,9 @@ public class Board extends JPanel {
             }
         }
 
-        @Override
-        public void mouseReleased(MouseEvent evt) {
-
-            // Remove the indicators from tiles
-            removeIndicators();
-
-
-            // If we had a piece being dragged
-            if(canPickupPiece()) {
-
-                // If the piece was not moved, then restore it to previous position
-                if (!attemptPieceMove(this.originatingTile)) {
-                    // If we had a piece that we attempted to move from a tile
-                    // Remove it from our layered pane and add it back to the originating tile
-                    originatingPiece.setVisible(false);
-                    layeredPane.remove(originatingPiece);
-                    originatingTile.add(originatingPiece);
-                    originatingPiece.setVisible(true);
-                } else {
-                    // Update game history
-                    ChessFrame frame = (ChessFrame) SwingUtilities.getAncestorOfClass(ChessFrame.class, layeredPane);
-                    frame.getHistoryPanel().updateHistory();
-                    displayBoard();
-                }
-            }
-        }
-
+        /**
+         * When dragging my mouse, if I have a piece picked up, move it around on screen
+         */
         @Override
         public void mouseDragged(MouseEvent evt) {
 
@@ -426,6 +389,38 @@ public class Board extends JPanel {
             }
         }
 
+        /**
+         * When releasing the mouse, remove highlighted indicators
+         * Then determine if a piece was picked up
+         * - If it was and we could not complete the move, then restore it to original tile
+         * - Otherwise, it will be moved, board reloaded and the history panel will be updated
+         */
+        @Override
+        public void mouseReleased(MouseEvent evt) {
+
+            // Remove the indicators from tiles
+            removeIndicators();
+
+            // If we had a piece being dragged
+            if(canPickupPiece()) {
+
+                // If the piece was not moved, then restore it to previous position
+                if (!attemptPieceMove(this.originatingTile)) {
+                    // If we had a piece that we attempted to move from a tile
+                    // Remove it from our layered pane and add it back to the originating tile
+                    originatingPiece.setVisible(false);
+                    layeredPane.remove(originatingPiece);
+                    originatingTile.add(originatingPiece);
+                    originatingPiece.setVisible(true);
+                } else {
+                    // Update game history
+                    ChessFrame frame = (ChessFrame) SwingUtilities.getAncestorOfClass(ChessFrame.class, layeredPane);
+                    frame.getHistoryPanel().updateHistory();
+                    displayBoard();
+                }
+            }
+        }
+
         /*
          * No other mouse events necessary
          */
@@ -434,20 +429,7 @@ public class Board extends JPanel {
         public void mouseClicked(MouseEvent evt) {}
 
         @Override
-        public void mouseMoved(MouseEvent evt) {
-
-            if(GameSettings.getInstance().isEnableDebugging()) {
-                layeredPane.remove(printOut);
-                layeredPane.add(printOut, JLayeredPane.DRAG_LAYER);
-
-                label.setText("<html>Mouse pos: [" + evt.getX() + ", " + evt.getY() + "]"
-                        + "<br/>" + "Tile pos: [y: " + getTilePositionFromMouse().y + ", x: " + getTilePositionFromMouse().x + "]</html>");
-                printOut.add(label);
-                printOut.setBounds(0, 0, 200, 50);
-                printOut.setLocation(evt.getX(), evt.getY());
-                layeredPane.repaint();
-            }
-        }
+        public void mouseMoved(MouseEvent evt) { }
 
         @Override
         public void mouseEntered(MouseEvent evt) { }

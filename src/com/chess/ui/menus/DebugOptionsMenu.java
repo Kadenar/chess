@@ -6,10 +6,7 @@ import com.chess.engine.board.Board;
 import com.chess.engine.board.FenUtils;
 import com.chess.ui.ChessFrame;
 
-import javax.swing.JCheckBoxMenuItem;
-import javax.swing.JMenu;
-import javax.swing.JMenuItem;
-import javax.swing.SwingUtilities;
+import javax.swing.*;
 import java.util.Map;
 
 public class DebugOptionsMenu extends JMenu {
@@ -76,10 +73,12 @@ public class DebugOptionsMenu extends JMenu {
     }
 
     /**
-     * Print out all game moves available currently
+     * Print out all game moves available currently (only those that are valid)
      */
     private void printGameMoves() {
-        System.out.println(getBoard().getGameState().getPlayerTurn().getMovesForPieces());
+        getBoard().getGameState().getPlayerTurn().getMovesForPieces().forEach((key, value) -> {
+            System.out.println(key.getValidMoves(getBoard()));
+        });
     }
 
     private Board getBoard() {

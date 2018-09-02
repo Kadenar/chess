@@ -7,16 +7,11 @@ import com.chess.engine.board.GameState;
 import com.chess.engine.pieces.Piece;
 import com.chess.ui.UIConstants;
 
-import javax.swing.BoxLayout;
-import javax.swing.JLabel;
-import javax.swing.JPanel;
-import javax.swing.JScrollPane;
-import javax.swing.JTable;
+import javax.swing.*;
 import javax.swing.border.TitledBorder;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
-import java.awt.Dimension;
-import java.awt.GridLayout;
+import java.awt.*;
 
 public class HistoryPanel extends JPanel{
 

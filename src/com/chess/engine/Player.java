@@ -5,15 +5,16 @@ import com.chess.engine.board.Tile;
 import com.chess.engine.moves.Move;
 import com.chess.engine.pieces.Piece;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 
 public class Player {
+
+    private final Color color;
+    private List<Piece> pieces = new ArrayList<>();
+    private List<Piece> capturedPieces = new ArrayList<>();
+    private Map<Piece, Set<Move>> moves = new HashMap<>();
 
     public enum Color {
         WHITE {
@@ -30,18 +31,13 @@ public class Player {
         }
     }
 
-    private final Color color;
-    private List<Piece> pieces = new ArrayList<>();
-    private List<Piece> capturedPieces = new ArrayList<>();
-    private Map<Piece, Set<Move>> moves = new HashMap<>();
-
     public Player(Color color) {
         this.color = color;
     }
 
     /**
      * Get the color of the player
-     * @return what color this Player2 is
+     * @return what color this player is
      */
     public Color getColor() {
         return this.color;
@@ -66,16 +62,16 @@ public class Player {
     }
 
     /**
-     * Get list of pieces that Player2 has lost
-     * @return the list of pieces the Player2 no longer controls
+     * Get list of pieces that player has lost
+     * @return the list of pieces the player no longer controls
      */
     public List<Piece> getCapturedPieces() {
         return capturedPieces;
     }
 
     /**
-     * Get list of pieces that Player2 controls
-     * @return a list of pieces that the Player2 still controls
+     * Get list of pieces that player controls
+     * @return a list of pieces that the player still controls
      */
     public List<Piece> getPieces() {
         return pieces;
@@ -83,7 +79,8 @@ public class Player {
 
     /**
      * Populate all possible moves given the current game state
-     * NOTE - This should be called whenever performing a move or initializing the game
+     * NOTE - This is to be called whenever performing a move or initializing the game
+     * @param board the current board to populate moves from / for
      */
     public void populateMoves(Board board) {
 
@@ -98,23 +95,19 @@ public class Player {
 
         // Filter out pieces not owned by me
         Predicate<Tile> sameOwner = tile -> tile.isOccupied() && tile.getPiece().getOwner().equals(this);
-
-        board.getTileMap().values().stream() // Get all tiles on our board
-                  .filter(sameOwner)
-                  .forEach(generateMoves);
-
+        board.getTileMap().values().stream().filter(sameOwner).forEach(generateMoves);
     }
 
     /**
-     * Get valid moves for given player
-     * @return all valid moves for this Player2 given current board state
+     * Get all moves for this player (even if they aren't valid) and might put their king in check
+     * @return all moves for this player given current board state
      */
     public Map<Piece, Set<Move>> getMovesForPieces() {
         return this.moves;
     }
 
     /**
-     * Is the Player2 white?
+     * Is the player white?
      * @return true if white, false if black
      */
     public boolean isWhite() {
@@ -122,7 +115,7 @@ public class Player {
     }
 
     /**
-     * Get opposing Player2 on game board
+     * Get opposing player on game board
      * @param board the board the players belong to
      * @return the opposing player
      */

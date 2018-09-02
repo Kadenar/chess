@@ -3,10 +3,7 @@ package com.chess.ui.panels;
 import com.chess.engine.pieces.Piece;
 import com.chess.ui.UIConstants;
 
-import javax.swing.JLabel;
-import javax.swing.JPanel;
-import javax.swing.border.Border;
-import javax.swing.border.EtchedBorder;
+import javax.swing.*;
 import javax.swing.border.TitledBorder;
 import java.awt.*;
 

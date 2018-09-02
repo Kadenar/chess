@@ -3,9 +3,8 @@ package com.chess.engine.board;
 import com.chess.engine.Position;
 import com.chess.engine.pieces.Piece;
 
-import javax.swing.BorderFactory;
-import javax.swing.JPanel;
-import java.awt.Color;
+import javax.swing.*;
+import java.awt.*;
 
 public class Tile extends JPanel {
 
@@ -28,7 +27,7 @@ public class Tile extends JPanel {
      * Highlight the given tile
      * @param highlight whether the tile should be highlighted
      */
-    public void highlightTile(boolean highlight) {
+    void highlightTile(boolean highlight) {
         if(highlight) {
             setBackground(Color.MAGENTA);
         } else {
@@ -42,14 +41,6 @@ public class Tile extends JPanel {
      */
     public Position getPosition() {
         return this.coordinate;
-    }
-
-    /**
-     * Return whether the given tile is a light or dark square
-     * @return is this tile light or dark
-     */
-    private boolean isLight() {
-        return (getPosition().getRow() % 2) == (getPosition().getColumn() % 2);
     }
 
     /**
@@ -74,6 +65,14 @@ public class Tile extends JPanel {
      */
     public void setPiece(Piece piece) {
         this.piece = piece;
+    }
+
+    /**
+     * Return whether the given tile is a light or dark square
+     * @return is this tile light or dark
+     */
+    private boolean isLight() {
+        return (getPosition().getRow() % 2) == (getPosition().getColumn() % 2);
     }
 
     @Override

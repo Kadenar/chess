@@ -10,9 +10,8 @@ import com.chess.engine.moves.Move;
 import com.chess.engine.moves.MoveUtils;
 
 import javax.imageio.ImageIO;
-import javax.swing.ImageIcon;
-import javax.swing.JLabel;
-import java.awt.Image;
+import javax.swing.*;
+import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;

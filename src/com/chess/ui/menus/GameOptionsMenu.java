@@ -5,10 +5,7 @@ import com.chess.engine.board.Board;
 import com.chess.engine.board.FenUtils;
 import com.chess.ui.ChessFrame;
 
-import javax.swing.JCheckBoxMenuItem;
-import javax.swing.JMenu;
-import javax.swing.JMenuItem;
-import javax.swing.SwingUtilities;
+import javax.swing.*;
 
 public class GameOptionsMenu extends JMenu {
 
