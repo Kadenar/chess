@@ -101,7 +101,8 @@ public class Player {
 
         board.getTileMap().values().stream() // Get all tiles on our board
                   .filter(sameOwner)
-                  .forEach(generateMoves); // Generate moves
+                  .forEach(generateMoves);
+
     }
 
     /**

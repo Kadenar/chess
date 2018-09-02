@@ -14,15 +14,13 @@ import com.chess.engine.pieces.Piece;
 import com.chess.engine.pieces.Queen;
 import com.chess.engine.pieces.Rook;
 import com.chess.ui.ChessFrame;
+import com.chess.ui.UIConstants;
 
 import javax.swing.JLabel;
 import javax.swing.JLayeredPane;
 import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
-import java.awt.Color;
-import java.awt.GridLayout;
-import java.awt.MouseInfo;
-import java.awt.Point;
+import java.awt.*;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
@@ -32,6 +30,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Predicate;
 
 public class Board extends JPanel {
 
@@ -52,20 +51,38 @@ public class Board extends JPanel {
     // Pane the board is added to
     private JLayeredPane layeredPane;
 
+    // Map of tiles that are or are not highlighted
+    private Map<Tile, Boolean> highlightedTiles;
+
+    /**
+     * Clone the other board to create another instance without UI
+     * @param otherBoard the board to clone
+     */
+    public Board(Board otherBoard) {
+        this(FenUtils.getFen(otherBoard), false);
+    }
+
+    /**
+     * Create a board with UI always
+     * @param fen the fen to load the board with
+     */
     public Board(String fen) {
         this(fen, true);
     }
 
     /**
-     * Create a new board with representing the given fen string
+     * Create a new board representing the given fen string
+     * Given the option of not rendering UI for the board
      * @param fen the fen string to present on a chessboard
+     * @param withUI true if should UI be rendered, false if not
      */
     public Board(String fen, boolean withUI) {
         super();
         Player white = new Player(Player.Color.WHITE);
         Player black = new Player(Player.Color.BLACK);
-        tileMap = new LinkedHashMap<>(64);
-        players = new HashMap<>(2);
+        this.tileMap = new LinkedHashMap<>(64);
+        this.highlightedTiles = new HashMap<>(64);
+        this.players = new HashMap<>(2);
         this.players.put(Player.Color.WHITE, white);
         this.players.put(Player.Color.BLACK, black);
         this.gameState = new GameState(white);
@@ -80,13 +97,14 @@ public class Board extends JPanel {
             //layeredPane.setLayout(new FlowLayout());
 
             // Set our board's layout to an 8x8 grid
-            this.setLayout(new GridLayout(8, 8));
-            this.setBounds(0, 0, ChessFrame.WINDOW_WIDTH - 60, ChessFrame.WINDOW_HEIGHT - 80);
+            setLayout(new GridLayout(8, 8));
+            setBounds(0, 0, UIConstants.BOARD_WIDTH, UIConstants.BOARD_HEIGHT);
+            setPreferredSize(new Dimension(UIConstants.BOARD_WIDTH, UIConstants.BOARD_HEIGHT));
 
-            // Create the chess tiles
+            // Add our piece listener
             Board.PieceListener listener = new Board.PieceListener();
-            this.addMouseListener(listener);
-            this.addMouseMotionListener(listener);
+            addMouseListener(listener);
+            addMouseMotionListener(listener);
 
             // Display the pieces on the board
             displayBoard();
@@ -113,6 +131,7 @@ public class Board extends JPanel {
         // Load in the default position
         try {
             FenUtils.loadFen(this, fen);
+            getTileMap().forEach((key, value) -> highlightedTiles.put(value, false));
         } catch (FenUtils.FenException e) {
             System.err.println(e.getMessage());
         }
@@ -159,14 +178,6 @@ public class Board extends JPanel {
         return piece;
     }
 
-    /**
-     * Clone the other board to create another instance
-     * @param otherBoard the board to clone
-     */
-    public Board(Board otherBoard) {
-        this(FenUtils.getFen(otherBoard), false);
-    }
-
     // GETTERS
     public Map<String, Tile> getTileMap() { return this.tileMap; }
     public Map<Player.Color, Player> getPlayers() { return this.players; }
@@ -202,41 +213,6 @@ public class Board extends JPanel {
         return blackKingPos;
     }
 
-    /**
-     * String representation of the board
-     * 8 [r] [n] [b] [q] [k] [b] [n] [r]
-     * 7 [p] [p] [p] [p] [p] [p] [p] [p]
-     * 6 [ ] [ ] [ ] [ ] [ ] [ ] [ ] [ ]
-     * 5 [ ] [ ] [ ] [ ] [ ] [ ] [ ] [ ]
-     * 4 [ ] [ ] [ ] [ ] [ ] [ ] [ ] [ ]
-     * 3 [ ] [ ] [ ] [ ] [ ] [ ] [ ] [ ]
-     * 2 [P] [P] [P] [P] [P] [P] [P] [P]
-     * 1 [R] [N] [B] [Q] [K] [N] [B] [R]
-     *    a   b   c   d   e   f   g   h
-     * @return can be used to print out the board in a string representation
-     */
-    @Override
-    public String toString() {
-        final StringBuilder builder = new StringBuilder();
-
-        final int[] i = {0};
-        getTileMap().values().forEach( tile -> {
-            if(i[0] == 0 || i[0] % 8 == 0) {
-                builder.append(7 - i[0] / 8 + 1).append(" ");
-            }
-
-            builder.append(String.format("%3s", tile.toString()));
-
-            if ((i[0] + 1) % 8 == 0) {
-                builder.append("\n");
-            }
-            i[0]++;
-        });
-
-        builder.append("   a  b  c  d  e  f  g  h");
-        return builder.toString();
-    }
-
     /*
      * UI related part of the board
      */
@@ -249,6 +225,9 @@ public class Board extends JPanel {
 
         // Remove all tiles
         this.removeAll();
+
+        // Un-highlight all tiles that were previously highlighted
+        highlightedTiles.entrySet().stream().filter(Map.Entry::getValue).forEach(tile -> tile.getKey().highlightTile(false));
 
         // Add all of our tiles to the chess panel
         getTileMap().values().forEach(tile -> {
@@ -271,13 +250,9 @@ public class Board extends JPanel {
                 // Highlight tiles containing pieces with valid moves
                 if(GameSettings.getInstance().isEnableHighlighting()) {
                     if(piece.getOwner() == getGameState().getPlayerTurn()
-                        && piece.getValidMoves(this).size() > 0) {
-                        //System.out.println("Piece: " + piece);
-                        //System.out.println("Owner: " + piece.getOwner());
-                        //System.out.println("Position: " + tile.getPosition());
+                        && piece.getMoves().size() > 0) {
                         tile.setBackground(Color.RED);
-                    } else {
-                        tile.highlightTile(false);
+                        highlightedTiles.replace(tile, true);
                     }
                 }
             }
@@ -479,5 +454,40 @@ public class Board extends JPanel {
 
         @Override
         public void mouseExited(MouseEvent evt) { }
+    }
+
+    /**
+     * String representation of the board
+     * 8 [r] [n] [b] [q] [k] [b] [n] [r]
+     * 7 [p] [p] [p] [p] [p] [p] [p] [p]
+     * 6 [ ] [ ] [ ] [ ] [ ] [ ] [ ] [ ]
+     * 5 [ ] [ ] [ ] [ ] [ ] [ ] [ ] [ ]
+     * 4 [ ] [ ] [ ] [ ] [ ] [ ] [ ] [ ]
+     * 3 [ ] [ ] [ ] [ ] [ ] [ ] [ ] [ ]
+     * 2 [P] [P] [P] [P] [P] [P] [P] [P]
+     * 1 [R] [N] [B] [Q] [K] [N] [B] [R]
+     *    a   b   c   d   e   f   g   h
+     * @return can be used to print out the board in a string representation
+     */
+    @Override
+    public String toString() {
+        final StringBuilder builder = new StringBuilder();
+
+        final int[] i = {0};
+        getTileMap().values().forEach( tile -> {
+            if(i[0] == 0 || i[0] % 8 == 0) {
+                builder.append(7 - i[0] / 8 + 1).append(" ");
+            }
+
+            builder.append(String.format("%3s", tile.toString()));
+
+            if ((i[0] + 1) % 8 == 0) {
+                builder.append("\n");
+            }
+            i[0]++;
+        });
+
+        builder.append("   a  b  c  d  e  f  g  h");
+        return builder.toString();
     }
 }

@@ -12,7 +12,6 @@ public class RankHeaders extends JPanel {
 
     public RankHeaders() {
         setLayout(new GridLayout(8, 1));
-        setPreferredSize(new Dimension(20, 20));
         for(String h : headers) {
             JLabel header = new JLabel();
             header.setText(h);

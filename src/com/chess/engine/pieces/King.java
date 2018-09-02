@@ -114,7 +114,7 @@ public class King extends Piece {
                     // TODO Disabled until can figure out how to get it working
                     Tile currentTile = board.getTileMap().get(kingPosition.toString());
                     Tile kingCastleLoc = tiles.get(BoardUtils.getOffSetPosition(kingPosition, increment * 2, 0).toString());
-                    validPositions.add(new Move(piece, currentTile, kingCastleLoc));
+                    validPositions.add(new Move(piece, currentTile, pieceAtOffset, kingCastleLoc));
                 }
 
                 // If we reached an occupied tile, we are done

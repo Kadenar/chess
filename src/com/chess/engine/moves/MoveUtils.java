@@ -11,7 +11,9 @@ import com.chess.engine.pieces.Pawn;
 import com.chess.engine.pieces.Piece;
 import com.chess.engine.pieces.Rook;
 import com.chess.engine.sound.SoundUtils;
+import com.chess.ui.ChessFrame;
 
+import javax.swing.*;
 import java.util.Collection;
 import java.util.function.Predicate;
 
@@ -48,7 +50,7 @@ public class MoveUtils {
     }
 
     /**
-     * Performs a test move
+     * Performs a test move to determine whether it is valid to actually do that move
      * @param board the board to copy
      * @param originatingTile the tile to move from
      * @param targetTile the tile to move to
@@ -162,7 +164,7 @@ public class MoveUtils {
         }
 
         // Check whether the given piece on the originating tile has the dragged to tile as a valid tile
-        return draggedPiece.getValidMoves(board).contains(new Move(draggedPiece, originatingTile, draggedToTile));
+        return draggedPiece.getValidMoves(board).contains(new Move(draggedPiece, originatingTile, draggedToTile.getPiece(), draggedToTile));
     }
 
     /**
@@ -178,6 +180,7 @@ public class MoveUtils {
         GameState state = board.getGameState();
         Piece draggedPiece = tileToMoveFrom.getPiece();
         Position moveFromPosition = tileToMoveFrom.getPosition();
+        Piece capturedPiece = tileToMoveTo.getPiece();
         Position targetPosition = tileToMoveTo.getPosition();
         Player currentPlayer = draggedPiece.getOwner();
         boolean isPawnMove = draggedPiece instanceof Pawn;
@@ -253,13 +256,13 @@ public class MoveUtils {
             typeOfMove = MoveType.CHECK;
         }
         // Otherwise play standard move sound if no sound assigned yet
-        else if(typeOfMove == null){
+        else if(typeOfMove == null) {
             typeOfMove = MoveType.REGULAR;
         }
 
         // Add our move to the move history
         // TODO -> need to get the actual move from piece that we generated instead of creating a new move
-        board.getMoveHistory().addMove(currentPlayer, new Move(draggedPiece, tileToMoveFrom, tileToMoveTo));
+        board.getMoveHistory().addMove(currentPlayer, new Move(draggedPiece, tileToMoveFrom, capturedPiece, tileToMoveTo));
 
         // Play corresponding sound based on type of move
         typeOfMove.playSound();

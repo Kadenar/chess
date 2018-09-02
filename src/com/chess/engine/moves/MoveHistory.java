@@ -46,23 +46,7 @@ public class MoveHistory {
      * @param Player the player
      * @return the list of moves performed by this player
      */
-    public List<Move> getMoveHistoryForPlayer(Player player) {
+    List<Move> getMoveHistoryForPlayer(Player player) {
         return movesByPlayers.getOrDefault(player, new ArrayList<>());
     }
-
-    @Override
-    public String toString() {
-        StringBuilder builder = new StringBuilder();
-        int i = 1;
-        for(Move move : getAllMoves()) {
-            builder.append(i).append(". ") // append move number
-                    .append(move.getMovedPiece()) // append the piece we moved
-                    .append(" ").append(move.getDestination().getPosition()); // append the location we moved too
-            builder.append(" "); // add a space between each move
-            i++;
-        }
-
-        return builder.toString();
-    }
-
 }

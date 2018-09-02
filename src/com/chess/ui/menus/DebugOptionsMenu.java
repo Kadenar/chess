@@ -84,6 +84,6 @@ public class DebugOptionsMenu extends JMenu {
 
     private Board getBoard() {
         ChessFrame frame = (ChessFrame) SwingUtilities.getRoot(this);
-        return frame.getBoardPanel();
+        return frame.getBoard();
     }
 }

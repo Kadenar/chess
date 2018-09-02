@@ -4,6 +4,8 @@ package com.chess.ui.panels;
 import com.chess.engine.Player;
 import com.chess.engine.board.Board;
 import com.chess.engine.board.GameState;
+import com.chess.engine.pieces.Piece;
+import com.chess.ui.UIConstants;
 
 import javax.swing.BoxLayout;
 import javax.swing.JLabel;
@@ -18,14 +20,16 @@ import java.awt.GridLayout;
 
 public class HistoryPanel extends JPanel{
 
-    private JPanel movesPanel;
     private JTable moveHistory;
+    private CapturedPanel captures;
     private final Board board;
 
     public HistoryPanel(Board board) {
         super(new GridLayout(2,1));
         this.board = board;
-        movesPanel = new JPanel();
+        this.captures = new CapturedPanel();
+        setPreferredSize(new Dimension(UIConstants.HISTORY_WIDTH, UIConstants.HISTORY_HEIGHT));
+        JPanel movesPanel = new JPanel();
         TitledBorder border = new TitledBorder("Moves");
         border.setTitleJustification(TitledBorder.CENTER);
         border.setTitlePosition(TitledBorder.TOP);
@@ -41,12 +45,12 @@ public class HistoryPanel extends JPanel{
         ((DefaultTableCellRenderer)moveHistory.getTableHeader().getDefaultRenderer())
                 .setHorizontalAlignment(JLabel.CENTER);
         JScrollPane scrollPane = new JScrollPane(moveHistory);
-        scrollPane.setPreferredSize(new Dimension(85, 40));
+        //scrollPane.setPreferredSize(new Dimension(85, 40));
 
         // Add header and content
         movesPanel.add(scrollPane);
         this.add(movesPanel, 0);
-        this.add(new CapturedPanel(), 1);
+        this.add(captures, 1);
     }
 
     /**
@@ -68,6 +72,12 @@ public class HistoryPanel extends JPanel{
             model.addRow(new Object[] {currentState.getFullMoves(), "", board.getMoveHistory().getLatestMove()});
         } else {
             model.addRow(new Object[] {currentState.getFullMoves(), board.getMoveHistory().getLatestMove(), ""});
+        }
+
+        // Update our captures
+        Piece capturedPiece = board.getMoveHistory().getLatestMove().getCapturedPiece();
+        if(capturedPiece != null) {
+            captures.addCaptured(capturedPiece);
         }
     }
 }

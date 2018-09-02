@@ -16,6 +16,7 @@ import java.awt.Image;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
@@ -25,10 +26,12 @@ public abstract class Piece extends JLabel {
 
     private final Player owner;
     private final JLabel scaledImg;
+    private final Map<Integer, Set<Move>> movesForTurn;
 
     public Piece(Player color, String pieceImagePath) {
         super();
         this.owner = color;
+        this.movesForTurn = new HashMap<>();
         JLabel testImg = null;
 
         try {
@@ -68,13 +71,21 @@ public abstract class Piece extends JLabel {
     /**
      * Get only valid moves for this piece
      * (preventing the piece from actually moving if it would put the Player in check)
+     * This information is cached on a per turn basis to avoid performing test moves unnecessarily multiple times
      * @param board the current board state
      * @return the list of valid moves for this piece
      */
     public Set<Move> getValidMoves(Board board) {
-        return getMoves().stream()
-            .filter(move -> MoveUtils.performTestMove(board, move.getOrigin(), move.getDestination()))
-            .collect(Collectors.toSet());
+        int currentTurn = board.getGameState().getFullMoves();
+        Set<Move> currentMoves = movesForTurn.get(currentTurn);
+        if(currentMoves == null) {
+            currentMoves = getMoves().stream()
+                    .filter(move -> MoveUtils.performTestMove(board, move.getOrigin(), move.getDestination()))
+                    .collect(Collectors.toSet());
+            movesForTurn.put(currentTurn, currentMoves);
+        }
+
+        return currentMoves;
     }
 
     /**
@@ -172,6 +183,7 @@ public abstract class Piece extends JLabel {
             // Get offset tile and check whether it is occupied
             Tile offSetTile = tiles.get(offSetPos.toString());
             boolean offSetTileIsOccupied = offSetTile.isOccupied();
+            Piece offSetTilePiece = offSetTile.getPiece();
 
             // If the offset tile is occupied by another piece
             if(offSetTileIsOccupied) {
@@ -195,9 +207,9 @@ public abstract class Piece extends JLabel {
 
             // Add our position if it was not occupied or was an opposing piece and does not cause check
             if(isPawn && offSetPos.isPromotionSquare(piece.getOwner())) {
-                positionsSet.add(new Move(piece, currentTile, offSetTile, true));
+                positionsSet.add(new Move(piece, currentTile, offSetTilePiece, offSetTile,true));
             } else {
-                positionsSet.add(new Move(piece, currentTile, offSetTile));
+                positionsSet.add(new Move(piece, currentTile, offSetTilePiece, offSetTile));
             }
 
 

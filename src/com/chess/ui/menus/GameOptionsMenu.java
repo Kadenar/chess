@@ -44,7 +44,7 @@ public class GameOptionsMenu extends JMenu {
     private void resetGameState() {
         // Recreate the board object with default position
         ChessFrame frame = (ChessFrame) SwingUtilities.getRoot(this);
-        Board board = frame.getBoardPanel();
+        Board board = frame.getBoard();
         board.updateBoardFromFen(FenUtils.DEFAULT_POSITION);
         board.getMoveHistory().getAllMoves().clear();
         frame.getHistoryPanel().updateHistory();

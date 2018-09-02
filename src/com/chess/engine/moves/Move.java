@@ -7,18 +7,20 @@ import java.util.Objects;
 
 public class Move {
 
-    private final Piece piece;
+    private final Piece moved;
+    private final Piece captured;
     private final Tile fromTile;
     private final Tile toTile;
     private final boolean promotion;
 
     public Move(final Move move) {
-        this(move.piece, move.fromTile, move.toTile, move.promotion);
+        this(move.moved, move.fromTile, move.captured, move.toTile, move.promotion);
     }
-    public Move(final Piece piece, final Tile from, final Tile to) { this(piece, from, to, false); }
-    public Move(final Piece piece, final Tile from, final Tile to, final boolean promote) {
-        this.piece = piece;
+    public Move(final Piece piece, final Tile from, final Piece pieceCaptured, final Tile to) { this(piece, from, pieceCaptured, to, false); }
+    public Move(final Piece pieceMoved, final Tile from, final Piece pieceCaptured, final Tile to, final boolean promote) {
+        this.moved = pieceMoved;
         this.fromTile = from;
+        this.captured = pieceCaptured;
         this.toTile = to;
         this.promotion = promote;
     }
@@ -27,7 +29,13 @@ public class Move {
      * Get the piece that is being moved
      * @return the piece being moved
      */
-    public Piece getMovedPiece() { return this.piece; }
+    public Piece getMovedPiece() { return this.moved; }
+
+    /**
+     * Get the piece that was captured from this move
+     * @return the piece that was captured, or null if there was no capture
+     */
+    public Piece getCapturedPiece() { return this.captured; }
 
     /**
      * Get the origin tile the move comes from
