@@ -240,7 +240,7 @@ public class Board extends JPanel {
 
                     // As long as the piece has moves, highlight it
                     if(piece.getValidMoves(this).size() > 0) {
-                        tile.setBackground(Color.RED);
+                        tile.setBackground(Color.GREEN);
                         highlightedTiles.replace(tile, true);
                     }
                 }

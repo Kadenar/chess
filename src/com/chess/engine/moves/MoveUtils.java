@@ -216,7 +216,7 @@ public class MoveUtils {
         tileToMoveFrom.setPiece(null);
 
         // Add our move to the move history
-        board.getMoveHistory().addMove(currentPlayer, new Move(draggedPiece, tileToMoveFrom, capturedPiece, tileToMoveTo));
+        board.getMoveHistory().addMove(new Move(draggedPiece, tileToMoveFrom, capturedPiece, tileToMoveTo));
 
         // Populate moves for current game state
         board.getPlayers().values().forEach(player -> player.populateMoves(board));

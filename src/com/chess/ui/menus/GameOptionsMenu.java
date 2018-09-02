@@ -43,7 +43,7 @@ public class GameOptionsMenu extends JMenu {
         ChessFrame frame = (ChessFrame) SwingUtilities.getRoot(this);
         Board board = frame.getBoard();
         board.updateBoardFromFen(FenUtils.DEFAULT_POSITION);
-        board.getMoveHistory().getAllMoves().clear();
+        board.getMoveHistory().reset();
         frame.getHistoryPanel().updateHistory();
         board.displayBoard();
     }
@@ -54,6 +54,8 @@ public class GameOptionsMenu extends JMenu {
     private void enableHighlighting() {
         GameSettings settings = GameSettings.getInstance();
         settings.setEnableHighlighting(!settings.isEnableHighlighting());
+        ChessFrame frame = (ChessFrame) SwingUtilities.getRoot(this);
+        frame.getBoard().displayBoard();
     }
 
 }

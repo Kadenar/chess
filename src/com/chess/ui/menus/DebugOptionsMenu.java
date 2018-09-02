@@ -49,6 +49,7 @@ public class DebugOptionsMenu extends JMenu {
     private void enableDebugging() {
         GameSettings settings = GameSettings.getInstance();
         settings.setEnableDebugging(!settings.isEnableDebugging());
+        getBoard().displayBoard();
     }
 
     /**

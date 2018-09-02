@@ -3,7 +3,7 @@ package com.chess.engine;
 public class GameSettings {
 
     // Configurable settings
-    private boolean enableHighlighting = true;
+    private boolean enableHighlighting = false;
     private boolean enableDebugging = false;
 
     private static final GameSettings INSTANCE = getInstance();
