@@ -3,6 +3,7 @@ package com.chess.ui.menus;
 import com.chess.engine.GameSettings;
 import com.chess.engine.board.Board;
 import com.chess.engine.board.FenUtils;
+import com.chess.engine.board.PGNUtils;
 import com.chess.ui.ChessFrame;
 
 import javax.swing.JCheckBoxMenuItem;
@@ -47,6 +48,7 @@ public class GameOptionsMenu extends JMenu {
         Board board = frame.getBoard();
         board.updateBoardFromFen(FenUtils.DEFAULT_POSITION);
         frame.getHistoryPanel().reset();
+        PGNUtils.performPGNMoves(board, board.getMoveHistory());
         board.displayBoard();
     }
 

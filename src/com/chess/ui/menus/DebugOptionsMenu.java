@@ -4,6 +4,7 @@ import com.chess.engine.GameSettings;
 import com.chess.engine.Player;
 import com.chess.engine.board.Board;
 import com.chess.engine.board.FenUtils;
+import com.chess.engine.board.PGNUtils;
 import com.chess.ui.ChessFrame;
 
 import javax.swing.JCheckBoxMenuItem;
@@ -35,6 +36,16 @@ public class DebugOptionsMenu extends JMenu {
         printFen.addActionListener(e -> printFen());
         add(printFen);
 
+        // Print PGN
+        JMenuItem printPGN = new JMenuItem("Print PGN");
+        printPGN.addActionListener(e -> printPGN());
+        add(printPGN);
+
+        // Parse PGN
+        JMenuItem parsePGN = new JMenuItem("Parse PGN");
+        parsePGN.addActionListener(e -> parsePGN());
+        add(parsePGN);
+
         // Print all pieces state
         JMenuItem printPieces = new JMenuItem("Print pieces");
         printPieces.addActionListener(e -> printPieces());
@@ -62,6 +73,17 @@ public class DebugOptionsMenu extends JMenu {
         Board board = getBoard();
         System.out.println(FenUtils.getFen(board));
         System.out.println(board.toString());
+    }
+
+    /**
+     * Print out the PGN from move history
+     */
+    private void printPGN() {
+        System.out.println(PGNUtils.getPGN(getBoard().getMoveHistory()));
+    }
+
+    private void parsePGN() {
+        PGNUtils.parsePGN("pgn/sample.pgn");
     }
 
     /**

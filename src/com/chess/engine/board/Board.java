@@ -275,6 +275,7 @@ public class Board extends JPanel {
         });
 
         // If player doesn't have valid moves, then the game is over
+        // TODO -> If the game is over before frame loads, then pane shows first..
         if(!gameState.getPlayerTurn().hasValidMoves(this)) {
             gameState.setGameOver(true);
             String[] options = {"Yes", "No", "Quit" };
@@ -367,7 +368,7 @@ public class Board extends JPanel {
         private boolean attemptPieceMove(Tile originatingTile) {
             Position draggedToPosition = new Position(getTilePositionFromMouse());
             Tile draggedToTile = getTileMap().getOrDefault(draggedToPosition, null);
-            return MoveUtils.executeMove(Board.this, originatingTile, draggedToTile);
+            return MoveUtils.executeMove(Board.this, originatingTile, draggedToTile, false);
         }
 
         /**

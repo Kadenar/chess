@@ -65,18 +65,18 @@ public class MoveHistory {
      * Get notation of the latest move
      * @return the notation entry for history
      */
-    public String getNotationEntry() {
+    public String getNotationEntry(Move move) {
 
-        if(lastMove == null) {
+        if(move == null) {
             return "";
         }
 
         StringBuilder builder = new StringBuilder();
-        Piece movedPiece = lastMove.getMovedPiece();
-        Piece takenPiece = lastMove.getCapturedPiece();
-        Tile movedFromTile = lastMove.getOrigin();
+        Piece movedPiece = move.getMovedPiece();
+        Piece takenPiece = move.getCapturedPiece();
+        Tile movedFromTile = move.getOrigin();
         Position movedFrom = movedFromTile.getPosition();
-        Tile movedToTile = lastMove.getDestination();
+        Tile movedToTile = move.getDestination();
         Position movedTo = movedToTile.getPosition();
 
         // If last move was a pawn move

@@ -96,7 +96,7 @@ public class MoveUtils {
      * @param targetTile the tile the move will be executed to
      * @return true if move was performed, false if not
      */
-    public static boolean executeMove(Board board, Tile originatingTile, Tile targetTile) {
+    public static boolean executeMove(Board board, Tile originatingTile, Tile targetTile, boolean testMove) {
 
         // If we can't move the piece just exit
         if(!canMovePiece(board, originatingTile, targetTile)) {
@@ -105,7 +105,7 @@ public class MoveUtils {
         }
 
         // Perform the actual piece move
-        updateGameState(board, originatingTile, targetTile, false);
+        updateGameState(board, originatingTile, targetTile, testMove);
 
         return true;
     }

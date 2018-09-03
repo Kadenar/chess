@@ -75,21 +75,28 @@ public class HistoryPanel extends JPanel{
         GameState currentState = board.getGameState();
         DefaultTableModel model = (DefaultTableModel) moveHistory.getModel();
 
-        // History is updated after the move is performed so if current player is white, then it was black who just moved
-        if(currentState.getPlayerTurn().getColor().equals(Player.Color.WHITE)) {
-            model.setValueAt(board.getMoveHistory().getNotationEntry(), model.getRowCount()-1, 2);
-        } else {
-            model.addRow(new Object[] {currentState.getFullMoves() + ".", board.getMoveHistory().getNotationEntry(), ""});
-        }
-
         // Update our captures
         Move latestMove = board.getMoveHistory().getLatestMove();
         if(latestMove != null) {
+
+            // History is updated after the move is performed so if current player is white, then it was black who just moved
+            if(currentState.getPlayerTurn().getColor().equals(Player.Color.WHITE)) {
+                int rowCount = model.getRowCount() == 0 ? 0 : model.getRowCount() - 1;
+                if(rowCount == 0) {
+                    model.addRow(new Object[] {currentState.getFullMoves() + ".", "", board.getMoveHistory().getNotationEntry(latestMove)});
+                } else {
+                    model.setValueAt(board.getMoveHistory().getNotationEntry(latestMove), rowCount, 2);
+                }
+            } else {
+                model.addRow(new Object[] {currentState.getFullMoves() + ".", board.getMoveHistory().getNotationEntry(latestMove), ""});
+            }
+
             Piece capturedPiece = latestMove.getCapturedPiece();
             if (capturedPiece != null) {
                 captures.addCaptured(capturedPiece);
             }
         }
+
     }
 
     /**
@@ -98,6 +105,7 @@ public class HistoryPanel extends JPanel{
     public void reset() {
 
         // Clean up moves
+        // TODO -> Disable this to test PGN moves
         board.getMoveHistory().reset();
 
         // Remove all rows from move history
