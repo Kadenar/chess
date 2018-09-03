@@ -81,10 +81,11 @@ public class HistoryPanel extends JPanel{
 
             // History is updated after the move is performed so if current player is white, then it was black who just moved
             if(currentState.getPlayerTurn().getColor().equals(Player.Color.WHITE)) {
-                if(model.getRowCount() == 0) {
+                int rowCount = model.getRowCount();
+                if(rowCount == 0) {
                     model.addRow(new Object[] {currentState.getFullMoves() + ".", "", board.getMoveHistory().getNotationEntry(latestMove)});
                 } else {
-                    model.setValueAt(board.getMoveHistory().getNotationEntry(latestMove), model.getRowCount() - 1, 2);
+                    model.setValueAt(board.getMoveHistory().getNotationEntry(latestMove), rowCount - 1, 2);
                 }
             } else {
                 model.addRow(new Object[] {currentState.getFullMoves() + ".", board.getMoveHistory().getNotationEntry(latestMove), ""});
