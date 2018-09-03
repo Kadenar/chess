@@ -1,5 +1,6 @@
 package com.chess.engine.moves;
 
+import com.chess.engine.GameSettings;
 import com.chess.engine.Player;
 import com.chess.engine.Position;
 import com.chess.engine.board.Board;
@@ -56,17 +57,36 @@ public class MoveUtils {
      */
     public static boolean performTestMove(Board board, Tile originatingTile, Tile targetTile) {
         Board testBoard = new Board(board);
-        Tile originTile = testBoard.getTileMap().get(originatingTile.getPosition().toString());
+        Tile originTile = testBoard.getTileMap().get(originatingTile.getPosition());
         Piece draggedPiece = originTile.getPiece();
         Player currentPlayer = draggedPiece.getOwner();
-        Tile destinationTile = testBoard.getTileMap().get(targetTile.getPosition().toString());
+        Tile destinationTile = testBoard.getTileMap().get(targetTile.getPosition());
         Player opposingPlayer = currentPlayer.opposite(testBoard);
 
         // Perform a test move
         updateGameState(testBoard, originTile, destinationTile, true);
 
+        // Determine whether the test move was valid
+        boolean isValid = isKingInCheck(testBoard, opposingPlayer, currentPlayer) == null;
+
+        // Print out the test board after updating it if we are debugging
+        if(GameSettings.getInstance().isEnableDebugging()) {
+            System.out.println("Current board state:");
+            System.out.println(board);
+            System.out.println("------------------");
+            Move moveToPerform = new Move(draggedPiece, originTile, null, destinationTile);
+            System.out.println("Checking if we can perform move: " + moveToPerform);
+            System.out.println(testBoard);
+
+            if(isValid) {
+                System.out.println("Can perform move!");
+            } else {
+                System.out.println("Can NOT perform move!");
+            }
+        }
+
         // If the current player is in check by other player, then move is not valid
-        return isKingInCheck(testBoard, opposingPlayer, currentPlayer) == null;
+        return isValid;
     }
 
     /**
@@ -120,7 +140,8 @@ public class MoveUtils {
         }
 
         // Check whether the given piece on the originating tile has the dragged to tile as a valid tile
-        return draggedPiece.getValidMoves(board).contains(new Move(draggedPiece, originatingTile, capturedPiece, draggedToTile));
+        Move moveToPerform = new Move(draggedPiece, originatingTile, capturedPiece, draggedToTile);
+        return draggedPiece.getValidMoves(board).contains(moveToPerform);
     }
 
     /**
@@ -131,6 +152,8 @@ public class MoveUtils {
      * @param testMove is this just a test move?
      */
     private static void updateGameState(Board board, Tile tileToMoveFrom, Tile tileToMoveTo, boolean testMove) {
+
+        // The type of move we performed (Standard, Capture, Check, or Castle)
         MoveType typeOfMove = null;
 
         // Get our current game state
@@ -154,22 +177,28 @@ public class MoveUtils {
         state.setHalfMoves(isPawnMove || isRegularCapture ? 0 : state.getHalfMoves() + 1);
         // Update Player turn and full moves
         state.setPlayerTurn(opposingPlayer);
-        state.setFullMoves(state.getFullMoves() + 1);
+
+        // If moving player was black, increment the move counter
+        if(!currentPlayer.isWhite()) {
+            state.setFullMoves(state.getFullMoves() + 1);
+        }
 
         // Sets en passant square if last move was pawn move that spanned 2 rows
         if (isPawnMove && BoardUtils.deltaRow(tileToMoveFrom, tileToMoveTo) == 2) {
             // En passant position is multiplied by -1 because dragged piece is opposite color of what we desire
-            int rowOffset = currentPlayer.isWhite() ? ((Pawn) draggedPiece).getEnpassantDirection() : ((Pawn) draggedPiece).getEnpassantDirection() * -1;
+            int rowOffset = ((Pawn) draggedPiece).getEnpassantDirection() * -1;
             Position enpassantSquare = BoardUtils.getOffSetPosition(targetPosition,0, rowOffset);
             board.getGameState().setEnpassantSquare(enpassantSquare);
-        } else {
+        }
+        // Clear en passant square
+        else {
             board.getGameState().setEnpassantSquare(null);
         }
 
         // If moving the rook or king, then castling is no longer allowed
         if(isKingMove || draggedPiece instanceof Rook) {
-            updateCastling(state, opposingPlayer);
             // TODO -> If moving rook, determine which side and don't allow castling to that side anymore
+            updateCastling(state, opposingPlayer);
         }
 
         /*
@@ -180,35 +209,49 @@ public class MoveUtils {
         if(isKingMove) {
 
             // Update the king position
-            board.setKingPosition((King)draggedPiece, targetPosition);
+            board.setKingPosition((King) draggedPiece, targetPosition);
 
             // If king moved > 1 square, move the corresponding rook as well
             if(BoardUtils.deltaCol(tileToMoveFrom, tileToMoveTo) > 1) {
+                typeOfMove = MoveType.CASTLE;
+
+                // Determine whether it was a king or queen side castle
                 boolean queenSideCastle = targetPosition.getColumn() < moveFromPosition.getColumn();
-                Position rookPos = BoardUtils.getOffSetPosition(targetPosition, queenSideCastle ? -2 : 1, 0);
-                Tile rookTile = board.getTileMap().get(rookPos.toString());
-                Position newRookPos = BoardUtils.getOffSetPosition(targetPosition, queenSideCastle ? 1 : -1, 0);
-                Tile newRookTile = board.getTileMap().get(newRookPos.toString());
+
+                // Get the current rook position
+                int columnOffSet = queenSideCastle ? -2 : 1;
+                Position rookPos = BoardUtils.getOffSetPosition(targetPosition, columnOffSet, 0);
+                Tile rookTile = board.getTileMap().get(rookPos);
+
+                // Get the rook's new position
+                columnOffSet = queenSideCastle ? 1 : -1;
+                Position newRookPos = BoardUtils.getOffSetPosition(targetPosition, columnOffSet, 0);
+                Tile newRookTile = board.getTileMap().get(newRookPos);
+
+                // Move the rook
                 newRookTile.setPiece(rookTile.getPiece());
                 rookTile.setPiece(null);
-                typeOfMove = MoveType.CASTLE;
             }
         }
 
         // Add the captured piece to list captured and play capture sound
         if(tileToMoveTo.isOccupied()) {
-            currentPlayer.capturePiece(opposingPlayer, capturedPiece);
             typeOfMove = MoveType.CAPTURE;
+            currentPlayer.capturePiece(opposingPlayer, capturedPiece);
         }
         // If this was an en passant capture, then remove the captured pawn
         else if(isPawnMove && isEnpassantCapture) {
-            int rowOffset = currentPlayer.isWhite() ? ((Pawn) draggedPiece).getEnpassantDirection() : ((Pawn) draggedPiece).getEnpassantDirection() * -1;
+            typeOfMove = MoveType.CAPTURE;
+
+            // Determine the location of the pawn to be captured
+            int rowOffset = ((Pawn) draggedPiece).getEnpassantDirection() * -1;
             Position pawnCapturedPosition = BoardUtils.getOffSetPosition(targetPosition,0, rowOffset);
-            Tile capturedPawnTile = board.getTileMap().get(pawnCapturedPosition.toString());
+            Tile capturedPawnTile = board.getTileMap().get(pawnCapturedPosition);
+
+            // Capture the pawn
             capturedPiece = capturedPawnTile.getPiece();
             currentPlayer.capturePiece(opposingPlayer, capturedPiece);
             capturedPawnTile.setPiece(null);
-            typeOfMove = MoveType.CAPTURE;
         }
 
         // Add piece to dragged to tile and remove from originating tile
@@ -219,7 +262,15 @@ public class MoveUtils {
         board.getMoveHistory().addMove(new Move(draggedPiece, tileToMoveFrom, capturedPiece, tileToMoveTo));
 
         // Populate moves for current game state
-        board.getPlayers().values().forEach(player -> player.populateMoves(board));
+        board.getPlayers().values().forEach(player -> {
+
+            // Clear out valid moves for the piece after it moves
+            for (Piece piece : player.getPieces()) {
+                piece.clearValidMoves();
+            }
+
+            player.populateMoves(board);
+        });
 
         // If check move, play checking sound
         if(isKingInCheck(board, currentPlayer, opposingPlayer) != null) {
@@ -234,7 +285,6 @@ public class MoveUtils {
         if(!testMove) {
             typeOfMove.playSound();
         }
-
     }
 
     /**
@@ -268,7 +318,7 @@ public class MoveUtils {
      * @return true if the tile is targeted, false if not
      */
     public static Piece isTileTargeted(Player targetingPlayer, Position destination) {
-        // Get all valid moves for opposing player
+        // Get all moves for opposing player
         // And check if that piece has a move with same location as the destination tile
         Predicate<Move> movesMatch = move -> move.getDestination().getPosition().equals(destination);
         return targetingPlayer.getMovesForPieces().values().stream()

@@ -5,7 +5,10 @@ import com.chess.engine.board.Board;
 import com.chess.engine.board.FenUtils;
 import com.chess.ui.ChessFrame;
 
-import javax.swing.*;
+import javax.swing.JCheckBoxMenuItem;
+import javax.swing.JMenu;
+import javax.swing.JMenuItem;
+import javax.swing.SwingUtilities;
 
 public class GameOptionsMenu extends JMenu {
 
@@ -43,8 +46,7 @@ public class GameOptionsMenu extends JMenu {
         ChessFrame frame = (ChessFrame) SwingUtilities.getRoot(this);
         Board board = frame.getBoard();
         board.updateBoardFromFen(FenUtils.DEFAULT_POSITION);
-        board.getMoveHistory().reset();
-        frame.getHistoryPanel().updateHistory();
+        frame.getHistoryPanel().reset();
         board.displayBoard();
     }
 

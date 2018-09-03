@@ -20,7 +20,7 @@ public class FenUtils {
      * - Sets full move counter
      * @param fen a valid FEN string for a standard chess game
      */
-    public static void loadFen(Board board, String fen) throws FenException {
+    static void loadFen(Board board, String fen) throws FenException {
 
         // If no FEN was provided, use the default starting position
         if ("".equals(fen)) {
@@ -143,16 +143,14 @@ public class FenUtils {
             // For each character in the current rank
             for (char ch : charArray) {
 
-                // Get the next character in the rank
                 // If the character is a digit
                 if (Character.isDigit(ch)) {
-
                     // Add an empty tile in the current rank denoted by digit in FEN
                     int numFiles = Integer.parseInt(ch + "");
                     int tempFile = filesAddedForRow;
                     for (int i = tempFile; i < (numFiles + tempFile); i++) {
                         Position emptyTilePos = new Position(7 - rankCount, i);
-                        board.getTileMap().put(emptyTilePos.toString(), new Tile(emptyTilePos));
+                        board.getTileMap().put(emptyTilePos, new Tile(emptyTilePos));
                         filesAddedForRow++;
                     }
                 }
@@ -164,14 +162,19 @@ public class FenUtils {
                     if(ch == 'k' || ch == 'K') {
                         board.setKingPosition((King) newPiece, piecePosition);
                     }
-                    board.getTileMap().put(piecePosition.toString(), new Tile(piecePosition, newPiece));
+                    board.getTileMap().put(piecePosition, new Tile(piecePosition, newPiece));
                     filesAddedForRow++;
                 }
             }
         }
     }
 
-    // Whose turn it is White or Black
+    /**
+     * Whose turn it is White or Black
+     * @param board the board to check
+     * @param turn the turn string
+     * @return the white or black player
+     */
     private static Player getPlayerTurn(Board board, final String turn) throws FenException {
         if(Player.Color.WHITE.toString().equals(turn)) {
             return board.getPlayers().get(Player.Color.WHITE);

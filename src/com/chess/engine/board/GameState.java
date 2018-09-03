@@ -8,39 +8,39 @@ public class GameState {
     // Is the game over?
     private boolean gameOver;
 
+    // Is the game stale mated
+    private boolean stalemate;
+
     // Which player's turn it is
     private Player playerTurn;
 
-    // State of castling / enPassant
+    // State of castling / en passant
     private String castling;
     private Position enPassant;
 
-    // Number of halfmoves / full moves
+    // Number of half moves / full moves
     private int halfMoves, fullMoves;
 
     /**
      * Game state instance to hold game specific information
      * @param turn which player's turn it is
      */
-    public GameState(Player turn) {
+    GameState(Player turn) {
         this.playerTurn = turn;
-        gameOver = false;
+        this.gameOver = false;
+        this.stalemate = false;
 
         // TODO - time controls
-
-        // TODO Player in check
-
-        // TODO Player in checkmate
-
-        // TODO stalemate
     }
 
     // Getters
     public Player getPlayerTurn() { return this.playerTurn; }
-    public String getCastles() { return castling; }
-    public Position getEPSquare() { return enPassant; }
-    public int getFullMoves() { return fullMoves; }
-    public int getHalfMoves() { return halfMoves; }
+    public String getCastles() { return this.castling; }
+    public Position getEPSquare() { return this.enPassant; }
+    public int getFullMoves() { return this.fullMoves; }
+    public int getHalfMoves() { return this.halfMoves; }
+    public boolean isStaleMate() { return this.stalemate; }
+    public boolean isGameOver() { return this.stalemate || this.gameOver; }
 
     // Setters
     public void setPlayerTurn(Player player) { this.playerTurn = player; }
@@ -48,6 +48,7 @@ public class GameState {
     public void setEnpassantSquare(Position enpassantSquare) { this.enPassant = enpassantSquare; }
     public void setHalfMoves(int halfMoves) { this.halfMoves = halfMoves; }
     public void setFullMoves(int fullMoves) { this.fullMoves = fullMoves; }
+    public void setGameOver(boolean gameOver) { this.gameOver = gameOver; }
 
     /**
      * Check whether given Player can king side castle
@@ -65,5 +66,20 @@ public class GameState {
      */
     public boolean canCastleQueenSide(Player player) {
         return player.isWhite() ? castling.contains("Q") : castling.contains("q");
+    }
+
+    /**
+     * Print out the current game state
+     * @return the current game state
+     */
+    @Override
+    public String toString() {
+        return "Full moves: " + getFullMoves() + "\n" +
+               "Half Moves: " + getHalfMoves() + "\n" +
+               "Player turn: " + getPlayerTurn() + "\n" +
+               "EP Square: " + getEPSquare() + "\n" +
+               "Castling: " + getCastles() + "\n" +
+               "Is stale mate: " + isStaleMate() + "\n" +
+               "Game over: " + isGameOver();
     }
 }

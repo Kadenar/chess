@@ -5,16 +5,28 @@ import com.chess.engine.board.Tile;
 import com.chess.engine.moves.Move;
 import com.chess.engine.pieces.Piece;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
 public class Player {
 
+    // Player's color
     private final Color color;
-    private List<Piece> pieces = new ArrayList<>();
-    private List<Piece> capturedPieces = new ArrayList<>();
-    private Map<Piece, Set<Move>> moves = new HashMap<>();
+
+    // Pieces owner by the player
+    private List<Piece> pieces = new ArrayList<>(24);
+
+    // Pieces captured by opponent
+    private List<Piece> capturedPieces = new ArrayList<>(16);
+
+    // Map of moves for each piece player owns
+    private Map<Piece, Set<Move>> moves = new HashMap<>(16);
 
     public enum Color {
         WHITE {
@@ -66,7 +78,7 @@ public class Player {
      * @return the list of pieces the player no longer controls
      */
     public List<Piece> getCapturedPieces() {
-        return capturedPieces;
+        return this.capturedPieces;
     }
 
     /**
@@ -74,7 +86,7 @@ public class Player {
      * @return a list of pieces that the player still controls
      */
     public List<Piece> getPieces() {
-        return pieces;
+        return this.pieces;
     }
 
     /**
@@ -94,7 +106,9 @@ public class Player {
         };
 
         // Filter out pieces not owned by me
-        Predicate<Tile> sameOwner = tile -> tile.isOccupied() && tile.getPiece().getOwner().equals(this);
+        Predicate<Tile> sameOwner = tile -> tile.isOccupied() && this.equals(tile.getPiece().getOwner());
+
+        // Generate moves for all pieces owned by me
         board.getTileMap().values().stream().filter(sameOwner).forEach(generateMoves);
     }
 
@@ -104,6 +118,17 @@ public class Player {
      */
     public Map<Piece, Set<Move>> getMovesForPieces() {
         return this.moves;
+    }
+
+    /**
+     * Checks if a player has any valid moves
+     * @param board the board to check
+     * @return true if has valid moves, false if not
+     */
+    public boolean hasValidMoves(Board board) {
+        // TODO -> This throws overflow exception
+        //return true;
+        return getPieces().stream().anyMatch(piece -> piece.getValidMoves(board).size() > 0);
     }
 
     /**

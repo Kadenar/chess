@@ -3,11 +3,14 @@ package com.chess.ui.panels;
 import com.chess.engine.pieces.Piece;
 import com.chess.ui.UIConstants;
 
-import javax.swing.*;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
 import javax.swing.border.TitledBorder;
-import java.awt.*;
+import java.awt.BorderLayout;
+import java.awt.Dimension;
+import java.awt.GridLayout;
 
-public class CapturedPanel extends JPanel {
+class CapturedPanel extends JPanel {
 
     private final JPanel blackPieces;
     private final JPanel whitePieces;
@@ -41,5 +44,13 @@ public class CapturedPanel extends JPanel {
         } else {
             whitePieces.add(scaledImg);
         }
+    }
+
+    /**
+     * Reset captured pieces
+     */
+    void reset() {
+        blackPieces.removeAll();
+        whitePieces.removeAll();
     }
 }

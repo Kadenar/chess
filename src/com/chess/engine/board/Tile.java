@@ -3,18 +3,21 @@ package com.chess.engine.board;
 import com.chess.engine.Position;
 import com.chess.engine.pieces.Piece;
 
-import javax.swing.*;
-import java.awt.*;
+import javax.swing.BorderFactory;
+import javax.swing.JPanel;
+import java.awt.Color;
 
 public class Tile extends JPanel {
 
     private final Position coordinate;
     private Piece piece;
 
+    // Empty tile
     public Tile(Position pos) {
         this(pos, null);
     }
 
+    // Tile with potential piece
     public Tile(Position pos, Piece piece) {
         super();
         this.coordinate = pos;
@@ -75,9 +78,13 @@ public class Tile extends JPanel {
         return (getPosition().getRow() % 2) == (getPosition().getColumn() % 2);
     }
 
+    /**
+     * Ensure unique hashcode for tiles based on tile position
+     * @return unique hash
+     */
     @Override
     public int hashCode() {
-        return coordinate.hashCode();
+        return getPosition().hashCode();
     }
 
     /**

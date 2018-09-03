@@ -9,8 +9,12 @@ import com.chess.ui.menus.DebugOptionsMenu;
 import com.chess.ui.menus.GameOptionsMenu;
 import com.chess.ui.panels.HistoryPanel;
 
-import javax.swing.*;
-import java.awt.*;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JMenuBar;
+import javax.swing.WindowConstants;
+import java.awt.BorderLayout;
+import java.awt.Dimension;
 
 public class ChessFrame extends JFrame {
 
@@ -42,7 +46,6 @@ public class ChessFrame extends JFrame {
 
         // Display the frame and play opening sound
         this.setVisible(true);
-        //board.setPreferredSize(board.getLayeredPane().getSize());
 
         // Play start game sound after frame is visible
         SoundUtils.playMoveSound("startGame");

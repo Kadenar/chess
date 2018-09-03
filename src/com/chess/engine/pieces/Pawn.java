@@ -20,7 +20,7 @@ public class Pawn extends Piece {
      * @return 1 or -1 depending on Player color
      */
     public int getEnpassantDirection() {
-        return getOwner().equals(Player.Color.WHITE) ? 1 : -1;
+        return getOwner().getColor().equals(Player.Color.WHITE) ? 1 : -1;
     }
 
     /**
@@ -36,7 +36,7 @@ public class Pawn extends Piece {
         Direction dir  = getOwner().isWhite() ? Direction.UP : Direction.DOWN;
 
         // Return valid positions that the pawn can move to
-        return addPositionsForPawn(board, this, currentPosition, dir);
+        return addPositionsForPawn(board, currentPosition, dir);
     }
 
     /**
@@ -46,11 +46,8 @@ public class Pawn extends Piece {
      * @param dir the direction
      * @return the positions that are valid to be moved to
      */
-    private Set<Move> addPositionsForPawn(Board board, Piece piece, Tile currentTile, Direction dir) {
+    private Set<Move> addPositionsForPawn(Board board, Tile currentTile, Direction dir) {
         Set<Move> validPositions = new HashSet<>();
-
-        // Only allow this to be called for pawns
-        if(!(piece instanceof Pawn)) return validPositions;
 
         int rowOffSet = 0;
         if(dir == Direction.UP) {
@@ -60,10 +57,10 @@ public class Pawn extends Piece {
         }
 
         // First check if the pawn can move in the forward direction
-        validPositions.addAll(addPositionsForOffset(board, piece, currentTile, 0, rowOffSet));
+        validPositions.addAll(addPositionsForOffset(board, this, currentTile, 0, rowOffSet));
 
         // Next check if the pawn can move in the diagonal direction
-        validPositions.addAll(addPositionsForDirection(board, piece, currentTile, dir, true));
+        validPositions.addAll(addPositionsForDirection(board, this, currentTile, dir, true));
 
         return validPositions;
     }

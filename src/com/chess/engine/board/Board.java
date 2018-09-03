@@ -6,22 +6,41 @@ import com.chess.engine.Position;
 import com.chess.engine.moves.Move;
 import com.chess.engine.moves.MoveHistory;
 import com.chess.engine.moves.MoveUtils;
-import com.chess.engine.pieces.*;
+import com.chess.engine.pieces.Bishop;
+import com.chess.engine.pieces.King;
+import com.chess.engine.pieces.Knight;
+import com.chess.engine.pieces.Pawn;
+import com.chess.engine.pieces.Piece;
+import com.chess.engine.pieces.Queen;
+import com.chess.engine.pieces.Rook;
 import com.chess.ui.ChessFrame;
 import com.chess.ui.UIConstants;
 
-import javax.swing.*;
-import java.awt.*;
+import javax.swing.JLabel;
+import javax.swing.JLayeredPane;
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.SwingUtilities;
+import java.awt.Color;
+import java.awt.Dimension;
+import java.awt.GridLayout;
+import java.awt.MouseInfo;
+import java.awt.Point;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
 
 public class Board extends JPanel {
 
     // All tiles for the current board
-    private final Map<String, Tile> tileMap;
+    private final Map<Position, Tile> tileMap;
 
     // The players for the current board
     private final Map<Player.Color, Player> players;
@@ -63,7 +82,7 @@ public class Board extends JPanel {
      * @param withUI true if should UI be rendered, false if not
      */
     public Board(String fen, boolean withUI) {
-        super();
+        super(new GridLayout(8, 8));
         Player white = new Player(Player.Color.WHITE);
         Player black = new Player(Player.Color.BLACK);
         this.tileMap = new LinkedHashMap<>(64);
@@ -72,7 +91,7 @@ public class Board extends JPanel {
         this.players.put(Player.Color.WHITE, white);
         this.players.put(Player.Color.BLACK, black);
         this.gameState = new GameState(white);
-        this.moveHistory = new MoveHistory();
+        this.moveHistory = new MoveHistory(this);
         updateBoardFromFen(fen);
 
         // Only add UI portion if desired
@@ -81,9 +100,6 @@ public class Board extends JPanel {
             this.layeredPane = new JLayeredPane();
             // TODO need to figure out how to add layout here for resizing
             //layeredPane.setLayout(new FlowLayout());
-
-            // Set our board's layout to an 8x8 grid
-            setLayout(new GridLayout(8, 8));
             setBounds(0, 0, UIConstants.BOARD_WIDTH, UIConstants.BOARD_HEIGHT);
             setPreferredSize(new Dimension(UIConstants.BOARD_WIDTH, UIConstants.BOARD_HEIGHT));
 
@@ -105,6 +121,7 @@ public class Board extends JPanel {
      * @param fen the fen string to update the board with
      */
     public void updateBoardFromFen(String fen) {
+
         // Clear each player's pieces / captured pieces
         getPlayers().values().forEach(player -> {
             player.getPieces().clear();
@@ -118,9 +135,16 @@ public class Board extends JPanel {
         try {
             FenUtils.loadFen(this, fen);
             getTileMap().forEach((key, value) -> highlightedTiles.put(value, false));
+            // If the current player has no valid moves, then the game is over
         } catch (FenUtils.FenException e) {
             System.err.println(e.getMessage());
         }
+
+        /*// If player doesn't have valid moves, then the game is over
+        if(!gameState.getPlayerTurn().hasValidMoves(Board.this)) {
+            gameState.setGameOver(true);
+            System.out.println("Game is over!");
+        }*/
     }
 
     /*
@@ -165,7 +189,7 @@ public class Board extends JPanel {
     }
 
     // GETTERS
-    public Map<String, Tile> getTileMap() { return this.tileMap; }
+    public Map<Position, Tile> getTileMap() { return this.tileMap; }
     public Map<Player.Color, Player> getPlayers() { return this.players; }
     public GameState getGameState() { return this.gameState; }
     public MoveHistory getMoveHistory() { return this.moveHistory; }
@@ -185,7 +209,7 @@ public class Board extends JPanel {
 
     /**
      * Get the white king's current position
-     * @return the positino of the white king
+     * @return the position of the white king
      */
     public Position getWhiteKingPosition() {
         return whiteKingPos;
@@ -250,8 +274,24 @@ public class Board extends JPanel {
             this.add(tile, this.getComponents().length);
         });
 
+        // If player doesn't have valid moves, then the game is over
+        if(!gameState.getPlayerTurn().hasValidMoves(this)) {
+            gameState.setGameOver(true);
+            String[] options = {"Yes", "No", "Quit" };
+            JOptionPane.showOptionDialog(this, "Game is ended in " + (gameState.isStaleMate() ? " stale mate." : " check mate.")
+                    + "\nWould you like to start a new game?", "Game over", JOptionPane.YES_NO_CANCEL_OPTION, JOptionPane.QUESTION_MESSAGE, null, options, options[0]);
+        }
+
         layeredPane.revalidate();
         layeredPane.repaint();
+    }
+
+    /**
+     * Get a reference to ChessFrame
+     * @return the chess frame the board belongs to
+     */
+    private ChessFrame getFrame() {
+        return (ChessFrame) SwingUtilities.getAncestorOfClass(ChessFrame.class, layeredPane);
     }
 
     /**
@@ -276,6 +316,7 @@ public class Board extends JPanel {
          */
         private void addIndicators() {
             if(GameSettings.getInstance().isEnableHighlighting()) {
+
                 Set<Move> validMoves = originatingPiece.getValidMoves(Board.this);
 
                 for (Move validMove : validMoves) {
@@ -325,7 +366,7 @@ public class Board extends JPanel {
          */
         private boolean attemptPieceMove(Tile originatingTile) {
             Position draggedToPosition = new Position(getTilePositionFromMouse());
-            Tile draggedToTile = getTileMap().getOrDefault(draggedToPosition.toString(), null);
+            Tile draggedToTile = getTileMap().getOrDefault(draggedToPosition, null);
             return MoveUtils.executeMove(Board.this, originatingTile, draggedToTile);
         }
 
@@ -342,7 +383,7 @@ public class Board extends JPanel {
 
             // Get mouse press location in tile coordinate system
             Position mousePressPosition = new Position(getTilePositionFromMouse());
-            this.originatingTile = getTileMap().getOrDefault(mousePressPosition.toString(), null);
+            this.originatingTile = getTileMap().getOrDefault(mousePressPosition, null);
 
             // If user clicked on a piece
             if(this.originatingTile != null) {
@@ -414,8 +455,7 @@ public class Board extends JPanel {
                     originatingPiece.setVisible(true);
                 } else {
                     // Update game history
-                    ChessFrame frame = (ChessFrame) SwingUtilities.getAncestorOfClass(ChessFrame.class, layeredPane);
-                    frame.getHistoryPanel().updateHistory();
+                    getFrame().getHistoryPanel().updateHistory();
                     displayBoard();
                 }
             }

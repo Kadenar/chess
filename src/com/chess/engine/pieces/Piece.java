@@ -10,8 +10,9 @@ import com.chess.engine.moves.Move;
 import com.chess.engine.moves.MoveUtils;
 
 import javax.imageio.ImageIO;
-import javax.swing.*;
-import java.awt.*;
+import javax.swing.ImageIcon;
+import javax.swing.JLabel;
+import java.awt.Image;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
@@ -25,12 +26,13 @@ public abstract class Piece extends JLabel {
 
     private final Player owner;
     private final JLabel scaledImg;
-    private final Map<Integer, Set<Move>> movesForTurn;
+    private final Map<Player, Set<Move>> movesForTurn;
 
     public Piece(Player color, String pieceImagePath) {
         super();
         this.owner = color;
-        this.movesForTurn = new HashMap<>();
+        // Max number of moves you would ever get would be queen in the center 4 tiles which is 27 locations
+        this.movesForTurn = new HashMap<>(27);
         JLabel testImg = null;
 
         try {
@@ -55,16 +57,16 @@ public abstract class Piece extends JLabel {
     /**
      * Create the possible moves for the given piece (to be implemented based on type of piece)
      * @param currentTile the current tile of the piece
-     * @return list of possible moves that are possible
+     * @return set of possible moves that are possible
      */
     public abstract Set<Move> generateMoves(Board board, Tile currentTile);
 
     /**
      * Get all moves for this piece
-     * @return get list of moves for this piece
+     * @return get set of moves for this piece
      */
-    public Set<Move> getMoves() {
-        return getOwner().getMovesForPieces().getOrDefault(this, new HashSet<>());
+    public final Set<Move> getMoves() {
+        return getOwner().getMovesForPieces().getOrDefault(this, new HashSet<>(27));
     }
 
     /**
@@ -72,19 +74,25 @@ public abstract class Piece extends JLabel {
      * (preventing the piece from actually moving if it would put the Player in check)
      * This information is cached on a per turn basis to avoid performing test moves unnecessarily multiple times
      * @param board the current board state
-     * @return the list of valid moves for this piece
+     * @return the set of valid moves for this piece
      */
-    public Set<Move> getValidMoves(Board board) {
-        int currentTurn = board.getGameState().getFullMoves();
-        Set<Move> currentMoves = movesForTurn.get(currentTurn);
+    public final Set<Move> getValidMoves(Board board) {
+        Set<Move> currentMoves = movesForTurn.get(getOwner());
         if(currentMoves == null) {
             currentMoves = getMoves().stream()
                     .filter(move -> MoveUtils.performTestMove(board, move.getOrigin(), move.getDestination()))
                     .collect(Collectors.toSet());
-            movesForTurn.put(currentTurn, currentMoves);
+            movesForTurn.put(getOwner(), currentMoves);
         }
 
         return currentMoves;
+    }
+
+    /**
+     * Clear out valid moves after a successful move is executed
+     */
+    public final void clearValidMoves() {
+        this.movesForTurn.clear();
     }
 
     /**
@@ -95,20 +103,30 @@ public abstract class Piece extends JLabel {
      * @param isDiagonal whether diagonal movement
      * @return the positions that are valid to be moved to
      */
-    Set<Move> addPositionsForDirection(Board board, Piece piece, Tile currentTile,
+    final Set<Move> addPositionsForDirection(Board board, Piece piece, Tile currentTile,
                                        Direction dir, boolean isDiagonal) {
         Set<Move> positions = new HashSet<>();
+
+        // Diagonal movement
         if(isDiagonal) {
             int rowOffset = dir == Direction.UP ? 1 : -1;
             positions.addAll(addPositionsForDiagonal(board, piece, currentTile, 1, rowOffset));
             positions.addAll(addPositionsForDiagonal(board, piece, currentTile, -1, rowOffset));
-        } else if(dir == Direction.UP) {
+        }
+        // Vertical up
+        else if(dir == Direction.UP) {
             positions.addAll(addPositionsForVertical(board, piece, currentTile, 1));
-        } else if(dir == Direction.DOWN) {
+        }
+        // Vertical down
+        else if(dir == Direction.DOWN) {
             positions.addAll(addPositionsForVertical(board, piece, currentTile, -1));
-        } else if(dir == Direction.LEFT) {
+        }
+        // Horizontal left
+        else if(dir == Direction.LEFT) {
             positions.addAll(addPositionsForHorizontal(board, piece, currentTile, -1));
-        } else if(dir == Direction.RIGHT) {
+        }
+        // Horizontal right
+        else if(dir == Direction.RIGHT) {
             positions.addAll(addPositionsForHorizontal(board, piece, currentTile, 1));
         }
 
@@ -158,7 +176,7 @@ public abstract class Piece extends JLabel {
      * @param rowOffSet the row offset (up and down movement)
      * @return the positions that are valid to be moved to
      */
-     Set<Move> addPositionsForOffset(Board board, Piece piece, Tile currentTile, int colOffset, int rowOffSet) {
+     final Set<Move> addPositionsForOffset(Board board, Piece piece, Tile currentTile, int colOffset, int rowOffSet) {
         Position currentPosition = currentTile.getPosition();
         boolean isPawn = piece instanceof Pawn;
         int maxSpacesMoved = piece.getMaxSpacesMoved();
@@ -170,9 +188,12 @@ public abstract class Piece extends JLabel {
 
         // While we haven't checked the max spaces allowed by this piece
         Set<Move> positionsSet = new HashSet<>();
-        Map<String, Tile> tiles = board.getTileMap();
-        Position offSetPos = BoardUtils.getOffSetPosition(currentPosition, colOffset, rowOffSet);
+        Map<Position, Tile> tiles = board.getTileMap();
+        Position offSetPos = currentPosition;
         for(int tilesCounted = 0; tilesCounted < maxSpacesMoved; tilesCounted++) {
+
+            // Get our next position based on our offset
+            offSetPos = BoardUtils.getOffSetPosition(offSetPos, colOffset, rowOffSet);
 
             // Ensure offset position is a valid coordinate
             if(!offSetPos.isValidCoord()) {
@@ -180,7 +201,7 @@ public abstract class Piece extends JLabel {
             }
 
             // Get offset tile and check whether it is occupied
-            Tile offSetTile = tiles.get(offSetPos.toString());
+            Tile offSetTile = tiles.get(offSetPos);
             boolean offSetTileIsOccupied = offSetTile.isOccupied();
             Piece offSetTilePiece = offSetTile.getPiece();
 
@@ -189,7 +210,7 @@ public abstract class Piece extends JLabel {
 
                 // Don't allow a pawn to be moved to another pawn's location unless it is a diagonal move
                 // Don't allow a pawn to move diagonally if the pawn on that tile is the same owner
-                if ((isPawn && colOffset == 0) || piece.sameSide(offSetTile.getPiece())) {
+                if ((isPawn && colOffset == 0) || piece.sameSide(offSetTilePiece)) {
                     break;
                 }
 
@@ -197,7 +218,7 @@ public abstract class Piece extends JLabel {
             // If the offset tile is not occupied by another piece
             else {
 
-                // If we are a pawn, don't allow diagonal movement unless en-passant
+                // If we are a pawn, don't allow diagonal movement unless en passant
                 if(isPawn && colOffset != 0 && rowOffSet != 0 && !offSetPos.equals(board.getGameState().getEPSquare())) {
                     break;
                 }
@@ -216,9 +237,6 @@ public abstract class Piece extends JLabel {
             if(offSetTileIsOccupied) {
                 break;
             }
-
-            // Get our next position based on our offset
-            offSetPos = BoardUtils.getOffSetPosition(offSetPos, colOffset, rowOffSet);
         }
 
         return positionsSet;
@@ -236,7 +254,7 @@ public abstract class Piece extends JLabel {
      * Whether a piece is on the same side as another piece
      * @return true if same player, false if not
      */
-    public boolean sameSide(Piece piece) {
+    public final boolean sameSide(Piece piece) {
         return piece.getOwner().equals(getOwner());
     }
 

@@ -1,6 +1,6 @@
 package com.chess.engine;
 
-import java.awt.*;
+import java.awt.Point;
 import java.util.Objects;
 
 /*
@@ -64,6 +64,10 @@ public class Position {
         return getRow() == 0;
     }
 
+    /**
+     * Ensure unique hashcode for Positions based on row / column
+     * @return unique hash
+     */
     @Override
     public int hashCode() {
         return Objects.hash(row, column);
