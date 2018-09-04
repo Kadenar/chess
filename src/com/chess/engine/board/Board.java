@@ -248,7 +248,7 @@ public class Board extends JPanel {
             tile.removeAll();
 
             // If debugging, display tile positions too
-            if(GameSettings.getInstance().isEnableDebugging()) {
+            if(GameSettings.INSTANCE.isEnableDebugging()) {
                 Position tilePos = tile.getPosition();
                 JLabel locationText = new JLabel(tilePos + " - [" + tilePos.getRow() + "," + tilePos.getColumn() + "]");
                 tile.add(locationText);
@@ -260,7 +260,7 @@ public class Board extends JPanel {
                 tile.add(piece);
 
                 // Highlight tiles containing pieces with valid moves
-                if(GameSettings.getInstance().isEnableHighlighting() && piece.getOwner() == getGameState().getPlayerTurn()) {
+                if(GameSettings.INSTANCE.isEnableHighlighting() && piece.getOwner() == getGameState().getPlayerTurn()) {
 
                     // As long as the piece has moves, highlight it
                     if(piece.getValidMoves(this).size() > 0) {
@@ -316,7 +316,7 @@ public class Board extends JPanel {
          * Add indicators to the UI for tiles we can move to
          */
         private void addIndicators() {
-            if(GameSettings.getInstance().isEnableHighlighting()) {
+            if(GameSettings.INSTANCE.isEnableHighlighting()) {
 
                 Set<Move> validMoves = originatingPiece.getValidMoves(Board.this);
 
@@ -332,7 +332,7 @@ public class Board extends JPanel {
          * Remove all indicators from the layered pane
          */
         private void removeIndicators() {
-            if(GameSettings.getInstance().isEnableHighlighting()) {
+            if(GameSettings.INSTANCE.isEnableHighlighting()) {
                 for (Tile targetTile : targetMoveTiles) {
                     targetTile.highlightTile(false);
                 }

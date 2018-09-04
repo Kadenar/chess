@@ -51,7 +51,7 @@ public class ChessFrame extends JFrame {
         SoundUtils.playMoveSound("startGame");
 
         // Debugging for the tile locations
-        if(GameSettings.getInstance().isEnableDebugging()) {
+        if(GameSettings.INSTANCE.isEnableDebugging()) {
             board.getTileMap().values().forEach(
                     tile -> tile.add(new JLabel("<html> x=" + tile.getLocation().x + "<br/> y="
                             + tile.getLocation().y + "</html>")));

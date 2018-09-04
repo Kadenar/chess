@@ -27,7 +27,7 @@ public class DebugOptionsMenu extends JMenu {
 
         // Enable or disable debugging
         JCheckBoxMenuItem enableDebugging = new JCheckBoxMenuItem("Enable debugging?");
-        enableDebugging.setState(GameSettings.getInstance().isEnableDebugging());
+        enableDebugging.setState(GameSettings.INSTANCE.isEnableDebugging());
         enableDebugging.addItemListener(e -> enableDebugging());
         add(enableDebugging);
 
@@ -61,7 +61,7 @@ public class DebugOptionsMenu extends JMenu {
      * Toggle whether to enable highlighting
      */
     private void enableDebugging() {
-        GameSettings settings = GameSettings.getInstance();
+        GameSettings settings = GameSettings.INSTANCE;
         settings.setEnableDebugging(!settings.isEnableDebugging());
         getBoard().displayBoard();
     }

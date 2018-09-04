@@ -6,9 +6,9 @@ public class GameSettings {
     private boolean enableHighlighting = false;
     private boolean enableDebugging = false;
 
-    private static final GameSettings INSTANCE = getInstance();
+    public static final GameSettings INSTANCE = getInstance();
 
-    public static GameSettings getInstance() {
+    private static GameSettings getInstance() {
         if(INSTANCE == null) {
             return new GameSettings();
         }

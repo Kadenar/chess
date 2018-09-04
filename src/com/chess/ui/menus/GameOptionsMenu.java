@@ -29,7 +29,7 @@ public class GameOptionsMenu extends JMenu {
 
         // Highlight valid moves
         JCheckBoxMenuItem highlighting = new JCheckBoxMenuItem("Highlight valid moves?");
-        highlighting.setState(GameSettings.getInstance().isEnableHighlighting());
+        highlighting.setState(GameSettings.INSTANCE.isEnableHighlighting());
         highlighting.addItemListener(e -> enableHighlighting());
         add(highlighting);
 
@@ -48,7 +48,10 @@ public class GameOptionsMenu extends JMenu {
         Board board = frame.getBoard();
         board.updateBoardFromFen(FenUtils.DEFAULT_POSITION);
         frame.getHistoryPanel().reset();
-        PGNUtils.performPGNMoves(board, board.getMoveHistory());
+
+        // TODO -> Remove this eventually
+        //PGNUtils.performPGNMoves(board, board.getMoveHistory());
+
         board.displayBoard();
     }
 
@@ -56,7 +59,7 @@ public class GameOptionsMenu extends JMenu {
      * Toggle whether to enable highlighting
      */
     private void enableHighlighting() {
-        GameSettings settings = GameSettings.getInstance();
+        GameSettings settings = GameSettings.INSTANCE;
         settings.setEnableHighlighting(!settings.isEnableHighlighting());
         ChessFrame frame = (ChessFrame) SwingUtilities.getRoot(this);
         frame.getBoard().displayBoard();
