@@ -137,8 +137,8 @@ public class MoveHistory {
         }
 
         Player movingPlayer = movedPiece.getOwner();
-        Position kingPosition = movingPlayer.opposite(board).isWhite() ? board.getWhiteKingPosition() : board.getBlackKingPosition();
-        if(MoveUtils.isTileTargeted(movingPlayer, kingPosition) != null) {
+        System.out.println(board.getKingPosition(movingPlayer.opposite(board)));
+        if(MoveUtils.isTileTargeted(movingPlayer, board.getKingPosition(movingPlayer.opposite(board))) != null) {
             builder.append("+");
         }
 

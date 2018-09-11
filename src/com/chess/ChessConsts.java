@@ -1,11 +1,14 @@
-package com.chess.ui;
+package com.chess;
 
-public final class UIConstants {
+public final class ChessConsts {
 
-    private UIConstants() { /*Static construct*/ }
+    private ChessConsts() { /*Static construct*/ }
 
-    final static int WINDOW_WIDTH = 1000;
-    final static int WINDOW_HEIGHT = 860;
+    public final static int NUM_TILES = 64;
+    public static final int NUM_TILE = NUM_TILES / 8;
+    public static final int NUM_PLAYERS = 2;
+    public final static int WINDOW_WIDTH = 1000;
+    public final static int WINDOW_HEIGHT = 860;
 
     public final static int HISTORY_WIDTH = 250;
     public final static int HISTORY_HEIGHT = 730;

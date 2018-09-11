@@ -3,7 +3,6 @@ package com.chess.ui.menus;
 import com.chess.engine.GameSettings;
 import com.chess.engine.board.Board;
 import com.chess.engine.board.FenUtils;
-import com.chess.engine.board.PGNUtils;
 import com.chess.ui.ChessFrame;
 
 import javax.swing.JCheckBoxMenuItem;

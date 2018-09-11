@@ -4,7 +4,6 @@ import com.chess.engine.Position;
 import com.chess.engine.moves.Move;
 import com.chess.engine.moves.MoveHistory;
 import com.chess.engine.moves.MoveUtils;
-import com.chess.engine.pieces.Piece;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -14,7 +13,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 public class PGNUtils {
 

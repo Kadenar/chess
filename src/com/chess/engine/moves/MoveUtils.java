@@ -209,7 +209,7 @@ public class MoveUtils {
         if(isKingMove) {
 
             // Update the king position
-            board.setKingPosition((King) draggedPiece, targetPosition);
+            board.setKingPosition(currentPlayer, targetPosition);
 
             // If king moved > 1 square, move the corresponding rook as well
             if(BoardUtils.deltaCol(tileToMoveFrom, tileToMoveTo) > 1) {
@@ -295,7 +295,7 @@ public class MoveUtils {
         StringBuilder castlingAbility = new StringBuilder();
         boolean canCastleKing = state.canCastleKingSide(player);
         boolean canCastleQueen = state.canCastleQueenSide(player);
-
+        // TODO make this suck less
         if(!canCastleKing && !canCastleQueen) {
             castlingAbility.append("-");
         } else {
@@ -335,7 +335,6 @@ public class MoveUtils {
      * @return true if in check, false if not
      */
     private static Piece isKingInCheck(Board board, Player playerToCheck, Player ownerOfKing) {
-        Position kingPosition = ownerOfKing.isWhite() ? board.getWhiteKingPosition() : board.getBlackKingPosition();
-        return isTileTargeted(playerToCheck, kingPosition);
+        return isTileTargeted(playerToCheck, board.getKingPosition(ownerOfKing));
     }
 }

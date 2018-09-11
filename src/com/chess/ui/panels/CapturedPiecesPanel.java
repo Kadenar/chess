@@ -1,15 +1,13 @@
 package com.chess.ui.panels;
 
+import com.chess.ChessConsts;
 import com.chess.engine.pieces.Piece;
-import com.chess.ui.UIConstants;
 
 import javax.swing.BoxLayout;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.border.TitledBorder;
-import java.awt.BorderLayout;
 import java.awt.Dimension;
-import java.awt.GridLayout;
 
 class CapturedPiecesPanel extends JPanel {
 
@@ -25,10 +23,10 @@ class CapturedPiecesPanel extends JPanel {
         this.setBorder(border);
 
         blackPieces = new JPanel();
-        blackPieces.setPreferredSize(new Dimension(UIConstants.HISTORY_WIDTH, UIConstants.HISTORY_HEIGHT / 8));
+        blackPieces.setPreferredSize(new Dimension(ChessConsts.HISTORY_WIDTH, ChessConsts.HISTORY_HEIGHT / 8));
 
         whitePieces = new JPanel();
-        whitePieces.setPreferredSize(new Dimension(UIConstants.HISTORY_WIDTH, UIConstants.HISTORY_HEIGHT / 8));
+        whitePieces.setPreferredSize(new Dimension(ChessConsts.HISTORY_WIDTH, ChessConsts.HISTORY_HEIGHT / 8));
 
         this.add(blackPieces);
         this.add(whitePieces);

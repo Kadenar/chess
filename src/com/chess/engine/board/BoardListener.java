@@ -44,6 +44,7 @@ class BoardListener implements MouseListener, MouseMotionListener {
 
     /**
      * Add indicators to the UI for tiles we can move to
+     * only if highlighting is enabled
      */
     private void addIndicators() {
         if(GameSettings.INSTANCE.isEnableHighlighting()) {

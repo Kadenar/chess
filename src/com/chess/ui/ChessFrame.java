@@ -1,5 +1,6 @@
 package com.chess.ui;
 
+import com.chess.ChessConsts;
 import com.chess.engine.board.Board;
 import com.chess.engine.sound.SoundUtils;
 import com.chess.ui.headers.FileHeaders;
@@ -7,7 +8,6 @@ import com.chess.ui.headers.RankHeaders;
 import com.chess.ui.menus.DebugOptionsMenu;
 import com.chess.ui.menus.GameOptionsMenu;
 import com.chess.ui.panels.GameStatePanel;
-import com.chess.ui.panels.MoveHistoryPanel;
 
 import javax.swing.JFrame;
 import javax.swing.JMenuBar;
@@ -25,9 +25,9 @@ public class ChessFrame extends JFrame {
     public ChessFrame(Board board) {
         super("Chess");
         this.board = board;
-        this.setMinimumSize(new Dimension(UIConstants.WINDOW_WIDTH, UIConstants.WINDOW_HEIGHT));
+        this.setMinimumSize(new Dimension(ChessConsts.WINDOW_WIDTH, ChessConsts.WINDOW_HEIGHT));
         JFrame.setDefaultLookAndFeelDecorated(true);
-        this.setSize(UIConstants.WINDOW_WIDTH, UIConstants.WINDOW_HEIGHT);
+        this.setSize(ChessConsts.WINDOW_WIDTH, ChessConsts.WINDOW_HEIGHT);
         this.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
         this.setResizable(true);
 

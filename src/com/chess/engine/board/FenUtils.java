@@ -2,8 +2,6 @@ package com.chess.engine.board;
 
 import com.chess.engine.Player;
 import com.chess.engine.Position;
-import com.chess.engine.pieces.King;
-import com.chess.engine.pieces.Piece;
 
 public class FenUtils {
 
@@ -157,14 +155,7 @@ public class FenUtils {
                 }
                 // If the character was a piece, then add it for white or black
                 else {
-                    Position piecePosition = new Position(rowIndex, filesAddedForRow);
-                    Piece newPiece = board.constructPiece(ch);
-                    // Need to know the king's position
-                    if(ch == 'k' || ch == 'K') {
-                        board.setKingPosition((King) newPiece, piecePosition);
-                    }
-                    board.getTileMap().put(piecePosition, new Tile(piecePosition, newPiece));
-                    filesAddedForRow++;
+                    board.constructPiece(ch, new Position(rowIndex, filesAddedForRow++));
                 }
             }
         }
