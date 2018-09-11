@@ -22,13 +22,20 @@ public class MoveHistory {
     // All moves that have been performed
     private List<Move> allMoves;
 
+    // All moves (including those that were done / redone)
+    private List<Move> cachedMoves;
+
     // The board move history is for
     private Board board;
+
+    //private boolean performedUndo;
 
     public MoveHistory(Board board) {
         this.board = board;
         this.lastMove = null;
         this.allMoves = new ArrayList<>();
+        this.cachedMoves = new ArrayList<>();
+        //this.performedUndo = false;
     }
 
     /**
@@ -38,6 +45,11 @@ public class MoveHistory {
     void addMove(Move move) {
         this.lastMove = move;
         this.allMoves.add(move);
+
+        // TODO This is horribly inefficient and not actually working yet
+        //this.cachedMoves.clear();
+        //this.cachedMoves.addAll(allMoves);
+        //this.performedUndo = false;
     }
 
     /**
@@ -55,10 +67,28 @@ public class MoveHistory {
     }
 
     /**
+     * Remove the latest move
+     */
+    public void undo() {
+        allMoves.remove(getLatestMove());
+        //performedUndo = true;
+    }
+
+    /**
+     * Redo the most recent move
+     */
+    public void redo() {
+        //if(performedUndo) {
+            allMoves.add(cachedMoves.get(cachedMoves.size() - 1));
+        //}
+    }
+
+    /**
      * Reset all moves
      */
     public void reset() {
         this.allMoves.clear();
+        this.cachedMoves.clear();
     }
 
     /**

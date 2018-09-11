@@ -3,9 +3,7 @@ package com.chess.engine.board;
 import com.chess.engine.GameSettings;
 import com.chess.engine.Player;
 import com.chess.engine.Position;
-import com.chess.engine.moves.Move;
 import com.chess.engine.moves.MoveHistory;
-import com.chess.engine.moves.MoveUtils;
 import com.chess.engine.pieces.Bishop;
 import com.chess.engine.pieces.King;
 import com.chess.engine.pieces.Knight;
@@ -13,29 +11,18 @@ import com.chess.engine.pieces.Pawn;
 import com.chess.engine.pieces.Piece;
 import com.chess.engine.pieces.Queen;
 import com.chess.engine.pieces.Rook;
-import com.chess.ui.ChessFrame;
 import com.chess.ui.UIConstants;
 
 import javax.swing.JLabel;
 import javax.swing.JLayeredPane;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
-import javax.swing.SwingUtilities;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.GridLayout;
-import java.awt.MouseInfo;
-import java.awt.Point;
-import java.awt.event.MouseEvent;
-import java.awt.event.MouseListener;
-import java.awt.event.MouseMotionListener;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
-import java.util.List;
 import java.util.Map;
-import java.util.Objects;
-import java.util.Set;
 
 public class Board extends JPanel {
 
@@ -104,7 +91,7 @@ public class Board extends JPanel {
             setPreferredSize(new Dimension(UIConstants.BOARD_WIDTH, UIConstants.BOARD_HEIGHT));
 
             // Add our piece listener
-            Board.PieceListener listener = new Board.PieceListener();
+            BoardListener listener = new BoardListener(this);
             addMouseListener(listener);
             addMouseMotionListener(listener);
 
@@ -131,11 +118,13 @@ public class Board extends JPanel {
         // Clear tiles on the board
         getTileMap().clear();
 
-        // Load in the default position
         try {
+            // Load in the fen string
             FenUtils.loadFen(this, fen);
+
+            // Initialize highlighted tiles to same as our map of tiles
             getTileMap().forEach((key, value) -> highlightedTiles.put(value, false));
-            // If the current player has no valid moves, then the game is over
+
         } catch (FenUtils.FenException e) {
             System.err.println(e.getMessage());
         }
@@ -188,23 +177,36 @@ public class Board extends JPanel {
         return piece;
     }
 
-    // GETTERS
+    /**
+     * Map of tiles on the given board
+     * @return all of the tiles for the given board
+     */
     public Map<Position, Tile> getTileMap() { return this.tileMap; }
-    public Map<Player.Color, Player> getPlayers() { return this.players; }
-    public GameState getGameState() { return this.gameState; }
-    public MoveHistory getMoveHistory() { return this.moveHistory; }
 
     /**
-     * Update the position if the king piece with new position
-     * @param kingPiece the king piece to update
-     * @param newPosition the new position of the king
+     * Map of players based on player color (White and Black)
+     * @return the two players for the given board
      */
-    public void setKingPosition(King kingPiece, Position newPosition) {
-        if(kingPiece.getOwner().isWhite()) {
-            whiteKingPos = newPosition;
-        } else {
-            blackKingPos = newPosition;
-        }
+    public Map<Player.Color, Player> getPlayers() { return this.players; }
+
+    /**
+     * The current game state of the board
+     * @return the {@link GameState} for the current board
+     */
+    public GameState getGameState() { return this.gameState; }
+
+    /**
+     * The move history of the board
+     * @return the {@link MoveHistory} for the current board
+     */
+    public MoveHistory getMoveHistory() { return this.moveHistory; }
+
+    public void undo() {
+        moveHistory.undo();
+    }
+
+    public void redo() {
+        moveHistory.redo();
     }
 
     /**
@@ -223,6 +225,19 @@ public class Board extends JPanel {
         return blackKingPos;
     }
 
+    /**
+     * Update the position if the king piece with new position
+     * @param kingPiece the king piece to update
+     * @param newPosition the new position of the king
+     */
+    public void setKingPosition(King kingPiece, Position newPosition) {
+        if(kingPiece.getOwner().isWhite()) {
+            whiteKingPos = newPosition;
+        } else {
+            blackKingPos = newPosition;
+        }
+    }
+
     /*
      * UI related part of the board
      */
@@ -236,6 +251,7 @@ public class Board extends JPanel {
         // Remove all tiles
         this.removeAll();
 
+        // Remove highlight from all tiles that were previously highlighted
         highlightedTiles.entrySet().stream().filter(Map.Entry::getValue).forEach(entry -> {
             entry.setValue(false);
             entry.getKey().highlightTile(false);
@@ -247,11 +263,10 @@ public class Board extends JPanel {
             // Remove all UI elements from the tile
             tile.removeAll();
 
-            // If debugging, display tile positions too
-            if(GameSettings.getInstance().isEnableDebugging()) {
+            // If displaying them, add tile positions
+            if(GameSettings.INSTANCE.isDisplayTilePositions()) {
                 Position tilePos = tile.getPosition();
-                JLabel locationText = new JLabel(tilePos + " - [" + tilePos.getRow() + "," + tilePos.getColumn() + "]");
-                tile.add(locationText);
+                tile.add(new JLabel(tilePos + " - [" + tilePos.getRow() + "," + tilePos.getColumn() + "]"));
             }
 
             // If tile is occupied, then display the piece
@@ -259,9 +274,8 @@ public class Board extends JPanel {
                 Piece piece = tile.getPiece();
                 tile.add(piece);
 
-                // Highlight tiles containing pieces with valid moves
-                if(GameSettings.getInstance().isEnableHighlighting() && piece.getOwner() == getGameState().getPlayerTurn()) {
-
+                // Highlight tiles containing pieces with valid moves for current player
+                if(GameSettings.INSTANCE.isEnableHighlighting() && piece.getOwner().equals(getGameState().getPlayerTurn())) {
                     // As long as the piece has moves, highlight it
                     if(piece.getValidMoves(this).size() > 0) {
                         tile.setBackground(Color.GREEN);
@@ -270,7 +284,7 @@ public class Board extends JPanel {
                 }
             }
 
-            // Add the tile to the board
+            // Add the tile to the board at last index
             this.add(tile, this.getComponents().length);
         });
 
@@ -288,195 +302,11 @@ public class Board extends JPanel {
     }
 
     /**
-     * Get a reference to ChessFrame
-     * @return the chess frame the board belongs to
-     */
-    private ChessFrame getFrame() {
-        return (ChessFrame) SwingUtilities.getAncestorOfClass(ChessFrame.class, layeredPane);
-    }
-
-    /**
      * Get the layered pane object which we use to drag pieces around on
      * @return the layered pane which our chessboard exists within
      */
     public JLayeredPane getLayeredPane() {
         return this.layeredPane;
-    }
-
-    /**
-     * Handle mouse interactions with pieces
-     */
-    class PieceListener implements MouseListener, MouseMotionListener {
-        private Tile originatingTile = null;
-        private Piece originatingPiece = null;
-        private int xAdjustment, yAdjustment;
-        private List<Tile> targetMoveTiles = new ArrayList<>();
-
-        /**
-         * Add indicators to the UI for tiles we can move to
-         */
-        private void addIndicators() {
-            if(GameSettings.getInstance().isEnableHighlighting()) {
-
-                Set<Move> validMoves = originatingPiece.getValidMoves(Board.this);
-
-                for (Move validMove : validMoves) {
-                    Tile destination = validMove.getDestination();
-                    targetMoveTiles.add(destination);
-                    destination.highlightTile(true);
-                }
-            }
-        }
-
-        /**
-         * Remove all indicators from the layered pane
-         */
-        private void removeIndicators() {
-            if(GameSettings.getInstance().isEnableHighlighting()) {
-                for (Tile targetTile : targetMoveTiles) {
-                    targetTile.highlightTile(false);
-                }
-            }
-        }
-
-        /**
-         * Prevent Player from moving a piece if it is not their turn
-         * @return whether the Player can pickup a given piece
-         */
-        private boolean canPickupPiece() {
-            return originatingPiece != null && originatingPiece.getOwner().equals(getGameState().getPlayerTurn());
-        }
-
-        /*
-         * Mouse coordinates are the inverse of the tile coordinates
-         * So we need to take the absolute value of 8 - mouse coordinate
-         */
-        private Point getTilePositionFromMouse() {
-            Point mouse = MouseInfo.getPointerInfo().getLocation();
-            SwingUtilities.convertPointFromScreen(mouse, Board.this);
-            int tile_x_pos = mouse.x / (getWidth() / 8);
-            int tile_y_pos = mouse.y / (getHeight() / 8) + 1;
-            tile_y_pos = Math.abs(8 - tile_y_pos);
-            return new Point(tile_x_pos, tile_y_pos);
-        }
-
-        /**
-         * Move originating piece to dragged to tile location
-         * @param originatingTile the originating tile on mouse press
-         * @return true if the piece was moved, false if not
-         */
-        private boolean attemptPieceMove(Tile originatingTile) {
-            Position draggedToPosition = new Position(getTilePositionFromMouse());
-            Tile draggedToTile = getTileMap().getOrDefault(draggedToPosition, null);
-            return MoveUtils.executeMove(Board.this, originatingTile, draggedToTile, false);
-        }
-
-        /**
-         * When the mouse is pressed, determine the originating tile of the click
-         * Then check if a piece is present and if so, ensure it is my turn
-         * If it is my turn, add indicators for where I can move to
-         */
-        @Override
-        public void mousePressed(MouseEvent evt) {
-
-            // Clear out lists
-            targetMoveTiles.clear();
-
-            // Get mouse press location in tile coordinate system
-            Position mousePressPosition = new Position(getTilePositionFromMouse());
-            this.originatingTile = getTileMap().getOrDefault(mousePressPosition, null);
-
-            // If user clicked on a piece
-            if(this.originatingTile != null) {
-
-                // If we have a piece, add it to our layered pane to drag it around
-                originatingPiece = originatingTile.getPiece();
-                if(canPickupPiece()) {
-                    Point origLoc = originatingTile.getLocation();
-                    originatingPiece.setLocation(origLoc.x + 10, origLoc.y + 5);
-                    layeredPane.add(originatingPiece, JLayeredPane.DRAG_LAYER);
-
-                    // Set adjustments for user when dragging
-                    xAdjustment = origLoc.x - evt.getX();
-                    yAdjustment = origLoc.y - evt.getY();
-
-                    // Add indicators for possible moves
-                    addIndicators();
-                }
-            }
-        }
-
-        /**
-         * When dragging my mouse, if I have a piece picked up, move it around on screen
-         */
-        @Override
-        public void mouseDragged(MouseEvent evt) {
-
-            // If we have a piece, then drag it with the mouse
-            if(canPickupPiece()) {
-                // Calculate x-coords - prevent going too far left or right
-                int xLoc = evt.getX() + xAdjustment;
-                int xMax = layeredPane.getWidth() - originatingPiece.getWidth();
-                xLoc = Math.min(xLoc, xMax);
-                xLoc = Math.max(xLoc, 0);
-
-                // Calculate y-coords - prevent going too far up or down
-                int yLoc = evt.getY() + yAdjustment;
-                int yMax = layeredPane.getHeight() - originatingPiece.getHeight();
-                yLoc = Math.min(yLoc, yMax);
-                yLoc = Math.max(yLoc, 0);
-
-                // Update location of the piece
-                originatingPiece.setLocation(xLoc, yLoc);
-            }
-        }
-
-        /**
-         * When releasing the mouse, remove highlighted indicators
-         * Then determine if a piece was picked up
-         * - If it was and we could not complete the move, then restore it to original tile
-         * - Otherwise, it will be moved, board reloaded and the history panel will be updated
-         */
-        @Override
-        public void mouseReleased(MouseEvent evt) {
-
-            // Remove the indicators from tiles
-            removeIndicators();
-
-            // If we had a piece being dragged
-            if(canPickupPiece()) {
-
-                // If the piece was not moved, then restore it to previous position
-                if (!attemptPieceMove(this.originatingTile)) {
-                    // If we had a piece that we attempted to move from a tile
-                    // Remove it from our layered pane and add it back to the originating tile
-                    originatingPiece.setVisible(false);
-                    layeredPane.remove(originatingPiece);
-                    originatingTile.add(originatingPiece);
-                    originatingPiece.setVisible(true);
-                } else {
-                    // Update game history
-                    getFrame().getHistoryPanel().updateHistory();
-                    displayBoard();
-                }
-            }
-        }
-
-        /*
-         * No other mouse events necessary
-         */
-
-        @Override
-        public void mouseClicked(MouseEvent evt) {}
-
-        @Override
-        public void mouseMoved(MouseEvent evt) { }
-
-        @Override
-        public void mouseEntered(MouseEvent evt) { }
-
-        @Override
-        public void mouseExited(MouseEvent evt) { }
     }
 
     /**

@@ -70,7 +70,7 @@ public class MoveUtils {
         boolean isValid = isKingInCheck(testBoard, opposingPlayer, currentPlayer) == null;
 
         // Print out the test board after updating it if we are debugging
-        if(GameSettings.getInstance().isEnableDebugging()) {
+        if(GameSettings.INSTANCE.isEnableDebugging()) {
             System.out.println("Current board state:");
             System.out.println(board);
             System.out.println("------------------");

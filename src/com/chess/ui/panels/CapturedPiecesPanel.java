@@ -3,6 +3,7 @@ package com.chess.ui.panels;
 import com.chess.engine.pieces.Piece;
 import com.chess.ui.UIConstants;
 
+import javax.swing.BoxLayout;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.border.TitledBorder;
@@ -10,27 +11,27 @@ import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.GridLayout;
 
-class CapturedPanel extends JPanel {
+class CapturedPiecesPanel extends JPanel {
 
     private final JPanel blackPieces;
     private final JPanel whitePieces;
 
-    CapturedPanel() {
-        super(new BorderLayout());
-        blackPieces = new JPanel(new GridLayout(4, 4));
-        blackPieces.setPreferredSize(new Dimension(UIConstants.HISTORY_WIDTH, UIConstants.HISTORY_HEIGHT / 2));
-        whitePieces = new JPanel(new GridLayout(4, 4));
-        whitePieces.setPreferredSize(new Dimension(UIConstants.HISTORY_WIDTH, UIConstants.HISTORY_HEIGHT / 2));
-        this.add(blackPieces, 0);
-        this.add(whitePieces, 1);
-
-        // Set border for panel
-        //Border border = new EtchedBorder(EtchedBorder.RAISED);
+    CapturedPiecesPanel() {
+        super();
+        this.setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
         TitledBorder border = new TitledBorder("Captured");
         border.setTitleJustification(TitledBorder.CENTER);
         border.setTitlePosition(TitledBorder.TOP);
         this.setBorder(border);
 
+        blackPieces = new JPanel();
+        blackPieces.setPreferredSize(new Dimension(UIConstants.HISTORY_WIDTH, UIConstants.HISTORY_HEIGHT / 8));
+
+        whitePieces = new JPanel();
+        whitePieces.setPreferredSize(new Dimension(UIConstants.HISTORY_WIDTH, UIConstants.HISTORY_HEIGHT / 8));
+
+        this.add(blackPieces);
+        this.add(whitePieces);
     }
 
     /**

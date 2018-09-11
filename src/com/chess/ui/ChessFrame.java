@@ -1,16 +1,15 @@
 package com.chess.ui;
 
-import com.chess.engine.GameSettings;
 import com.chess.engine.board.Board;
 import com.chess.engine.sound.SoundUtils;
 import com.chess.ui.headers.FileHeaders;
 import com.chess.ui.headers.RankHeaders;
 import com.chess.ui.menus.DebugOptionsMenu;
 import com.chess.ui.menus.GameOptionsMenu;
-import com.chess.ui.panels.HistoryPanel;
+import com.chess.ui.panels.GameStatePanel;
+import com.chess.ui.panels.MoveHistoryPanel;
 
 import javax.swing.JFrame;
-import javax.swing.JLabel;
 import javax.swing.JMenuBar;
 import javax.swing.WindowConstants;
 import java.awt.BorderLayout;
@@ -21,7 +20,7 @@ public class ChessFrame extends JFrame {
     private final Board board;
     private final RankHeaders rankHeaders;
     private final FileHeaders fileHeaders;
-    private final HistoryPanel historyPanel;
+    private final GameStatePanel historyPanel;
 
     public ChessFrame(Board board) {
         super("Chess");
@@ -39,7 +38,7 @@ public class ChessFrame extends JFrame {
         setJMenuBar(menuBar);
 
         // Add all headers and panels to the frame
-        this.historyPanel = new HistoryPanel(board);
+        this.historyPanel = new GameStatePanel(board);
         this.rankHeaders = new RankHeaders();
         this.fileHeaders = new FileHeaders();
         addHeadersAndPanels();
@@ -49,13 +48,6 @@ public class ChessFrame extends JFrame {
 
         // Play start game sound after frame is visible
         SoundUtils.playMoveSound("startGame");
-
-        // Debugging for the tile locations
-        if(GameSettings.getInstance().isEnableDebugging()) {
-            board.getTileMap().values().forEach(
-                    tile -> tile.add(new JLabel("<html> x=" + tile.getLocation().x + "<br/> y="
-                            + tile.getLocation().y + "</html>")));
-        }
     }
 
     /**
@@ -82,6 +74,6 @@ public class ChessFrame extends JFrame {
      * Get our history panel
      * @return the history of moves
      */
-    public HistoryPanel getHistoryPanel() { return this.historyPanel; }
+    public GameStatePanel getHistoryPanel() { return this.historyPanel; }
 
 }

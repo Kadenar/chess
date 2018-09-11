@@ -1,0 +1,3 @@
+highlight:true
+debugging:false
+coordinates:true

@@ -29,9 +29,15 @@ public class GameOptionsMenu extends JMenu {
 
         // Highlight valid moves
         JCheckBoxMenuItem highlighting = new JCheckBoxMenuItem("Highlight valid moves?");
-        highlighting.setState(GameSettings.getInstance().isEnableHighlighting());
+        highlighting.setState(GameSettings.INSTANCE.isEnableHighlighting());
         highlighting.addItemListener(e -> enableHighlighting());
         add(highlighting);
+
+        // Display coordinates
+        JCheckBoxMenuItem displayCoords = new JCheckBoxMenuItem("Display tile coordinates?");
+        displayCoords.setState(GameSettings.INSTANCE.isDisplayTilePositions());
+        displayCoords.addItemListener(e -> enableCoordinateDisplay());
+        add(displayCoords);
 
         // Quit the game
         JMenuItem quit = new JMenuItem("Quit");
@@ -56,8 +62,18 @@ public class GameOptionsMenu extends JMenu {
      * Toggle whether to enable highlighting
      */
     private void enableHighlighting() {
-        GameSettings settings = GameSettings.getInstance();
+        GameSettings settings = GameSettings.INSTANCE;
         settings.setEnableHighlighting(!settings.isEnableHighlighting());
+        ChessFrame frame = (ChessFrame) SwingUtilities.getRoot(this);
+        frame.getBoard().displayBoard();
+    }
+
+    /**
+     * Toggle whether to display coordinate positions
+     */
+    private void enableCoordinateDisplay() {
+        GameSettings settings = GameSettings.INSTANCE;
+        settings.setDisplayTilePositions(!settings.isDisplayTilePositions());
         ChessFrame frame = (ChessFrame) SwingUtilities.getRoot(this);
         frame.getBoard().displayBoard();
     }

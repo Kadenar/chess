@@ -43,7 +43,7 @@ public class FenUtils {
         final int[] row = {7};
         final int[] col = {0};
         final int[] blanks = {0};
-        board.getTileMap().values().forEach( tile -> {
+        board.getTileMap().values().forEach(tile -> {
             if(!tile.isOccupied()) {
                 blanks[0]++;
             } else {
@@ -139,6 +139,7 @@ public class FenUtils {
             // For each character in the rank
             char[] charArray = ranks[rankCount].toCharArray();
             int filesAddedForRow = 0;
+            int rowIndex = 7 - rankCount;
 
             // For each character in the current rank
             for (char ch : charArray) {
@@ -149,14 +150,14 @@ public class FenUtils {
                     int numFiles = Integer.parseInt(ch + "");
                     int tempFile = filesAddedForRow;
                     for (int i = tempFile; i < (numFiles + tempFile); i++) {
-                        Position emptyTilePos = new Position(7 - rankCount, i);
+                        Position emptyTilePos = new Position(rowIndex, i);
                         board.getTileMap().put(emptyTilePos, new Tile(emptyTilePos));
                         filesAddedForRow++;
                     }
                 }
                 // If the character was a piece, then add it for white or black
                 else {
-                    Position piecePosition = new Position(7 - rankCount, filesAddedForRow);
+                    Position piecePosition = new Position(rowIndex, filesAddedForRow);
                     Piece newPiece = board.constructPiece(ch);
                     // Need to know the king's position
                     if(ch == 'k' || ch == 'K') {
