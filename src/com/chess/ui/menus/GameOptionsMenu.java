@@ -51,10 +51,11 @@ public class GameOptionsMenu extends JMenu {
     private void resetGameState() {
         // Recreate the board object with default position
         ChessFrame frame = (ChessFrame) SwingUtilities.getRoot(this);
+        frame.getHistoryPanel().reset();
         Board board = frame.getBoard();
         board.updateBoardFromFen(FenUtils.DEFAULT_POSITION);
-        frame.getHistoryPanel().reset();
-        PGNUtils.performPGNMoves(board, board.getMoveHistory());
+        // TODO -> Remove this eventually
+        //PGNUtils.performPGNMoves(board, board.getMoveHistory());
         board.displayBoard();
     }
 

@@ -123,7 +123,10 @@ public class Board extends JPanel {
             FenUtils.loadFen(this, fen);
 
             // Initialize highlighted tiles to same as our map of tiles
-            getTileMap().forEach((key, value) -> highlightedTiles.put(value, false));
+            getTileMap().forEach((key, value) -> {
+                // TODO is this needed? value.highlightTile(false);
+                highlightedTiles.put(value, false);
+            });
 
         } catch (FenUtils.FenException e) {
             System.err.println(e.getMessage());
@@ -259,6 +262,9 @@ public class Board extends JPanel {
 
         // Add all of our tiles to the chess panel
         getTileMap().values().forEach(tile -> {
+
+            // TODO -> Replace this with more performant version so we are only updating tiles that need to be
+            tile.highlightTile(false);
 
             // Remove all UI elements from the tile
             tile.removeAll();
