@@ -164,7 +164,7 @@ class BoardListener implements MouseListener, MouseMotionListener {
 
             // If the piece was not moved, then restore it to previous position
             Tile draggedToTile = board.getTileMap().getOrDefault(getTilePositionFromMouse(), null);
-            if (!MoveUtils.executeMove(board, originatingTile, draggedToTile, false)) {
+            if (!MoveUtils.executeActualMove(board, originatingTile, draggedToTile, false)) {
                 // If we had a piece that we attempted to move from a tile
                 // Remove it from our layered pane and add it back to the originating tile
                 originatingPiece.setVisible(false);

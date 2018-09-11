@@ -34,6 +34,7 @@ public class Board extends JPanel {
 
     // The players for the current board
     private final Map<Player.Color, Player> players;
+    private final Map<Player.Color, Player> immutablePlayers;
 
     // Contains the king position for each player
     private Map<Player, Position> kingPositionMap;
@@ -80,6 +81,7 @@ public class Board extends JPanel {
         Player black = new Player(Player.Color.BLACK);
         this.players.put(Player.Color.WHITE, white);
         this.players.put(Player.Color.BLACK, black);
+        this.immutablePlayers = new HashMap<>(players);
 
         // Initialize the current game state, move history and king positions
         this.gameState = new GameState(white);
@@ -87,7 +89,7 @@ public class Board extends JPanel {
         this.kingPositionMap = new HashMap<>(ChessConsts.NUM_PLAYERS);
 
         // Load our board information from FEN string
-        updateBoardFromFen(fen);
+        loadBoardFromFen(fen);
 
         // Only add UI portion if desired
         if(withUI) {
@@ -113,9 +115,9 @@ public class Board extends JPanel {
 
     /**
      * Updates reference to game board and recreates it with given fen
-     * @param fen the fen string to update the board with
+     * @param fen a valid fen string to update the board with. Providing an invalid fen will result in an error message.
      */
-    public void updateBoardFromFen(String fen) {
+    public void loadBoardFromFen(final String fen) {
 
         // Clear each player's pieces / captured pieces
         getPlayers().values().forEach(player -> {
@@ -148,7 +150,7 @@ public class Board extends JPanel {
     /*
      * Construct a game piece at the given position
      */
-    void constructPiece(final char ch, Position positionOnBoard) {
+    void constructPiece(final char ch, final Position positionOnBoard) {
         Piece piece = null;
 
         // Determine the color this piece belongs to
@@ -197,7 +199,7 @@ public class Board extends JPanel {
      * Map of players based on player color (White and Black)
      * @return the two players for the given board
      */
-    public Map<Player.Color, Player> getPlayers() { return this.players; }
+    public Map<Player.Color, Player> getPlayers() { return this.immutablePlayers; }
 
     /**
      * The current game state of the board
@@ -224,7 +226,7 @@ public class Board extends JPanel {
      * @param player the {@link Player} to get the king position for
      * @return the position of the king
      */
-    public Position getKingPosition(Player player) {
+    public Position getKingPosition(final Player player) {
         return kingPositionMap.get(player);
     }
 
@@ -233,7 +235,7 @@ public class Board extends JPanel {
      * @param player the player to update king position for
      * @param newPosition the new position of the king
      */
-    public void setKingPosition(Player player, Position newPosition) {
+    public void setKingPosition(final Player player, final Position newPosition) {
         kingPositionMap.put(player, newPosition);
     }
 
@@ -246,6 +248,8 @@ public class Board extends JPanel {
      * - All chess tiles
      */
     public void displayBoard() {
+
+        System.out.println("---Displaying the board---");
 
         // Remove all tiles
         this.removeAll();
@@ -277,6 +281,7 @@ public class Board extends JPanel {
                 if(GameSettings.INSTANCE.isEnableHighlighting() && piece.getOwner().equals(getGameState().getPlayerTurn())) {
                     // As long as the piece has moves, highlight it
                     if(piece.getValidMoves(this).size() > 0) {
+                        System.out.println("Highlighting : " + tile.getPosition());
                         tile.setBackground(Color.GREEN);
                         highlightedTiles.replace(tile, true);
                     }

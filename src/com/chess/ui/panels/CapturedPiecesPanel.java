@@ -3,9 +3,7 @@ package com.chess.ui.panels;
 import com.chess.ChessConsts;
 import com.chess.engine.pieces.Piece;
 
-import javax.swing.BoxLayout;
-import javax.swing.JLabel;
-import javax.swing.JPanel;
+import javax.swing.*;
 import javax.swing.border.TitledBorder;
 import java.awt.Dimension;
 
@@ -25,10 +23,13 @@ class CapturedPiecesPanel extends JPanel {
         blackPieces = new JPanel();
         blackPieces.setPreferredSize(new Dimension(ChessConsts.HISTORY_WIDTH, ChessConsts.HISTORY_HEIGHT / 8));
 
+        JSeparator separate = new JSeparator(SwingConstants.HORIZONTAL);
+
         whitePieces = new JPanel();
         whitePieces.setPreferredSize(new Dimension(ChessConsts.HISTORY_WIDTH, ChessConsts.HISTORY_HEIGHT / 8));
 
         this.add(blackPieces);
+        this.add(separate);
         this.add(whitePieces);
     }
 

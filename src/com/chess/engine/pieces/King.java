@@ -15,6 +15,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class King extends Piece {
 
@@ -71,6 +72,7 @@ public class King extends Piece {
      * @return king side castle location
      */
     private Move addKingSideCastlePosition(Board board) {
+        System.out.println("Checking king side castle for: " + getOwner());
         return checkCastlingDirection(board, Direction.RIGHT);
     }
 
@@ -80,6 +82,7 @@ public class King extends Piece {
      * @return queen side castle location
      */
     private Move addQueenSideCastlePosition(Board board) {
+        System.out.println("Checking queen side castle for: " + getOwner());
         return checkCastlingDirection(board, Direction.LEFT);
     }
 
@@ -91,12 +94,14 @@ public class King extends Piece {
      */
     private Move checkCastlingDirection(Board board, Direction direction) {
 
+        Player opponent = getOwner().opposite(board);
+
         // If the king position is targeted or the king has previously moved, castling is not allowed
         Position kingPosition = board.getKingPosition(getOwner());
         boolean kingMoved = board.getMoveHistory()
                             .getMoves(move -> move.getMovedPiece().equals(this))
                             .findFirst().orElse(null) != null;
-        if(kingMoved || MoveUtils.isTileTargeted(getOwner().opposite(board), kingPosition) != null) {
+        if(kingMoved || MoveUtils.isTileTargeted(opponent, kingPosition) != null) {
             return null;
         }
 
@@ -105,8 +110,9 @@ public class King extends Piece {
         Position rookPosition = isLeft
                 ? BoardUtils.getOffSetPosition(kingPosition, -4, 0)
                 : BoardUtils.getOffSetPosition(kingPosition, 3, 0);
-        Map<Position, Tile> tiles = board.getTileMap();
 
+        // Get our tiles
+        Map<Position, Tile> tiles = board.getTileMap();
 
         // If the expected rook tile is not occupied by a rook, castling not allowed
         Tile rookTile = tiles.get(rookPosition);
@@ -114,70 +120,30 @@ public class King extends Piece {
             return null;
         }
 
-        // Only getting tiles on the same row as the king
-        Predicate<Map.Entry<Position, Tile>> sameRow = entry -> entry.getKey().getRow() == kingPosition.getRow();
-
-        // Only getting tiles between the king and location where king will move to
+        // Only getting tiles between the king (not inclusive) and location where king will move to (inclusive)
         Position targetCastlePos = BoardUtils.getOffSetPosition(kingPosition, isLeft ? -2 : 2, 0);
-        Tile targetCastleTile = tiles.get(targetCastlePos);
         Predicate<Map.Entry<Position, Tile>> betweenKingTarget = entry -> {
             Position toTest = entry.getKey();
-            return isLeft
-                    ? toTest.getColumn() >= targetCastlePos.getColumn() && toTest.getColumn() < kingPosition.getColumn()
-                    : toTest.getColumn() <= targetCastlePos.getColumn() && toTest.getColumn() > kingPosition.getColumn();
+            int toTestCol = toTest.getColumn(); // Column we are testing
+            int castleCol = targetCastlePos.getColumn(); // Column we are castling to
+            int kingCol = kingPosition.getColumn(); // Column of the king
+            return isLeft ? toTestCol >= castleCol && toTestCol < kingCol : toTestCol <= castleCol && toTestCol > kingCol;
         };
 
-        // Tiles can not be occupied
-        Predicate<Map.Entry<Position, Tile>> notOccupied = entry -> !entry.getValue().isOccupied();
-
-        // Tiles cannot be targeted by opponent
-        Predicate<Map.Entry<Position, Tile>> notTargeted = entry -> MoveUtils.isTileTargeted(getOwner().opposite(board), entry.getKey()) == null;
+        // Tiles must be unoccupied and not targeted
+        Predicate<Map.Entry<Position, Tile>> notOccupiedOrTargeted = entry ->
+                !entry.getValue().isOccupied() && MoveUtils.isTileTargeted(opponent, entry.getKey()) == null;
 
         // If all conditions pass, then add the move
         Tile kingTile = tiles.get(kingPosition);
         if(tiles.entrySet().stream()
-                .filter(sameRow) // only include tiles from home row
-                .filter(betweenKingTarget) // must be between king and target position
-                .filter(notOccupied) // cannot be occupied
-                .filter(notTargeted) // cannot be targeted
-                .findFirst().orElse(null) != null) {
-            return new Move(this, kingTile, null, targetCastleTile);
+            .filter(entry -> entry.getKey().getRow() == kingPosition.getRow()) // Must be on same row as king
+            .filter(betweenKingTarget) // Must be between king and target position
+            .allMatch(notOccupiedOrTargeted)) { // Nor can they be targeted
+            return new Move(this, kingTile, null, tiles.get(targetCastlePos));
         }
 
         return null;
-
-        /* TODO - This code should be removed at some point when we know java8 impl is functioning properly
-        int kingColumn = kingPosition.getColumn();
-        int increment = isLeft ? -1 : 1;
-        for(int i = kingColumn + increment; i >= 0 && i < 8; i = i + increment) {
-            Position offSetPosition = BoardUtils.getOffSetPosition(kingPosition, i - kingColumn, 0);
-
-            // If the tile is occupied...
-            Tile offsetTile = tiles.get(offSetPosition);
-            if(offsetTile.isOccupied()) {
-                // If the piece is a rook and has not moved
-                Piece pieceAtOffset = offsetTile.getPiece();
-                if(pieceAtOffset instanceof Rook
-                        && board.getMoveHistory()
-                        .getMoves(e -> e.getMovedPiece().getOwner().equals(piece.getOwner()))
-                        .anyMatch(move -> move.getMovedPiece().equals(pieceAtOffset))) {
-                    // TODO Disabled until can figure out how to get it working
-                    Tile currentTile = board.getTileMap().get(kingPosition);
-                    Tile kingCastleLoc = tiles.get(BoardUtils.getOffSetPosition(kingPosition, increment * 2, 0));
-                    castlingMove = new Move(this, currentTile, null, kingCastleLoc);
-                }
-
-                // If we reached an occupied tile, we are done
-                break;
-            }
-
-            // If the tile is targeted, castling is not allowed
-            if(MoveUtils.isTileTargeted(getOwner().opposite(board), offSetPosition) != null) {
-                break;
-            }
-        }
-
-        return castlingMove;*/
     }
 
     /**

@@ -1,5 +1,6 @@
 package com.chess.engine.pieces;
 
+import com.chess.ChessConsts;
 import com.chess.engine.Player;
 import com.chess.engine.Position;
 import com.chess.engine.board.Board;
@@ -16,10 +17,7 @@ import java.awt.Image;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public abstract class Piece extends JLabel {
@@ -32,7 +30,7 @@ public abstract class Piece extends JLabel {
         super();
         this.owner = color;
         // Max number of moves you would ever get would be queen in the center 4 tiles which is 27 locations
-        this.movesForTurn = new HashMap<>(27);
+        this.movesForTurn = new HashMap<>(ChessConsts.MAX_MOVE_LOCS);
         JLabel testImg = null;
 
         try {
@@ -50,37 +48,39 @@ public abstract class Piece extends JLabel {
 
     /**
      * Force subclasses to implement toString method
-     * @return the string representation of this piece
+     * @return the {@code String} representation of this piece
      */
-    abstract public String toString();
+    public abstract String toString();
 
     /**
      * Create the possible moves for the given piece (to be implemented based on type of piece)
-     * @param currentTile the current tile of the piece
+     * @param board the {@code Board} to generate moves for this piece
+     * @param currentTile the current {@code Tile} of the piece
      * @return set of possible moves that are possible
      */
     public abstract Set<Move> generateMoves(Board board, Tile currentTile);
 
     /**
      * Get all moves for this piece
-     * @return get set of moves for this piece
+     * @return get the {@code Set} of moves for this piece.
+     * Includes all moves this piece can make (including ones that would put the player into check)
      */
     public final Set<Move> getMoves() {
-        return getOwner().getMovesForPieces().getOrDefault(this, new HashSet<>(27));
+        return getOwner().getMovesForPieces().getOrDefault(this, Collections.emptySet());
     }
 
     /**
      * Get only valid moves for this piece
      * (preventing the piece from actually moving if it would put the Player in check)
      * This information is cached on a per turn basis to avoid performing test moves unnecessarily multiple times
-     * @param board the current board state
-     * @return the set of valid moves for this piece
+     * @param board the current @{code Board} to get valid moves for this piece
+     * @return a {@code Set} of valid moves for this piece
      */
     public final Set<Move> getValidMoves(Board board) {
-        Set<Move> currentMoves = movesForTurn.get(getOwner());
+        Set<Move> currentMoves = movesForTurn.getOrDefault(getOwner(), null);
         if(currentMoves == null) {
             currentMoves = getMoves().stream()
-                    .filter(move -> MoveUtils.performTestMove(board, move.getOrigin(), move.getDestination()))
+                    .filter(move -> MoveUtils.executeTestMove(board, move.getOrigin(), move.getDestination()))
                     .collect(Collectors.toSet());
             movesForTurn.put(getOwner(), currentMoves);
         }
@@ -92,6 +92,7 @@ public abstract class Piece extends JLabel {
      * Clear out valid moves after a successful move is executed
      */
     public final void clearValidMoves() {
+        // TODO System.gc(); // Indicate now is a good time for garbage collection
         this.movesForTurn.clear();
     }
 
@@ -219,7 +220,8 @@ public abstract class Piece extends JLabel {
             else {
 
                 // If we are a pawn, don't allow diagonal movement unless en passant
-                if(isPawn && colOffset != 0 && rowOffSet != 0 && !offSetPos.equals(board.getGameState().getEPSquare())) {
+                boolean enpassant = offSetPos.equals(board.getGameState().getEPSquare());
+                if(isPawn && colOffset != 0 && !enpassant) {
                     break;
                 }
 
@@ -231,7 +233,6 @@ public abstract class Piece extends JLabel {
             } else {
                 positionsSet.add(new Move(piece, currentTile, offSetTilePiece, offSetTile));
             }
-
 
             // Break if the tile was occupied as we can't go past an occupied tile
             if(offSetTileIsOccupied) {

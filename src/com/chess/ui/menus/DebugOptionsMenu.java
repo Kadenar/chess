@@ -5,6 +5,7 @@ import com.chess.engine.Player;
 import com.chess.engine.board.Board;
 import com.chess.engine.board.FenUtils;
 import com.chess.engine.board.PGNUtils;
+import com.chess.engine.moves.Move;
 import com.chess.ui.ChessFrame;
 
 import javax.swing.JCheckBoxMenuItem;
@@ -12,6 +13,7 @@ import javax.swing.JMenu;
 import javax.swing.JMenuItem;
 import javax.swing.SwingUtilities;
 import java.util.Map;
+import java.util.Set;
 
 public class DebugOptionsMenu extends JMenu {
 
@@ -103,7 +105,10 @@ public class DebugOptionsMenu extends JMenu {
      */
     private void printGameMoves() {
         getBoard().getGameState().getPlayerTurn().getMovesForPieces().forEach((key, value) -> {
-            System.out.println(key.getValidMoves(getBoard()));
+            Set<Move> validMoves = key.getValidMoves(getBoard());
+            if(!validMoves.isEmpty()) {
+                System.out.println(validMoves);
+            }
         });
     }
 

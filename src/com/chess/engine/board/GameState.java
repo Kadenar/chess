@@ -23,15 +23,34 @@ public class GameState {
 
     /**
      * Game state instance to hold game specific information
-     * @param turn which player's turn it is
+     * @param turn which {@code Player} turn it is
      */
     GameState(Player turn) {
         this.playerTurn = turn;
         this.gameOver = false;
         this.stalemate = false;
+        this.castling = "";
+        this.enPassant = null;
+        this.halfMoves = 0;
+        this.fullMoves = 0;
 
         // TODO - time controls
     }
+
+    /**
+     * Game state instance with the same values as another given game state
+     * @param otherState the {@code GameState} to copy
+     */
+    GameState(GameState otherState) {
+        this.playerTurn = otherState.playerTurn;
+        this.gameOver = otherState.gameOver;
+        this.stalemate = otherState.stalemate;
+        this.castling = otherState.castling;
+        this.enPassant = otherState.enPassant;
+        this.halfMoves = otherState.halfMoves;
+        this.fullMoves = otherState.fullMoves;
+    }
+
 
     // Getters
     public Player getPlayerTurn() { return this.playerTurn; }
@@ -52,8 +71,8 @@ public class GameState {
 
     /**
      * Check whether given Player can king side castle
-     * @param player the Player to check
-     * @return true if can king side castle, false if not
+     * @param player the {@code Player} to check
+     * @return {@code true} if can king side castle, {@code false} if not
      */
     public boolean canCastleKingSide(Player player) {
         return player.isWhite() ? castling.contains("K") : castling.contains("k");
@@ -61,8 +80,8 @@ public class GameState {
 
     /**
      * Check whether given Player can queen side castle
-     * @param player the Player to check
-     * @return true if can queen side castle, false if not
+     * @param player the {@code Player} to check
+     * @return {@code true} if can queen side castle, {@code false} if not
      */
     public boolean canCastleQueenSide(Player player) {
         return player.isWhite() ? castling.contains("Q") : castling.contains("q");
@@ -70,7 +89,7 @@ public class GameState {
 
     /**
      * Print out the current game state
-     * @return the current game state
+     * @return the {@code String} representation of current game state
      */
     @Override
     public String toString() {

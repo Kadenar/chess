@@ -20,47 +20,41 @@ public class MoveHistory {
     private Move lastMove;
 
     // All moves that have been performed
-    private List<Move> allMoves;
-
-    // All moves (including those that were done / redone)
-    private List<Move> cachedMoves;
+    private final List<Move> allMoves;
 
     // The board move history is for
-    private Board board;
-
-    //private boolean performedUndo;
+    private final Board board;
 
     public MoveHistory(Board board) {
         this.board = board;
         this.lastMove = null;
         this.allMoves = new ArrayList<>();
-        this.cachedMoves = new ArrayList<>();
-        //this.performedUndo = false;
+    }
+
+    public MoveHistory(MoveHistory other) {
+        this.board = other.board;
+        this.lastMove = other.lastMove;
+        this.allMoves = other.allMoves;
     }
 
     /**
      * Add a move to the move history
-     * @param move the move performed
+     * @param move the {@code Move} performed
      */
     void addMove(Move move) {
         this.lastMove = move;
         this.allMoves.add(move);
-
-        // TODO This is horribly inefficient and not actually working yet
-        //this.cachedMoves.clear();
-        //this.cachedMoves.addAll(allMoves);
-        //this.performedUndo = false;
     }
 
     /**
      * Get a list of moves based on filter condition
-     * @return get a list of moves based on filtering condition
+     * @return get a {@code Stream<Move>} based on filtering condition
      */
     public Stream<Move> getMoves(Predicate<Move> filter) { return this.allMoves.stream().filter(filter); }
 
     /**
      * Get the most recent move that was performed
-     * @return the last move performed
+     * @return the last {@code Move} performed
      */
     public Move getLatestMove() {
         return this.lastMove;
@@ -71,16 +65,14 @@ public class MoveHistory {
      */
     public void undo() {
         allMoves.remove(getLatestMove());
-        //performedUndo = true;
+        // TODO
     }
 
     /**
      * Redo the most recent move
      */
     public void redo() {
-        //if(performedUndo) {
-            allMoves.add(cachedMoves.get(cachedMoves.size() - 1));
-        //}
+       // TODO
     }
 
     /**
@@ -88,12 +80,11 @@ public class MoveHistory {
      */
     public void reset() {
         this.allMoves.clear();
-        this.cachedMoves.clear();
     }
 
     /**
      * Get notation of the latest move
-     * @return the notation entry for history
+     * @return the {@code String} notation entry for history
      */
     public String getNotationEntry(Move move) {
 
@@ -137,7 +128,6 @@ public class MoveHistory {
         }
 
         Player movingPlayer = movedPiece.getOwner();
-        System.out.println(board.getKingPosition(movingPlayer.opposite(board)));
         if(MoveUtils.isTileTargeted(movingPlayer, board.getKingPosition(movingPlayer.opposite(board))) != null) {
             builder.append("+");
         }

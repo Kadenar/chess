@@ -1,5 +1,6 @@
 package com.chess.engine;
 
+import com.chess.ChessConsts;
 import com.chess.engine.board.Board;
 import com.chess.engine.board.Tile;
 import com.chess.engine.moves.Move;
@@ -19,14 +20,15 @@ public class Player {
     private final Color color;
 
     // Pieces owner by the player
-    private List<Piece> pieces = new ArrayList<>(24);
+    private List<Piece> pieces = new ArrayList<>(ChessConsts.MAX_PIECES);
 
     // Pieces captured by opponent
-    private List<Piece> capturedPieces = new ArrayList<>(16);
+    private List<Piece> capturedPieces = new ArrayList<>(ChessConsts.MAX_PIECES);
 
     // Map of moves for each piece player owns
-    private Map<Piece, Set<Move>> moves = new HashMap<>(16);
+    private Map<Piece, Set<Move>> moves = new HashMap<>(ChessConsts.MAX_PIECES);
 
+    // The available colors for a player
     public enum Color {
         WHITE {
             @Override
@@ -42,13 +44,17 @@ public class Player {
         }
     }
 
+    /**
+     * Create a new {@code Player} instance with a given {@Color}
+     * @param color the {@code Color} of the player
+     */
     public Player(Color color) {
         this.color = color;
     }
 
     /**
      * Get the color of the player
-     * @return what color this player is
+     * @return what {@code Color} this player is
      */
     public Color getColor() {
         return this.color;
@@ -56,7 +62,7 @@ public class Player {
 
     /**
      * Add a piece for the player
-     * @param piece the piece to add
+     * @param piece the {@code Piece} to add as controlled
      */
     public void addPiece(Piece piece) {
         pieces.add(piece);
@@ -64,8 +70,8 @@ public class Player {
 
     /**
      * Capture a piece from opposing player
-     * @param player the opposing player
-     * @param piece the piece to capture
+     * @param player the opposing {@code Player}
+     * @param piece the {@code Piece} to capture
      */
     public void capturePiece(Player player, Piece piece) {
         player.getCapturedPieces().add(piece);
@@ -74,7 +80,7 @@ public class Player {
 
     /**
      * Get list of pieces that player has lost
-     * @return the list of pieces the player no longer controls
+     * @return a {@code List<Piece>} of pieces the player no longer controls
      */
     public List<Piece> getCapturedPieces() {
         return this.capturedPieces;
@@ -82,7 +88,7 @@ public class Player {
 
     /**
      * Get list of pieces that player controls
-     * @return a list of pieces that the player still controls
+     * @return a {@code List<Piece>} of pieces that the player still controls
      */
     public List<Piece> getPieces() {
         return this.pieces;
@@ -91,28 +97,31 @@ public class Player {
     /**
      * Populate all possible moves given the current game state
      * NOTE - This is to be called whenever performing a move or initializing the game
-     * @param board the current board to populate moves from / for
+     * @param board the current {@code Board} to populate moves from / for
      */
     public void populateMoves(Board board) {
 
         // Clear out valid moves
         moves.clear();
 
+        // Filter out pieces not owned by me
+        Predicate<Tile> sameOwner = tile -> tile.isOccupied() && this.equals(tile.getPiece().getOwner());
+
         // Consumer for generating the move for a piece
         Consumer<Tile> generateMoves = tile -> {
             Piece pieceOnTile = tile.getPiece();
-            moves.put(pieceOnTile, pieceOnTile.generateMoves(board, tile));
+            Set<Move> movesForPiece = pieceOnTile.generateMoves(board, tile);
+            moves.put(pieceOnTile, movesForPiece);
         };
 
-        // Filter out pieces not owned by me
-        Predicate<Tile> sameOwner = tile -> tile.isOccupied() && this.equals(tile.getPiece().getOwner());
+        System.out.println("Populating moves for: " + this);
 
         // Generate moves for all pieces owned by me
         board.getTileMap().values().stream().filter(sameOwner).forEach(generateMoves);
     }
 
     /**
-     * Get all moves for this player (even if they aren't valid) and might put their king in check
+     * Get all moves for this player (even if they aren't valid and might put their king in check)
      * @return all moves for this player given current board state
      */
     public Map<Piece, Set<Move>> getMovesForPieces() {
@@ -121,18 +130,16 @@ public class Player {
 
     /**
      * Checks if a player has any valid moves
-     * @param board the board to check
-     * @return true if has valid moves, false if not
+     * @param board the {@code Board} to check
+     * @return {@code true} if has valid moves, {@code false} if no valid moves
      */
     public boolean hasValidMoves(Board board) {
-        // TODO -> This throws overflow exception
-        //return true;
         return getPieces().stream().anyMatch(piece -> piece.getValidMoves(board).size() > 0);
     }
 
     /**
-     * Is the player white?
-     * @return true if white, false if black
+     * Is the given player white?
+     * @return {@code true} if white, {@code false} if black
      */
     public boolean isWhite() {
         return this.getColor() == Color.WHITE;
@@ -140,12 +147,11 @@ public class Player {
 
     /**
      * Get opposing player on game board
-     * @param board the board the players belong to
-     * @return the opposing player
+     * @param board the {@code Board} the players are playing on
+     * @return the opposing {@code Player}
      */
     public Player opposite(Board board) {
-        Color otherColor = isWhite() ? Color.BLACK : Color.WHITE;
-        return board.getPlayers().get(otherColor);
+        return board.getPlayers().get(isWhite() ? Color.BLACK : Color.WHITE);
     }
 
     @Override

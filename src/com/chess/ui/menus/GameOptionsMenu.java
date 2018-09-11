@@ -52,7 +52,7 @@ public class GameOptionsMenu extends JMenu {
         ChessFrame frame = (ChessFrame) SwingUtilities.getRoot(this);
         frame.getHistoryPanel().reset();
         Board board = frame.getBoard();
-        board.updateBoardFromFen(FenUtils.DEFAULT_POSITION);
+        board.loadBoardFromFen(FenUtils.DEFAULT_POSITION);
         // TODO -> Remove this eventually
         //PGNUtils.performPGNMoves(board, board.getMoveHistory());
         board.displayBoard();

@@ -42,6 +42,12 @@ public class MoveUtils {
             void playSound() {
                 SoundUtils.playMoveSound("check1");
             }
+        },
+        INVALID {
+            @Override
+            void playSound() {
+                SoundUtils.playMoveSound("invalid");
+            }
         };
 
         abstract void playSound();
@@ -50,12 +56,15 @@ public class MoveUtils {
 
     /**
      * Performs a test move to determine whether it is valid to actually do that move
-     * @param board the board to copy
-     * @param originatingTile the tile to move from
-     * @param targetTile the tile to move to
-     * @return true if move can be performed, false if not
+     * @param board the {@code Board} to copy and test a move against
+     * @param originatingTile the {@code Tile} to move from
+     * @param targetTile the {@code Tile} to move to
+     * @return {@code true} if move can be performed, {@code false} if move cannot be performed
      */
-    public static boolean performTestMove(Board board, Tile originatingTile, Tile targetTile) {
+    public static boolean executeTestMove(Board board, Tile originatingTile, Tile targetTile) {
+        // TODO -> How to get a new board instance that is a copy of current
+        // TODO -> without going through entire chain of events to create new object
+        System.out.println("Constructing test board");
         Board testBoard = new Board(board);
         Tile originTile = testBoard.getTileMap().get(originatingTile.getPosition());
         Piece draggedPiece = originTile.getPiece();
@@ -65,17 +74,18 @@ public class MoveUtils {
 
         // Perform a test move
         updateGameState(testBoard, originTile, destinationTile, true);
+        System.out.println("------------------");
+        System.out.println(board);
+        System.out.println("Move: " + testBoard.getMoveHistory().getLatestMove());
+        System.out.println(testBoard);
 
-        // Determine whether the test move was valid
+        // Determine whether the test move was valid (current player cannot be in check by opposing player)
         boolean isValid = isKingInCheck(testBoard, opposingPlayer, currentPlayer) == null;
 
         // Print out the test board after updating it if we are debugging
         if(GameSettings.INSTANCE.isEnableDebugging()) {
-            System.out.println("Current board state:");
-            System.out.println(board);
             System.out.println("------------------");
-            Move moveToPerform = new Move(draggedPiece, originTile, null, destinationTile);
-            System.out.println("Checking if we can perform move: " + moveToPerform);
+            System.out.println("Checking if we can perform move: " + testBoard.getMoveHistory().getLatestMove());
             System.out.println(testBoard);
 
             if(isValid) {
@@ -91,16 +101,16 @@ public class MoveUtils {
 
     /**
      * Updates the piece displayed on a given tile after checking that the piece can be moved to target tile
-     * @param board the board to execute the move on
-     * @param originatingTile the tile the move was executed from
-     * @param targetTile the tile the move will be executed to
-     * @return true if move was performed, false if not
+     * @param board the {@code Board} to execute the move on
+     * @param originatingTile the {@code Tile} the move was executed from
+     * @param targetTile the {@code Tile} the move will be executed to
+     * @return {@code true} if move was performed, {@code false} if move was not performed
      */
-    public static boolean executeMove(Board board, Tile originatingTile, Tile targetTile, boolean testMove) {
+    public static boolean executeActualMove(Board board, Tile originatingTile, Tile targetTile, boolean testMove) {
 
         // If we can't move the piece just exit
         if(!canMovePiece(board, originatingTile, targetTile)) {
-            SoundUtils.playMoveSound("invalid");
+            MoveType.INVALID.playSound();
             return false;
         }
 
@@ -112,10 +122,10 @@ public class MoveUtils {
 
     /**
      * Determine whether we can move a piece from an originating tile to dragged to tile
-     * @param board the board to check if the piece can be moved on
-     * @param originatingTile the originating tile that contains the piece we want to move
-     * @param draggedToTile the tile we want to move the piece to
-     * @return true if we can move the piece, false if not
+     * @param board the {@code Board} to check if the piece can be moved on
+     * @param originatingTile the originating {@code Tile} that contains the piece we want to move
+     * @param draggedToTile the {@code Tile} we want to move the piece to
+     * @return {@code true} if we can move the piece, {@code false} if we can not move the piece
      */
     private static boolean canMovePiece(Board board, Tile originatingTile, Tile draggedToTile) {
         // If originating tile or piece are null..
@@ -146,10 +156,10 @@ public class MoveUtils {
 
     /**
      * Perform a piece move updating game state and user interface
-     * @param board the board we are updating
-     * @param tileToMoveFrom the tile to remove dragged piece from
-     * @param tileToMoveTo the tile we dragged the piece to
-     * @param testMove is this just a test move?
+     * @param board the {@code Board} we are updating
+     * @param tileToMoveFrom the {@code Tile} to remove dragged piece from
+     * @param tileToMoveTo the {@code Tile} we dragged the piece to
+     * @param testMove {@code true} if performing a test move, {@code false} if this is an actual move
      */
     private static void updateGameState(Board board, Tile tileToMoveFrom, Tile tileToMoveTo, boolean testMove) {
 
@@ -166,7 +176,7 @@ public class MoveUtils {
         Position targetPosition = tileToMoveTo.getPosition();
         boolean isPawnMove = draggedPiece instanceof Pawn;
         boolean isKingMove = draggedPiece instanceof King;
-        boolean isEnpassantCapture = targetPosition.equals(state.getEPSquare());
+        boolean isEnpassantCapture = isPawnMove && targetPosition.equals(state.getEPSquare());
         boolean isRegularCapture = tileToMoveTo.isOccupied();
 
         /*
@@ -205,7 +215,7 @@ public class MoveUtils {
          * Update the actual board state / pieces
          */
 
-        // If we moved the king
+        // If moving the king
         if(isKingMove) {
 
             // Update the king position
@@ -240,7 +250,7 @@ public class MoveUtils {
             currentPlayer.capturePiece(opposingPlayer, capturedPiece);
         }
         // If this was an en passant capture, then remove the captured pawn
-        else if(isPawnMove && isEnpassantCapture) {
+        else if(isEnpassantCapture) {
             typeOfMove = MoveType.CAPTURE;
 
             // Determine the location of the pawn to be captured
@@ -261,7 +271,7 @@ public class MoveUtils {
         // Add our move to the move history
         board.getMoveHistory().addMove(new Move(draggedPiece, tileToMoveFrom, capturedPiece, tileToMoveTo));
 
-        // Populate moves for current game state
+        // Update each player's moves for next turn
         board.getPlayers().values().forEach(player -> {
 
             // Clear out valid moves for the piece after it moves
@@ -269,10 +279,12 @@ public class MoveUtils {
                 piece.clearValidMoves();
             }
 
+            // Populate moves for current game state
             player.populateMoves(board);
         });
 
-        // If check move, play checking sound
+
+        // If current player checked opponent, play checking sound
         if(isKingInCheck(board, currentPlayer, opposingPlayer) != null) {
             typeOfMove = MoveType.CHECK;
         }
@@ -289,7 +301,8 @@ public class MoveUtils {
 
     /**
      * Update the castling fen value for the current board state
-     * @param player the opposing player
+     * @param state the current {@code GameState}
+     * @param player the opposing {@code Player}
      */
     private static void updateCastling(GameState state, Player player) {
         StringBuilder castlingAbility = new StringBuilder();
@@ -328,11 +341,11 @@ public class MoveUtils {
     }
 
     /**
-     * Check whether a given Player is in check
-     * @param board the board to check the king position on
-     * @param playerToCheck the player to determine if they can deliver / are delivering check
-     * @param ownerOfKing the owner of the king
-     * @return true if in check, false if not
+     * Check whether a given {@code Player} is in check
+     * @param board the {@code Board} to check the king position on
+     * @param playerToCheck the {@code Player} to determine if they can deliver / are delivering check
+     * @param ownerOfKing the {@code Player} who owns the king
+     * @return {@code true} if in owner of king is in check, {@code false} if not
      */
     private static Piece isKingInCheck(Board board, Player playerToCheck, Player ownerOfKing) {
         return isTileTargeted(playerToCheck, board.getKingPosition(ownerOfKing));

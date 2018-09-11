@@ -102,6 +102,6 @@ public class PGNUtils {
     public static void performPGNMoves(Board board, MoveHistory history) {
         Map<Position, Tile> tileMap =  board.getTileMap();
         List<Move> moves = history.getMoves(Objects::nonNull).collect(Collectors.toList());
-        moves.forEach(move -> MoveUtils.executeMove(board, tileMap.get(move.getOrigin().getPosition()), tileMap.get(move.getDestination().getPosition()), true));
+        moves.forEach(move -> MoveUtils.executeActualMove(board, tileMap.get(move.getOrigin().getPosition()), tileMap.get(move.getDestination().getPosition()), true));
     }
 }
