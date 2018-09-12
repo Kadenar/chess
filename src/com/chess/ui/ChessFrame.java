@@ -3,29 +3,13 @@ package com.chess.ui;
 import com.chess.ChessConsts;
 import com.chess.engine.board.Board;
 import com.chess.engine.moves.MoveType;
-import com.chess.engine.sound.SoundUtils;
-import com.chess.ui.headers.FileHeaders;
-import com.chess.ui.headers.RankHeaders;
 import com.chess.ui.menus.DebugOptionsMenu;
 import com.chess.ui.menus.GameOptionsMenu;
 import com.chess.ui.panels.BoardPanel;
 import com.chess.ui.panels.GameStatePanel;
 
-import javax.swing.BoxLayout;
-import javax.swing.JFrame;
-import javax.swing.JMenuBar;
-import javax.swing.WindowConstants;
-import java.awt.BorderLayout;
-import java.awt.Dimension;
-import java.awt.FlowLayout;
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
-import java.awt.GridLayout;
-
-import static com.chess.ChessConsts.BOARD_HEIGHT;
-import static com.chess.ChessConsts.BOARD_WIDTH;
-import static com.chess.ChessConsts.HISTORY_HEIGHT;
-import static com.chess.ChessConsts.HISTORY_WIDTH;
+import javax.swing.*;
+import java.awt.*;
 
 public class ChessFrame extends JFrame {
 

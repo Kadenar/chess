@@ -11,12 +11,9 @@ import com.chess.engine.moves.MoveUtils;
 
 import java.util.Collection;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.Predicate;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 public class King extends Piece {
 
@@ -105,8 +102,8 @@ public class King extends Piece {
         System.out.println("Current board before checking if tile targeted:");
         System.out.println(board);
         Predicate<Move> movesMatch = move -> move.getDestination().getPosition().equals(kingPosition);
-        System.out.println(board.getMovesForPlayer(opponent));
-        Piece targetingPiece = board.getMovesForPlayer(opponent).values().stream()
+        System.out.println(board.getMovesForTurn(board.getGameState().getFullMoves(), opponent));
+        Piece targetingPiece = board.getMovesForTurn(board.getGameState().getFullMoves(), opponent).values().stream()
                 .flatMap(Collection::stream)
                 .filter(movesMatch)
                 .map(Move::getMovedPiece).findFirst().orElse(null);

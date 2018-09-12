@@ -7,10 +7,8 @@ import com.chess.engine.moves.MoveUtils;
 import com.chess.engine.pieces.Piece;
 import com.chess.ui.ChessFrame;
 
-import javax.swing.JLayeredPane;
-import javax.swing.SwingUtilities;
-import java.awt.MouseInfo;
-import java.awt.Point;
+import javax.swing.*;
+import java.awt.*;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
@@ -48,7 +46,7 @@ class BoardListener implements MouseListener, MouseMotionListener {
      */
     private void addIndicators() {
         if(GameSettings.INSTANCE.isEnableHighlighting()) {
-            Set<Move> validMoves = originatingPiece.getValidMoves(board);
+            Set<Move> validMoves = board.getValidMovesForPiece(board.getGameState().getFullMoves(), originatingPiece);
             for (Move validMove : validMoves) {
                 Tile destination = validMove.getDestination();
                 targetMoveTiles.add(destination);

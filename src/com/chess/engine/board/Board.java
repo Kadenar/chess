@@ -6,26 +6,14 @@ import com.chess.engine.Player;
 import com.chess.engine.Position;
 import com.chess.engine.moves.Move;
 import com.chess.engine.moves.MoveHistory;
-import com.chess.engine.pieces.Bishop;
-import com.chess.engine.pieces.King;
-import com.chess.engine.pieces.Knight;
-import com.chess.engine.pieces.Pawn;
-import com.chess.engine.pieces.Piece;
-import com.chess.engine.pieces.Queen;
-import com.chess.engine.pieces.Rook;
+import com.chess.engine.moves.MoveUtils;
+import com.chess.engine.pieces.*;
 
-import javax.swing.JLabel;
-import javax.swing.JLayeredPane;
-import javax.swing.JOptionPane;
-import javax.swing.JPanel;
-import java.awt.Color;
-import java.awt.Dimension;
-import java.awt.GridLayout;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedHashMap;
-import java.util.Map;
-import java.util.Set;
+import javax.swing.*;
+import java.awt.*;
+import java.util.*;
+import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
 public class Board extends JPanel {
 
@@ -33,15 +21,16 @@ public class Board extends JPanel {
     private final Map<Position, Tile> tileMap;
 
     // Map of tiles that contain a piece which can move
-    private Map<Tile, Boolean> highlightedTiles;
+    private final Map<Tile, Boolean> highlightedTiles;
 
     private final Map<Player.Color, Player> immutablePlayers;
 
     // Contains the king position for each player
-    private Map<Player, Position> kingPositionMap;
+    private final Map<Player, Position> kingPositionMap;
 
     // Contains both players set of moves for all pieces owned by that player
-    private Map<Player, Map<Piece, Set<Move>>> movesForPlayers;
+    private final Map<Player, Map<Integer, Map<Piece, Set<Move>>>> movesForPlayers;
+    private final Map<Player, Map<Integer, Map<Piece, Set<Move>>>> validMovesForPlayers;
 
     // The current game state
     private final GameState gameState;
@@ -81,19 +70,21 @@ public class Board extends JPanel {
 
         // Add our players
         Map<Player.Color, Player> players = new HashMap<>(ChessConsts.NUM_PLAYERS);
-        Player white = new Player(Player.Color.WHITE);
-        Player black = new Player(Player.Color.BLACK);
-        players.put(Player.Color.WHITE, white);
-        players.put(Player.Color.BLACK, black);
-        this.immutablePlayers = new HashMap<>(players);
+        players.put(Player.Color.WHITE, new Player(Player.Color.WHITE));
+        players.put(Player.Color.BLACK, new Player(Player.Color.BLACK));
+        this.immutablePlayers = Collections.unmodifiableMap(players);
 
-        // Add our moves for both players (initially empty)
+        // Our moves / valid moves for both players
         this.movesForPlayers = new HashMap<>(ChessConsts.NUM_PLAYERS);
-        this.movesForPlayers.put(white, new HashMap<>());
-        this.movesForPlayers.put(black, new HashMap<>());
+        this.validMovesForPlayers = new HashMap<>(ChessConsts.NUM_PLAYERS);
+        immutablePlayers.forEach((key, value) -> {
+            // Use 500 as a chess game should never reach this # of turns
+            this.movesForPlayers.put(value, new HashMap<>(500));
+            this.validMovesForPlayers.put(value, new HashMap<>(500));
+        });
 
         // Initialize the current game state, move history and king positions
-        this.gameState = new GameState(white);
+        this.gameState = new GameState();
         this.moveHistory = new MoveHistory(this);
         this.kingPositionMap = new HashMap<>(ChessConsts.NUM_PLAYERS);
 
@@ -197,13 +188,6 @@ public class Board extends JPanel {
      * @param player the {@code Player} to generate moves for
      */
     public void generateMovesForPlayer(Player player) {
-
-        // Clear all moves for the given player
-        getMovesForPlayer(player).clear();
-
-        // Clear all valid moves for each piece
-        player.getPieces().forEach(Piece::clearValidMoves);
-
         // Generate moves for all pieces owned by me
         getTileMap().values().stream()
                 .filter(tile -> tile.isOccupied() && player.equals(tile.getPiece().getOwner()))
@@ -220,17 +204,97 @@ public class Board extends JPanel {
      * Get all moves for each player and piece that player controls
      * @return all of the available moves for each piece players control
      */
-    public Map<Piece, Set<Move>> getMovesForPlayer(Player player) {
-        return this.movesForPlayers.getOrDefault(player, new HashMap<>());
+    private Map<Integer, Map<Piece, Set<Move>>> getMovesForPlayer(Player player) {
+        return this.movesForPlayers.getOrDefault(player, new TreeMap<>());
     }
 
     /**
-     * Get moves for a given piece
+     * Get all moves for a specific player on a given turn
+     * @param turn the {@code int} representing what turn to get moves for
+     * @param player the {@code Player} to get moves for
+     * @return the {@code Map<Piece, Set<Move>>} of moves for the player on the given turn
+     */
+    public Map<Piece, Set<Move>> getMovesForTurn(int turn, Player player) {
+        Map<Integer, Map<Piece, Set<Move>>> movesForPlayer = getMovesForPlayer(player);
+        Map<Piece, Set<Move>> movesForTurn = movesForPlayer.get(turn);
+
+        if(movesForTurn == null) {
+            movesForTurn = new HashMap<>();
+            movesForPlayer.put(turn, movesForTurn);
+        }
+
+        return movesForTurn;
+    }
+
+    /**
+     * Get moves for a given piece on a specific turn
+     * @param turn the {@code int} for the turn to get moves from
      * @param piece the {@code Piece} to get moves for
      * @return the {@code Set<Move>} for the given piece
      */
-    public Set<Move> getMovesForPiece(Piece piece) {
-        return getMovesForPlayer(piece.getOwner()).getOrDefault(piece, new HashSet<>());
+    public Set<Move> getMovesForPiece(int turn, Piece piece) {
+        Map<Piece, Set<Move>> movesForTurn = getMovesForTurn(turn, piece.getOwner());
+        Set<Move> movesForPiece = movesForTurn.get(piece);
+
+        if(movesForPiece == null) {
+            movesForPiece = new HashSet<>();
+            movesForTurn.put(piece, movesForPiece);
+        }
+
+        return movesForPiece;
+    }
+
+    /**
+     * Get valid moves for a specific player and pieces that player controls
+     * @return all of the available moves for each piece players control for all turns of the game thus far
+     */
+    private Map<Integer, Map<Piece, Set<Move>>> getValidMovesForPlayer(Player player) {
+        return this.validMovesForPlayers.getOrDefault(player, new HashMap<>());
+    }
+
+    /**
+     * Get valid moves for a specific player on a given turn
+     * @param player the {@code Player} to get moves for
+     * @param turn the {@code int} representing what turn to get moves for
+     * @return the {@code Map<Piece, Set<Move>>} of moves for the @{code Player} on the given turn
+     */
+    public Map<Piece, Set<Move>> getValidMovesForTurn(int turn, Player player) {
+        // Get valid moves for a given turn
+        Map<Integer, Map<Piece, Set<Move>>> validMovesForPlayer = getValidMovesForPlayer(player);
+        Map<Piece, Set<Move>> validMovesForTurn = validMovesForPlayer.get(turn);
+
+        // If moves for the given turn have not been generated yet, then create them
+        if(validMovesForTurn == null) {
+            validMovesForTurn = new HashMap<>();
+            int fullMoves = getGameState().getFullMoves();
+
+            // For each piece, execute a test move and add valid moves for the turn
+            for(Piece piece : player.getPieces()) {
+                Set<Move> validMovesForPiece = getMovesForPiece(fullMoves, piece).stream()
+                        .filter(move -> MoveUtils.executeTestMove(this, move.getOrigin(), move.getDestination()))
+                        .collect(Collectors.toSet());
+
+                validMovesForTurn.put(piece, validMovesForPiece);
+            }
+
+            // Put valid moves into our map for the current player
+            validMovesForPlayer.put(fullMoves, validMovesForTurn);
+        }
+
+        // Return valid moves for the turn for the given player
+        return validMovesForTurn;
+    }
+
+    /**
+     * Get valid moves for this piece
+     * (preventing the piece from actually moving if it would put the Player in check)
+     * This information is cached on a per turn basis to avoid performing test moves unnecessarily multiple times
+     * @param turn the {@code int} representing what turn to get moves for
+     * @param piece the {@code Piece} to get moves for
+     * @return the {@code Set<Move>} for the given piece on the given turn
+     */
+    public Set<Move> getValidMovesForPiece(int turn, Piece piece) {
+        return getValidMovesForTurn(turn, piece.getOwner()).getOrDefault(piece, Collections.emptySet());
     }
 
     /**
@@ -318,8 +382,7 @@ public class Board extends JPanel {
                 // Highlight tiles containing pieces with valid moves for current player
                 if(GameSettings.INSTANCE.isEnableHighlighting() && piece.getOwner().equals(getGameState().getPlayerTurn())) {
                     // As long as the piece has moves, highlight it
-                    if(piece.getValidMoves(this).size() > 0) {
-                        System.out.println("Highlighting : " + tile.getPosition());
+                    if(getValidMovesForPiece(getGameState().getFullMoves(), piece).size() > 0) {
                         tile.setBackground(Color.GREEN);
                         highlightedTiles.replace(tile, true);
                     }

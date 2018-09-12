@@ -1,6 +1,5 @@
 package com.chess.engine.pieces;
 
-import com.chess.ChessConsts;
 import com.chess.engine.Player;
 import com.chess.engine.Position;
 import com.chess.engine.board.Board;
@@ -8,29 +7,25 @@ import com.chess.engine.board.BoardUtils;
 import com.chess.engine.board.Tile;
 import com.chess.engine.moves.Direction;
 import com.chess.engine.moves.Move;
-import com.chess.engine.moves.MoveUtils;
 
 import javax.imageio.ImageIO;
-import javax.swing.ImageIcon;
-import javax.swing.JLabel;
-import java.awt.Image;
+import javax.swing.*;
+import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
-import java.util.*;
-import java.util.stream.Collectors;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 
 public abstract class Piece extends JLabel {
 
     private final Player owner;
     private final JLabel scaledImg;
-    private final Map<Player, Set<Move>> movesForTurn;
 
     public Piece(Player color, String pieceImagePath) {
         super();
         this.owner = color;
-        // Max number of moves you would ever get would be queen in the center 4 tiles which is 27 locations
-        this.movesForTurn = new HashMap<>(ChessConsts.MAX_MOVE_LOCS);
         JLabel testImg = null;
 
         try {
@@ -66,35 +61,7 @@ public abstract class Piece extends JLabel {
      * @param currentTile the {@code Tile} of the piece
      */
     public final void addMovesToBoard(Board board, Tile currentTile) {
-        board.getMovesForPlayer(getOwner()).put(this, generateMoves(board, currentTile));
-    }
-
-    /**
-     * Get only valid moves for this piece
-     * (preventing the piece from actually moving if it would put the Player in check)
-     * This information is cached on a per turn basis to avoid performing test moves unnecessarily multiple times
-     * @param board the current @{code Board} to get valid moves for this piece
-     * @return a {@code Set} of valid moves for this piece
-     */
-    public final Set<Move> getValidMoves(Board board) {
-        // TODO is there a better way to do this than having this here? We do want to cache this information, just not sure where.
-        Set<Move> currentMoves = movesForTurn.getOrDefault(getOwner(), null);
-        if(currentMoves == null) {
-            currentMoves = board.getMovesForPiece(this).stream()
-                    .filter(move -> MoveUtils.executeTestMove(board, move.getOrigin(), move.getDestination()))
-                    .collect(Collectors.toSet());
-            movesForTurn.put(getOwner(), currentMoves);
-        }
-
-        return currentMoves;
-    }
-
-    /**
-     * Clear out valid moves after a successful move is executed
-     */
-    public final void clearValidMoves() {
-        // TODO System.gc(); // Indicate now is a good time for garbage collection
-        this.movesForTurn.clear();
+        board.getMovesForTurn(board.getGameState().getFullMoves(), getOwner()).put(this, generateMoves(board, currentTile));
     }
 
     /**

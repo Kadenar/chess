@@ -1,9 +1,7 @@
 package com.chess.ui.headers;
 
-import javax.swing.JLabel;
-import javax.swing.JPanel;
-import javax.swing.SwingConstants;
-import java.awt.GridLayout;
+import javax.swing.*;
+import java.awt.*;
 
 public class RankHeaders extends JPanel {
 

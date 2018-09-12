@@ -111,7 +111,7 @@ public class MoveUtils {
 
         // Check whether the given piece on the originating tile has the dragged to tile as a valid tile
         Move moveToPerform = new Move(draggedPiece, originatingTile, capturedPiece, draggedToTile);
-        return draggedPiece.getValidMoves(board).contains(moveToPerform);
+        return board.getValidMovesForPiece(board.getGameState().getFullMoves(), draggedPiece).contains(moveToPerform);
     }
 
     /**
@@ -285,7 +285,7 @@ public class MoveUtils {
         // Get all moves for opposing player
         // And check if that piece has a move with same location as the destination tile
         Predicate<Move> movesMatch = move -> move.getDestination().getPosition().equals(destination);
-        return board.getMovesForPlayer(targetingPlayer).values().stream()
+        return  board.getMovesForTurn(board.getGameState().getFullMoves(), targetingPlayer).values().stream()
                 .flatMap(Collection::stream)
                 .filter(movesMatch)
                 .map(Move::getMovedPiece).findFirst().orElse(null);
@@ -294,11 +294,11 @@ public class MoveUtils {
     /**
      * Check whether a given {@code Player} is in check
      * @param board the {@code Board} to check the king position on
-     * @param playerToCheck the {@code Player} to determine if they can deliver / are delivering check
+     * @param targetingPlayer the {@code Player} to determine if they can deliver / are delivering check
      * @param ownerOfKing the {@code Player} who owns the king
      * @return {@code true} if in owner of king is in check, {@code false} if not
      */
-    private static Piece isKingInCheck(Board board, Player playerToCheck, Player ownerOfKing) {
-        return isTileTargeted(board, playerToCheck, board.getKingPosition(ownerOfKing));
+    private static Piece isKingInCheck(Board board, Player targetingPlayer, Player ownerOfKing) {
+        return isTileTargeted(board, targetingPlayer, board.getKingPosition(ownerOfKing));
     }
 }

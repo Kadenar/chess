@@ -2,17 +2,10 @@ package com.chess.engine;
 
 import com.chess.ChessConsts;
 import com.chess.engine.board.Board;
-import com.chess.engine.board.Tile;
-import com.chess.engine.moves.Move;
 import com.chess.engine.pieces.Piece;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.function.Consumer;
-import java.util.function.Predicate;
 
 public class Player {
 
@@ -97,7 +90,8 @@ public class Player {
      * @return {@code true} if has valid moves, {@code false} if no valid moves
      */
     public boolean hasValidMoves(Board board) {
-        return getPieces().stream().anyMatch(piece -> piece.getValidMoves(board).size() > 0);
+        System.out.println("Checking has valid moves?");
+        return board.getValidMovesForTurn(board.getGameState().getFullMoves(), this).size() > 0;
     }
 
     /**

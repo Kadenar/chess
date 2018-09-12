@@ -5,7 +5,7 @@ import com.chess.engine.pieces.Piece;
 
 import javax.swing.*;
 import javax.swing.border.TitledBorder;
-import java.awt.Dimension;
+import java.awt.*;
 
 class CapturedPiecesPanel extends JPanel {
 

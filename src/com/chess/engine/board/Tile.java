@@ -3,9 +3,8 @@ package com.chess.engine.board;
 import com.chess.engine.Position;
 import com.chess.engine.pieces.Piece;
 
-import javax.swing.BorderFactory;
-import javax.swing.JPanel;
-import java.awt.Color;
+import javax.swing.*;
+import java.awt.*;
 
 public class Tile extends JPanel {
 

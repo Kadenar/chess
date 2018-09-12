@@ -7,10 +7,9 @@ import com.chess.engine.board.GameState;
 import com.chess.engine.moves.Move;
 import com.chess.engine.pieces.Piece;
 
-import javax.swing.BoxLayout;
-import javax.swing.JPanel;
+import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
-import java.awt.Dimension;
+import java.awt.*;
 
 public class GameStatePanel extends JPanel {
 

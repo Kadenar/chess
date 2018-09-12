@@ -23,10 +23,9 @@ public class GameState {
 
     /**
      * Game state instance to hold game specific information
-     * @param turn which {@code Player} turn it is
      */
-    GameState(Player turn) {
-        this.playerTurn = turn;
+    GameState() {
+        this.playerTurn = null;
         this.gameOver = false;
         this.stalemate = false;
         this.castling = "";
@@ -36,21 +35,6 @@ public class GameState {
 
         // TODO - time controls
     }
-
-    /**
-     * Game state instance with the same values as another given game state
-     * @param otherState the {@code GameState} to copy
-     */
-    GameState(GameState otherState) {
-        this.playerTurn = otherState.playerTurn;
-        this.gameOver = otherState.gameOver;
-        this.stalemate = otherState.stalemate;
-        this.castling = otherState.castling;
-        this.enPassant = otherState.enPassant;
-        this.halfMoves = otherState.halfMoves;
-        this.fullMoves = otherState.fullMoves;
-    }
-
 
     // Getters
     public Player getPlayerTurn() { return this.playerTurn; }
