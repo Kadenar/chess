@@ -42,21 +42,30 @@ public class King extends Piece {
         validPositions.addAll(addPositionsForDirection(board, this, currentTile, Direction.RIGHT, false));
         validPositions.addAll(addPositionsForDirection(board, this, currentTile, Direction.LEFT, false));
 
-        // castling king side
-        // TODO -> Might be able to remove this when rule
-        if (board.getGameState().canCastleKingSide(getOwner())) {
-            Move kingCastle = addKingSideCastlePosition(board);
-            if (kingCastle != null) {
-                validPositions.add(kingCastle);
-            }
-        }
 
-        // castling queen side
-        // TODO -> Might be able to remove this when rule
-        if (board.getGameState().canCastleQueenSide(getOwner())) {
-            Move queenCastle = addQueenSideCastlePosition(board);
-            if (queenCastle != null) {
-                validPositions.add(queenCastle);
+        // Check if the king moved
+        boolean kingMoved = board.getMoveHistory().getMoves(move -> move.getMovedPiece().equals(this))
+                                                  .findFirst().orElse(null) != null;
+
+        // The king can not have moved and can't be in check by opponent
+        if(!kingMoved && MoveUtils.isKingInCheck(board, getOwner().opposite(board), getOwner()) == null) {
+
+            // castling king side
+            // TODO -> Might be able to remove this when rule
+            if (board.getGameState().canCastleKingSide(getOwner())) {
+                Move kingCastle = addKingSideCastlePosition(board);
+                if (kingCastle != null) {
+                    validPositions.add(kingCastle);
+                }
+            }
+
+            // castling queen side
+            // TODO -> Might be able to remove this when rule
+            if (board.getGameState().canCastleQueenSide(getOwner())) {
+                Move queenCastle = addQueenSideCastlePosition(board);
+                if (queenCastle != null) {
+                    validPositions.add(queenCastle);
+                }
             }
         }
 
@@ -70,7 +79,6 @@ public class King extends Piece {
      * @return king side castle location
      */
     private Move addKingSideCastlePosition(Board board) {
-        System.out.println("Checking king side castle for: " + getOwner());
         return checkCastlingDirection(board, Direction.RIGHT);
     }
 
@@ -80,7 +88,6 @@ public class King extends Piece {
      * @return queen side castle location
      */
     private Move addQueenSideCastlePosition(Board board) {
-        System.out.println("Checking queen side castle for: " + getOwner());
         return checkCastlingDirection(board, Direction.LEFT);
     }
 
@@ -92,25 +99,8 @@ public class King extends Piece {
      */
     private Move checkCastlingDirection(Board board, Direction direction) {
 
-        Player opponent = getOwner().opposite(board);
-
         // If the king position is targeted or the king has previously moved, castling is not allowed
         Position kingPosition = board.getKingPosition(getOwner());
-        boolean kingMoved = board.getMoveHistory()
-                            .getMoves(move -> move.getMovedPiece().equals(this))
-                            .findFirst().orElse(null) != null;
-        System.out.println("Current board before checking if tile targeted:");
-        System.out.println(board);
-        Predicate<Move> movesMatch = move -> move.getDestination().getPosition().equals(kingPosition);
-        System.out.println(board.getMovesForTurn(board.getGameState().getFullMoves(), opponent));
-        Piece targetingPiece = board.getMovesForTurn(board.getGameState().getFullMoves(), opponent).values().stream()
-                .flatMap(Collection::stream)
-                .filter(movesMatch)
-                .map(Move::getMovedPiece).findFirst().orElse(null);
-        System.out.println("Checking if king is targeted? : " + targetingPiece);
-        if(kingMoved || targetingPiece != null) {
-            return null;
-        }
 
         // Get offset position for rook
         boolean isLeft = direction == Direction.LEFT;
@@ -138,6 +128,7 @@ public class King extends Piece {
         };
 
         // Tiles must be unoccupied and not targeted
+        Player opponent = getOwner().opposite(board);
         Predicate<Map.Entry<Position, Tile>> notOccupiedOrTargeted = entry ->
                 !entry.getValue().isOccupied() && MoveUtils.isTileTargeted(board, opponent, entry.getKey()) == null;
 

@@ -4,9 +4,11 @@ import com.chess.engine.GameSettings;
 import com.chess.engine.board.Board;
 import com.chess.engine.board.FenUtils;
 import com.chess.engine.board.PGNUtils;
+import com.chess.engine.moves.Move;
 import com.chess.ui.ChessFrame;
 
 import javax.swing.*;
+import java.util.Set;
 
 public class DebugOptionsMenu extends JMenu {
 
@@ -100,7 +102,12 @@ public class DebugOptionsMenu extends JMenu {
         int fullMoves = board.getGameState().getFullMoves();
         board.getPlayers().values().forEach( player -> {
             System.out.println("Valid moves for: " + player);
-            player.getPieces().forEach(piece -> System.out.println(board.getValidMovesForPiece(fullMoves, piece)));
+            player.getPieces().forEach(piece -> {
+                Set<Move> movesForPiece = board.getValidMovesForPiece(fullMoves, piece);
+                if(!movesForPiece.isEmpty()) {
+                    System.out.println(movesForPiece);
+                }
+            });
         });
 
     }

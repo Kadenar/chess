@@ -351,8 +351,6 @@ public class Board extends JPanel {
      */
     public void displayBoard() {
 
-        System.out.println("---Displaying the board---");
-
         // Remove all tiles
         this.removeAll();
 

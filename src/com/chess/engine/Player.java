@@ -90,7 +90,6 @@ public class Player {
      * @return {@code true} if has valid moves, {@code false} if no valid moves
      */
     public boolean hasValidMoves(Board board) {
-        System.out.println("Checking has valid moves?");
         return board.getValidMovesForTurn(board.getGameState().getFullMoves(), this).size() > 0;
     }
 

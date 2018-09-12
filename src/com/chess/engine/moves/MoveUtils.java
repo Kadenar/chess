@@ -27,7 +27,6 @@ public class MoveUtils {
     public static boolean executeTestMove(Board board, Tile originatingTile, Tile targetTile) {
         // TODO -> How to get a new board instance that is a copy of current
         // TODO -> without going through entire chain of events to create new object
-        System.out.println("Constructing test board");
         Board testBoard = new Board(board);
         Tile originTile = testBoard.getTileMap().get(originatingTile.getPosition());
         Piece draggedPiece = originTile.getPiece();
@@ -36,7 +35,6 @@ public class MoveUtils {
         Player opposingPlayer = currentPlayer.opposite(testBoard);
 
         // Perform a test move
-        System.out.println("Updating game state for test board");
         updateGameState(testBoard, originTile, destinationTile, true);
 
         // Determine whether the test move was valid (current player cannot be in check by opposing player)
@@ -298,7 +296,7 @@ public class MoveUtils {
      * @param ownerOfKing the {@code Player} who owns the king
      * @return {@code true} if in owner of king is in check, {@code false} if not
      */
-    private static Piece isKingInCheck(Board board, Player targetingPlayer, Player ownerOfKing) {
+    public static Piece isKingInCheck(Board board, Player targetingPlayer, Player ownerOfKing) {
         return isTileTargeted(board, targetingPlayer, board.getKingPosition(ownerOfKing));
     }
 }
