@@ -63,8 +63,7 @@ public class FenUtils {
         gameState.setFullMoves(getFullMove(tokens[5]));
 
         // Populate moves for each player
-        System.out.println("Populating moves for player in setGameState");
-        board.getPlayers().values().forEach(player -> player.populateMoves(board));
+        board.getPlayers().values().forEach(board::generateMovesForPlayer);
     }
 
     /**

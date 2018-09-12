@@ -104,7 +104,7 @@ public class DebugOptionsMenu extends JMenu {
      * Print out all game moves available currently (only those that are valid)
      */
     private void printGameMoves() {
-        getBoard().getGameState().getPlayerTurn().getMovesForPieces().forEach((key, value) -> {
+        getBoard().getMovesForPlayer(getBoard().getGameState().getPlayerTurn()).forEach((key, value) -> {
             Set<Move> validMoves = key.getValidMoves(getBoard());
             if(!validMoves.isEmpty()) {
                 System.out.println(validMoves);

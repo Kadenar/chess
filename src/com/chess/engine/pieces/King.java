@@ -9,6 +9,7 @@ import com.chess.engine.moves.Direction;
 import com.chess.engine.moves.Move;
 import com.chess.engine.moves.MoveUtils;
 
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -29,7 +30,7 @@ public class King extends Piece {
      * @return list of valid moves the king can make
      */
     @Override
-    public Set<Move> generateMoves(Board board, Tile currentTile) {
+    Set<Move> generateMoves(Board board, Tile currentTile) {
         Set<Move> validPositions = new HashSet<>();
 
         // Vertical movement
@@ -101,7 +102,16 @@ public class King extends Piece {
         boolean kingMoved = board.getMoveHistory()
                             .getMoves(move -> move.getMovedPiece().equals(this))
                             .findFirst().orElse(null) != null;
-        if(kingMoved || MoveUtils.isTileTargeted(opponent, kingPosition) != null) {
+        System.out.println("Current board before checking if tile targeted:");
+        System.out.println(board);
+        Predicate<Move> movesMatch = move -> move.getDestination().getPosition().equals(kingPosition);
+        System.out.println(board.getMovesForPlayer(opponent));
+        Piece targetingPiece = board.getMovesForPlayer(opponent).values().stream()
+                .flatMap(Collection::stream)
+                .filter(movesMatch)
+                .map(Move::getMovedPiece).findFirst().orElse(null);
+        System.out.println("Checking if king is targeted? : " + targetingPiece);
+        if(kingMoved || targetingPiece != null) {
             return null;
         }
 
@@ -132,14 +142,14 @@ public class King extends Piece {
 
         // Tiles must be unoccupied and not targeted
         Predicate<Map.Entry<Position, Tile>> notOccupiedOrTargeted = entry ->
-                !entry.getValue().isOccupied() && MoveUtils.isTileTargeted(opponent, entry.getKey()) == null;
+                !entry.getValue().isOccupied() && MoveUtils.isTileTargeted(board, opponent, entry.getKey()) == null;
 
         // If all conditions pass, then add the move
         Tile kingTile = tiles.get(kingPosition);
         if(tiles.entrySet().stream()
             .filter(entry -> entry.getKey().getRow() == kingPosition.getRow()) // Must be on same row as king
             .filter(betweenKingTarget) // Must be between king and target position
-            .allMatch(notOccupiedOrTargeted)) { // Nor can they be targeted
+            .allMatch(notOccupiedOrTargeted)) { // Cannot be occupied or targeted
             return new Move(this, kingTile, null, tiles.get(targetCastlePos));
         }
 

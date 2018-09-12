@@ -13,10 +13,10 @@ public class FileHeaders extends JPanel{
 
         for(String h : headers) {
             JLabel header = new JLabel();
-            header.setSize(20, 20);
+            //header.setPreferredSize(new Dimension(ChessConsts.FILE_WIDTH, ChessConsts.FILE_HEIGHT));
             header.setText(h);
             header.setHorizontalAlignment(SwingConstants.CENTER);
-            add(header);
+            this.add(header);
         }
     }
 }

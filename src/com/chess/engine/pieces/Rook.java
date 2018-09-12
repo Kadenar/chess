@@ -21,7 +21,7 @@ public class Rook extends Piece {
      * @return list of valid moves the rook can make
      */
     @Override
-    public Set<Move> generateMoves(Board board, Tile currentPosition) {
+    Set<Move> generateMoves(Board board, Tile currentPosition) {
         Set<Move> validPositions = new HashSet<>();
 
         // Vertical movement

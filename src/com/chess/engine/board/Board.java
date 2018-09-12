@@ -4,6 +4,7 @@ import com.chess.ChessConsts;
 import com.chess.engine.GameSettings;
 import com.chess.engine.Player;
 import com.chess.engine.Position;
+import com.chess.engine.moves.Move;
 import com.chess.engine.moves.MoveHistory;
 import com.chess.engine.pieces.Bishop;
 import com.chess.engine.pieces.King;
@@ -21,8 +22,10 @@ import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.GridLayout;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Set;
 
 public class Board extends JPanel {
 
@@ -32,12 +35,13 @@ public class Board extends JPanel {
     // Map of tiles that contain a piece which can move
     private Map<Tile, Boolean> highlightedTiles;
 
-    // The players for the current board
-    private final Map<Player.Color, Player> players;
     private final Map<Player.Color, Player> immutablePlayers;
 
     // Contains the king position for each player
     private Map<Player, Position> kingPositionMap;
+
+    // Contains both players set of moves for all pieces owned by that player
+    private Map<Player, Map<Piece, Set<Move>>> movesForPlayers;
 
     // The current game state
     private final GameState gameState;
@@ -76,12 +80,17 @@ public class Board extends JPanel {
         this.highlightedTiles = new HashMap<>(ChessConsts.NUM_TILES);
 
         // Add our players
-        this.players = new HashMap<>(ChessConsts.NUM_PLAYERS);
+        Map<Player.Color, Player> players = new HashMap<>(ChessConsts.NUM_PLAYERS);
         Player white = new Player(Player.Color.WHITE);
         Player black = new Player(Player.Color.BLACK);
-        this.players.put(Player.Color.WHITE, white);
-        this.players.put(Player.Color.BLACK, black);
+        players.put(Player.Color.WHITE, white);
+        players.put(Player.Color.BLACK, black);
         this.immutablePlayers = new HashMap<>(players);
+
+        // Add our moves for both players (initially empty)
+        this.movesForPlayers = new HashMap<>(ChessConsts.NUM_PLAYERS);
+        this.movesForPlayers.put(white, new HashMap<>());
+        this.movesForPlayers.put(black, new HashMap<>());
 
         // Initialize the current game state, move history and king positions
         this.gameState = new GameState(white);
@@ -89,7 +98,7 @@ public class Board extends JPanel {
         this.kingPositionMap = new HashMap<>(ChessConsts.NUM_PLAYERS);
 
         // Load our board information from FEN string
-        loadBoardFromFen(fen);
+        this.loadBoardFromFen(fen);
 
         // Only add UI portion if desired
         if(withUI) {
@@ -97,16 +106,16 @@ public class Board extends JPanel {
             this.layeredPane = new JLayeredPane();
             // TODO need to figure out how to add layout here for resizing
             //layeredPane.setLayout(new FlowLayout());
-            setBounds(0, 0, ChessConsts.BOARD_WIDTH, ChessConsts.BOARD_HEIGHT);
-            setPreferredSize(new Dimension(ChessConsts.BOARD_WIDTH, ChessConsts.BOARD_HEIGHT));
+            this.setBounds(0, 0, ChessConsts.BOARD_WIDTH, ChessConsts.BOARD_HEIGHT);
+            this.setPreferredSize(new Dimension(ChessConsts.BOARD_WIDTH, ChessConsts.BOARD_HEIGHT));
 
             // Add our piece listener
             BoardListener listener = new BoardListener(this);
-            addMouseListener(listener);
-            addMouseMotionListener(listener);
+            this.addMouseListener(listener);
+            this.addMouseMotionListener(listener);
 
             // Display the pieces on the board
-            displayBoard();
+            this.displayBoard();
 
             // Add the myself to our layered pane's default layer
             this.layeredPane.add(this, JLayeredPane.DEFAULT_LAYER);
@@ -139,12 +148,6 @@ public class Board extends JPanel {
         } catch (FenUtils.FenException e) {
             System.err.println(e.getMessage());
         }
-
-        /*// If player doesn't have valid moves, then the game is over
-        if(!gameState.getPlayerTurn().hasValidMoves(Board.this)) {
-            gameState.setGameOver(true);
-            System.out.println("Game is over!");
-        }*/
     }
 
     /*
@@ -190,10 +193,45 @@ public class Board extends JPanel {
     }
 
     /**
+     * Generate moves for the current board state
+     * @param player the {@code Player} to generate moves for
+     */
+    public void generateMovesForPlayer(Player player) {
+
+        // Clear all moves for the given player
+        getMovesForPlayer(player).clear();
+
+        // Clear all valid moves for each piece
+        player.getPieces().forEach(Piece::clearValidMoves);
+
+        // Generate moves for all pieces owned by me
+        getTileMap().values().stream()
+                .filter(tile -> tile.isOccupied() && player.equals(tile.getPiece().getOwner()))
+                .forEach(tile -> tile.getPiece().addMovesToBoard(this, tile));
+    }
+
+    /**
      * Map of tiles on the given board
      * @return all of the tiles for the given board
      */
     public Map<Position, Tile> getTileMap() { return this.tileMap; }
+
+    /**
+     * Get all moves for each player and piece that player controls
+     * @return all of the available moves for each piece players control
+     */
+    public Map<Piece, Set<Move>> getMovesForPlayer(Player player) {
+        return this.movesForPlayers.getOrDefault(player, new HashMap<>());
+    }
+
+    /**
+     * Get moves for a given piece
+     * @param piece the {@code Piece} to get moves for
+     * @return the {@code Set<Move>} for the given piece
+     */
+    public Set<Move> getMovesForPiece(Piece piece) {
+        return getMovesForPlayer(piece.getOwner()).getOrDefault(piece, new HashSet<>());
+    }
 
     /**
      * Map of players based on player color (White and Black)

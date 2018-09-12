@@ -11,48 +11,11 @@ import com.chess.engine.pieces.King;
 import com.chess.engine.pieces.Pawn;
 import com.chess.engine.pieces.Piece;
 import com.chess.engine.pieces.Rook;
-import com.chess.engine.sound.SoundUtils;
 
 import java.util.Collection;
 import java.util.function.Predicate;
 
 public class MoveUtils {
-
-    private enum MoveType {
-        CASTLE {
-            @Override
-            void playSound() {
-                SoundUtils.playMoveSound("castle");
-            }
-        },
-        CAPTURE {
-            @Override
-            void playSound() {
-                SoundUtils.playMoveSound("capture2");
-            }
-        },
-        REGULAR {
-            @Override
-            void playSound() {
-                SoundUtils.playMoveSound("mov2");
-            }
-        },
-        CHECK {
-            @Override
-            void playSound() {
-                SoundUtils.playMoveSound("check1");
-            }
-        },
-        INVALID {
-            @Override
-            void playSound() {
-                SoundUtils.playMoveSound("invalid");
-            }
-        };
-
-        abstract void playSound();
-
-    }
 
     /**
      * Performs a test move to determine whether it is valid to actually do that move
@@ -73,11 +36,8 @@ public class MoveUtils {
         Player opposingPlayer = currentPlayer.opposite(testBoard);
 
         // Perform a test move
+        System.out.println("Updating game state for test board");
         updateGameState(testBoard, originTile, destinationTile, true);
-        System.out.println("------------------");
-        System.out.println(board);
-        System.out.println("Move: " + testBoard.getMoveHistory().getLatestMove());
-        System.out.println(testBoard);
 
         // Determine whether the test move was valid (current player cannot be in check by opposing player)
         boolean isValid = isKingInCheck(testBoard, opposingPlayer, currentPlayer) == null;
@@ -272,17 +232,7 @@ public class MoveUtils {
         board.getMoveHistory().addMove(new Move(draggedPiece, tileToMoveFrom, capturedPiece, tileToMoveTo));
 
         // Update each player's moves for next turn
-        board.getPlayers().values().forEach(player -> {
-
-            // Clear out valid moves for the piece after it moves
-            for (Piece piece : player.getPieces()) {
-                piece.clearValidMoves();
-            }
-
-            // Populate moves for current game state
-            player.populateMoves(board);
-        });
-
+        board.getPlayers().values().forEach(board::generateMovesForPlayer);
 
         // If current player checked opponent, play checking sound
         if(isKingInCheck(board, currentPlayer, opposingPlayer) != null) {
@@ -326,15 +276,16 @@ public class MoveUtils {
 
     /**
      * Check whether a given tile is targeted by a specific player
-     * @param targetingPlayer the player to check if they target a tile with a piece
-     * @param destination the destination tile to consider
-     * @return true if the tile is targeted, false if not
+     * @param board the {@code Board} to check on
+     * @param targetingPlayer the {@code Player} to check if they target a tile with a piece
+     * @param destination the destination {@code Tile} to consider
+     * @return {@code true} if the tile is targeted, {@code false} if not
      */
-    public static Piece isTileTargeted(Player targetingPlayer, Position destination) {
+    public static Piece isTileTargeted(Board board, Player targetingPlayer, Position destination) {
         // Get all moves for opposing player
         // And check if that piece has a move with same location as the destination tile
         Predicate<Move> movesMatch = move -> move.getDestination().getPosition().equals(destination);
-        return targetingPlayer.getMovesForPieces().values().stream()
+        return board.getMovesForPlayer(targetingPlayer).values().stream()
                 .flatMap(Collection::stream)
                 .filter(movesMatch)
                 .map(Move::getMovedPiece).findFirst().orElse(null);
@@ -348,6 +299,6 @@ public class MoveUtils {
      * @return {@code true} if in owner of king is in check, {@code false} if not
      */
     private static Piece isKingInCheck(Board board, Player playerToCheck, Player ownerOfKing) {
-        return isTileTargeted(playerToCheck, board.getKingPosition(ownerOfKing));
+        return isTileTargeted(board, playerToCheck, board.getKingPosition(ownerOfKing));
     }
 }

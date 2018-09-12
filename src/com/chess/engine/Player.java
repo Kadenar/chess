@@ -25,9 +25,6 @@ public class Player {
     // Pieces captured by opponent
     private List<Piece> capturedPieces = new ArrayList<>(ChessConsts.MAX_PIECES);
 
-    // Map of moves for each piece player owns
-    private Map<Piece, Set<Move>> moves = new HashMap<>(ChessConsts.MAX_PIECES);
-
     // The available colors for a player
     public enum Color {
         WHITE {
@@ -95,40 +92,6 @@ public class Player {
     }
 
     /**
-     * Populate all possible moves given the current game state
-     * NOTE - This is to be called whenever performing a move or initializing the game
-     * @param board the current {@code Board} to populate moves from / for
-     */
-    public void populateMoves(Board board) {
-
-        // Clear out valid moves
-        moves.clear();
-
-        // Filter out pieces not owned by me
-        Predicate<Tile> sameOwner = tile -> tile.isOccupied() && this.equals(tile.getPiece().getOwner());
-
-        // Consumer for generating the move for a piece
-        Consumer<Tile> generateMoves = tile -> {
-            Piece pieceOnTile = tile.getPiece();
-            Set<Move> movesForPiece = pieceOnTile.generateMoves(board, tile);
-            moves.put(pieceOnTile, movesForPiece);
-        };
-
-        System.out.println("Populating moves for: " + this);
-
-        // Generate moves for all pieces owned by me
-        board.getTileMap().values().stream().filter(sameOwner).forEach(generateMoves);
-    }
-
-    /**
-     * Get all moves for this player (even if they aren't valid and might put their king in check)
-     * @return all moves for this player given current board state
-     */
-    public Map<Piece, Set<Move>> getMovesForPieces() {
-        return this.moves;
-    }
-
-    /**
      * Checks if a player has any valid moves
      * @param board the {@code Board} to check
      * @return {@code true} if has valid moves, {@code false} if no valid moves
@@ -142,7 +105,15 @@ public class Player {
      * @return {@code true} if white, {@code false} if black
      */
     public boolean isWhite() {
-        return this.getColor() == Color.WHITE;
+        return getColor() == Color.WHITE;
+    }
+
+    /**
+     * Get opposing {@code Color}
+     * @return if player is white, returns black. otherwise, returns white.
+     */
+    private Color opposite() {
+        return isWhite() ? Color.BLACK : Color.WHITE;
     }
 
     /**
@@ -151,11 +122,11 @@ public class Player {
      * @return the opposing {@code Player}
      */
     public Player opposite(Board board) {
-        return board.getPlayers().get(isWhite() ? Color.BLACK : Color.WHITE);
+        return board.getPlayers().get(opposite());
     }
 
     @Override
     public String toString() {
-        return isWhite() ? Color.WHITE.toString() : Color.BLACK.toString();
+        return getColor().toString();
     }
 }

@@ -58,15 +58,15 @@ public abstract class Piece extends JLabel {
      * @param currentTile the current {@code Tile} of the piece
      * @return set of possible moves that are possible
      */
-    public abstract Set<Move> generateMoves(Board board, Tile currentTile);
+    abstract Set<Move> generateMoves(Board board, Tile currentTile);
 
     /**
-     * Get all moves for this piece
-     * @return get the {@code Set} of moves for this piece.
-     * Includes all moves this piece can make (including ones that would put the player into check)
+     * Add the possible moves for the given piece to the board object
+     * @param board the {@code Board} to add moves to
+     * @param currentTile the {@code Tile} of the piece
      */
-    public final Set<Move> getMoves() {
-        return getOwner().getMovesForPieces().getOrDefault(this, Collections.emptySet());
+    public final void addMovesToBoard(Board board, Tile currentTile) {
+        board.getMovesForPlayer(getOwner()).put(this, generateMoves(board, currentTile));
     }
 
     /**
@@ -77,9 +77,10 @@ public abstract class Piece extends JLabel {
      * @return a {@code Set} of valid moves for this piece
      */
     public final Set<Move> getValidMoves(Board board) {
+        // TODO is there a better way to do this than having this here? We do want to cache this information, just not sure where.
         Set<Move> currentMoves = movesForTurn.getOrDefault(getOwner(), null);
         if(currentMoves == null) {
-            currentMoves = getMoves().stream()
+            currentMoves = board.getMovesForPiece(this).stream()
                     .filter(move -> MoveUtils.executeTestMove(board, move.getOrigin(), move.getDestination()))
                     .collect(Collectors.toSet());
             movesForTurn.put(getOwner(), currentMoves);

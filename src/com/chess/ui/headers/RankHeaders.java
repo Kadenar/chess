@@ -15,7 +15,7 @@ public class RankHeaders extends JPanel {
             JLabel header = new JLabel();
             header.setText(h);
             header.setHorizontalAlignment(SwingConstants.CENTER);
-            add(header);
+            this.add(header);
         }
     }
 }

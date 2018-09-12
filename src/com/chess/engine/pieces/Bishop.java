@@ -21,7 +21,7 @@ public class Bishop extends Piece {
      * @return list of valid moves the bishop can make
      */
     @Override
-    public Set<Move> generateMoves(Board board, Tile currentPosition) {
+    Set<Move> generateMoves(Board board, Tile currentPosition) {
         Set<Move> validPositions = new HashSet<>();
 
         // Up 1, over 1

@@ -2,24 +2,35 @@ package com.chess.ui;
 
 import com.chess.ChessConsts;
 import com.chess.engine.board.Board;
+import com.chess.engine.moves.MoveType;
 import com.chess.engine.sound.SoundUtils;
 import com.chess.ui.headers.FileHeaders;
 import com.chess.ui.headers.RankHeaders;
 import com.chess.ui.menus.DebugOptionsMenu;
 import com.chess.ui.menus.GameOptionsMenu;
+import com.chess.ui.panels.BoardPanel;
 import com.chess.ui.panels.GameStatePanel;
 
+import javax.swing.BoxLayout;
 import javax.swing.JFrame;
 import javax.swing.JMenuBar;
 import javax.swing.WindowConstants;
 import java.awt.BorderLayout;
 import java.awt.Dimension;
+import java.awt.FlowLayout;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
+import java.awt.GridLayout;
+
+import static com.chess.ChessConsts.BOARD_HEIGHT;
+import static com.chess.ChessConsts.BOARD_WIDTH;
+import static com.chess.ChessConsts.HISTORY_HEIGHT;
+import static com.chess.ChessConsts.HISTORY_WIDTH;
 
 public class ChessFrame extends JFrame {
 
     private final Board board;
-    private final RankHeaders rankHeaders;
-    private final FileHeaders fileHeaders;
+    private final BoardPanel boardPanel;
     private final GameStatePanel historyPanel;
 
     public ChessFrame(Board board) {
@@ -39,15 +50,14 @@ public class ChessFrame extends JFrame {
 
         // Add all headers and panels to the frame
         this.historyPanel = new GameStatePanel(board);
-        this.rankHeaders = new RankHeaders();
-        this.fileHeaders = new FileHeaders();
+        this.boardPanel = new BoardPanel(board);
         addHeadersAndPanels();
 
         // Display the frame and play opening sound
         this.setVisible(true);
 
         // Play start game sound after frame is visible
-        SoundUtils.playMoveSound("startGame");
+        MoveType.GAME_START.playSound();
     }
 
     /**
@@ -55,11 +65,23 @@ public class ChessFrame extends JFrame {
      */
     private void addHeadersAndPanels() {
         // Set content to use border layout
-        getContentPane().setLayout(new BorderLayout());
-        getContentPane().add(rankHeaders, BorderLayout.WEST);
-        getContentPane().add(fileHeaders, BorderLayout.SOUTH);
-        getContentPane().add(historyPanel, BorderLayout.EAST);
-        getContentPane().add(board.getLayeredPane(), BorderLayout.CENTER);
+        getContentPane().setLayout(new GridBagLayout());
+        GridBagConstraints constraints = new GridBagConstraints();
+        constraints.gridwidth = 1;
+        constraints.gridheight = 1;
+        constraints.weighty = 1.0;
+        constraints.fill = GridBagConstraints.BOTH;
+
+        // location / sizing for board
+        constraints.gridx = 0;
+        constraints.gridy = 0;
+        constraints.weightx = 0.0;
+        getContentPane().add(boardPanel, constraints);
+
+        // location / sizing for history
+        constraints.gridx = 1;
+        constraints.weightx = 1.0;
+        getContentPane().add(historyPanel, constraints);
     }
 
     /**

@@ -21,7 +21,7 @@ public class Queen extends Piece {
      * @return list of valid moves the queen can make
      */
     @Override
-    public Set<Move> generateMoves(Board board, Tile currentPosition) {
+    Set<Move> generateMoves(Board board, Tile currentPosition) {
         Set<Move> validPositions = new HashSet<>();
 
         // Diagonal movement

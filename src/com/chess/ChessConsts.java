@@ -11,17 +11,11 @@ public final class ChessConsts {
     public static final int MAX_PIECES = 24;
 
     public final static int WINDOW_WIDTH = 1000;
-    public final static int WINDOW_HEIGHT = 860;
+    public final static int WINDOW_HEIGHT = 760;
 
-    public final static int HISTORY_WIDTH = 250;
-    public final static int HISTORY_HEIGHT = 730;
+    public final static int HISTORY_WIDTH = WINDOW_WIDTH - 750;
+    public final static int HISTORY_HEIGHT = WINDOW_HEIGHT - 130;
 
-    public final static int BOARD_WIDTH = 700;
-    public final static int BOARD_HEIGHT = 760;
-
-    public final static int FILE_WIDTH = 750 / 8;
-    public final static int FILE_HEIGHT = WINDOW_HEIGHT;
-
-    public final static int RANK_WIDTH = 20;
-    public final static int RANK_HEIGHT = WINDOW_HEIGHT / 8;
+    public final static int BOARD_WIDTH = WINDOW_WIDTH - 275;
+    public final static int BOARD_HEIGHT = WINDOW_HEIGHT - 63;
 }
