@@ -35,14 +35,14 @@ import java.util.stream.Stream;
 
 public class MoveHistory extends JPanel {
 
+    // The board move history is for
+    private final Board board;
+
     // Last move that was performed
-    private Move lastMove;
+    private Move lastMove = null;
 
     // All moves that have been performed
     private final List<Move> allMoves;
-
-    // The board move history is for
-    private final Board board;
 
     // Move history table / scrolling
     private final JTable moveHistory = new JTable(new DefaultTableModel()) {
@@ -58,12 +58,15 @@ public class MoveHistory extends JPanel {
     private final JPanel blackPieces = new JPanel();
     private final JPanel whitePieces = new JPanel();
 
+    /**
+     * Creates a new instance for a given board
+     * @param board the {@code Board} this move history represents
+     */
     public MoveHistory(Board board) {
         super();
 
         // Backend information
         this.board = board;
-        this.lastMove = null;
         this.allMoves = new ArrayList<>();
 
         // UI components for Move History
@@ -71,6 +74,16 @@ public class MoveHistory extends JPanel {
         this.setPreferredSize(new Dimension(ChessConsts.HISTORY_WIDTH, ChessConsts.HISTORY_HEIGHT));
         addMoveHistoryPanel();
         addCapturedPiecesPanel();
+    }
+
+    /**
+     * Create move history instance with same board, and moves as the other
+     * @param other the {@code MoveHistory} to copy
+     */
+    public MoveHistory(MoveHistory other) {
+        this.board = other.board;
+        this.lastMove = other.lastMove;
+        this.allMoves = other.allMoves;
     }
 
     /**
@@ -201,12 +214,12 @@ public class MoveHistory extends JPanel {
         if(currentState.getPlayerTurn().getColor().equals(Player.Color.WHITE)) {
             int rowCount = model.getRowCount();
             if(rowCount == 0) {
-                model.addRow(new Object[] {currentState.getFullMoves() + ".", "", board.getMoveHistory().getNotationEntry(latestMove)});
+                model.addRow(new Object[] {currentState.getFullMoves() + ".", "", getNotationEntry(latestMove)});
             } else {
-                model.setValueAt(board.getMoveHistory().getNotationEntry(latestMove), rowCount - 1, 2);
+                model.setValueAt(getNotationEntry(latestMove), rowCount - 1, 2);
             }
         } else {
-            model.addRow(new Object[] {currentState.getFullMoves() + ".", board.getMoveHistory().getNotationEntry(latestMove), ""});
+            model.addRow(new Object[] {currentState.getFullMoves() + ".", getNotationEntry(latestMove), ""});
         }
 
         // Scroll to bottom of move history

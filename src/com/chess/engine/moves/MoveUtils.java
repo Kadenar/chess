@@ -24,7 +24,7 @@ public class MoveUtils {
      * @return {@code true} if move can be performed, {@code false} if move cannot be performed
      */
     public static boolean executeTestMove(Board board, Tile originatingTile, Tile targetTile) {
-        Board testBoard = new Board(board);
+        Board testBoard = new Board(board, true);
         Tile originTile = testBoard.getTileMap().get(originatingTile.getPosition());
         Piece draggedPiece = originTile.getPiece();
         Player currentPlayer = draggedPiece.getOwner();

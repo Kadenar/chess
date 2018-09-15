@@ -15,10 +15,10 @@ public class Player {
     private final Color color;
 
     // Pieces owner by the player
-    private List<Piece> ownedPieces = new ArrayList<>(ChessConsts.MAX_PIECES);
+    private List<Piece> ownedPieces;
 
     // Pieces captured by opponent
-    private List<Piece> capturedPieces = new ArrayList<>(ChessConsts.MAX_PIECES);
+    private List<Piece> capturedPieces;
 
     // The available colors for a player
     public enum Color {
@@ -42,6 +42,18 @@ public class Player {
      */
     public Player(Color color) {
         this.color = color;
+        this.ownedPieces = new ArrayList<>(ChessConsts.MAX_PIECES);
+        this.capturedPieces = new ArrayList<>(ChessConsts.MAX_PIECES);
+    }
+
+    /**
+     * Create a new {@code Player} instance with same info as the other {@code Player}
+     * @param other the {@code Player} to copy
+     */
+    public Player(Player other) {
+        this.color = other.color;
+        this.ownedPieces = new ArrayList<>(other.ownedPieces);
+        this.capturedPieces = new ArrayList<>(other.capturedPieces);
     }
 
     /**

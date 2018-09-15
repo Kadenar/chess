@@ -63,6 +63,27 @@ public class Board extends JPanel {
         this(FenUtils.getFen(otherBoard), false);
     }
 
+    public Board(Board otherBoard, boolean test) {
+        this.immutablePlayers = new HashMap<>(ChessConsts.NUM_PLAYERS);
+        otherBoard.immutablePlayers.forEach((key, value) -> this.immutablePlayers.put(key, new Player(value)));
+
+        this.kingPositionMap = new HashMap<>(ChessConsts.NUM_PLAYERS);
+        otherBoard.kingPositionMap.forEach((key, value) -> this.kingPositionMap.put(new Player(key.getColor()), value));
+
+        this.tileMap = new LinkedHashMap<>(ChessConsts.NUM_TILES);
+        otherBoard.tileMap.forEach((key, value) -> this.tileMap.put(key, new Tile(value)));
+
+        this.movesForPlayers = new HashMap<>(ChessConsts.NUM_PLAYERS);
+        this.validMovesForPlayers = new HashMap<>(ChessConsts.NUM_PLAYERS);
+        otherBoard.immutablePlayers.entrySet().forEach(entry -> {
+           this.movesForPlayers.put(entry.getValue(), new HashMap<>(500));
+           this.validMovesForPlayers.put(entry.getValue(), new HashMap<>(500));
+        });
+
+        this.gameState = new GameState(otherBoard.gameState);
+        this.moveHistory = new MoveHistory(otherBoard.moveHistory);
+    }
+
     /**
      * Create a board with UI always
      * @param fen the fen to load the board with
@@ -165,39 +186,20 @@ public class Board extends JPanel {
      * @param positionOnBoard the {@code Position} to construct the piece at
      */
     void constructPiece(final char ch, final Position positionOnBoard) {
-        Piece piece = null;
-
         // Determine the color this piece belongs to
-        Player color = Character.isUpperCase(ch) ? getPlayers().get(Player.Color.WHITE)
+        Player owner = Character.isUpperCase(ch) ? getPlayers().get(Player.Color.WHITE)
                                                  : getPlayers().get(Player.Color.BLACK);
 
-        // Determine the type of piece
-        switch(Character.toLowerCase(ch)) {
-            case 'p':
-                piece = new Pawn(color);
-                break;
-            case 'b':
-                piece = new Bishop(color);
-                break;
-            case 'r':
-                piece = new Rook(color);
-                break;
-            case 'n':
-                piece = new Knight(color);
-                break;
-            case 'q':
-                piece = new Queen(color);
-                break;
-            case 'k':
-                piece = new King(color);
-                setKingPosition(color, positionOnBoard);
-                break;
-            default:
-                break;
+        // Get the type of piece to be created
+        Piece piece = BoardUtils.getTypeOfPieceToCreate(ch, owner);
+
+        // If the type of piece is a king, set king position
+        if(piece instanceof King) {
+            setKingPosition(owner, positionOnBoard);
         }
 
         // Add the piece for that player
-        color.addPiece(piece);
+        owner.addPiece(piece);
 
         // Add the piece to the tile
         getTileMap().put(positionOnBoard, new Tile(positionOnBoard, piece));

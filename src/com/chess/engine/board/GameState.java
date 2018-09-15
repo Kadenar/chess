@@ -36,6 +36,16 @@ public class GameState {
         // TODO - time controls
     }
 
+    GameState(GameState other) {
+        this.playerTurn = other.playerTurn;
+        this.gameOver = other.gameOver;
+        this.stalemate = other.stalemate;
+        this.castling = other.castling;
+        this.enPassant = other.enPassant;
+        this.halfMoves = other.halfMoves;
+        this.fullMoves = other.fullMoves;
+    }
+
     // Getters
     public Player getPlayerTurn() { return this.playerTurn; }
     public String getCastles() { return this.castling; }

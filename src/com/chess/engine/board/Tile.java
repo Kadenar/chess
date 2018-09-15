@@ -13,12 +13,20 @@ public class Tile extends JPanel {
     private Piece piece;
     private boolean isHighlighted = false;
 
-    // Empty tile
+
+    /**
+     * Construct a tile at given position without any piece
+     * @param pos the positino of the tile
+     */
     public Tile(Position pos) {
         this(pos, null);
     }
 
-    // Tile with potential piece
+    /**
+     * Construct a tile at given position with or without a piece
+     * @param pos the position of the tile
+     * @param piece the piece on the tile, or null if not piece
+     */
     public Tile(Position pos, Piece piece) {
         super();
         this.coordinate = pos;
@@ -28,17 +36,27 @@ public class Tile extends JPanel {
     }
 
     /**
+     * Construct a tile based on another tile
+     * @param other the other tile to copy
+     */
+    public Tile(Tile other) {
+        this.coordinate = new Position(other.coordinate);
+        Piece otherPiece = other.getPiece();
+        if(otherPiece != null) {
+            this.piece = BoardUtils.getTypeOfPieceToCreate(otherPiece.toString().charAt(0), otherPiece.getOwner());
+        } else {
+            this.piece = null;
+        }
+    }
+
+    /**
      * Highlight the given tile
-     * @param highlight whether the tile should be highlighted
+     * @param highlight {@code true} if the tile should be highlighted,
+ *                      {@code false} if it should not be highlighted
      */
     void highlightTile(boolean highlight, Color color) {
-        if(highlight) {
-            setBackground(color);
-            isHighlighted = true;
-        } else {
-            setBackground(isLight() ? Color.WHITE : Color.GRAY);
-            isHighlighted = false;
-        }
+        setBackground(highlight ? color : (isLight() ? Color.WHITE : Color.GRAY));
+        isHighlighted = highlight;
     }
 
     /**

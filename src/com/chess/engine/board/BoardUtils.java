@@ -1,6 +1,14 @@
 package com.chess.engine.board;
 
+import com.chess.engine.Player;
 import com.chess.engine.Position;
+import com.chess.engine.pieces.Bishop;
+import com.chess.engine.pieces.King;
+import com.chess.engine.pieces.Knight;
+import com.chess.engine.pieces.Pawn;
+import com.chess.engine.pieces.Piece;
+import com.chess.engine.pieces.Queen;
+import com.chess.engine.pieces.Rook;
 
 public class BoardUtils {
 
@@ -45,5 +53,42 @@ public class BoardUtils {
      */
     public static int deltaCol(final Tile pos1, final Tile pos2) {
         return Math.abs(pos1.getPosition().getColumn() - pos2.getPosition().getColumn());
+    }
+
+    /**
+     * Get the type of piece to create
+     * @param ch the character for type of piece
+     * @param owner the owner of the piece
+     * @return the type of piece that is created, or null if not a valid type of piece
+     */
+    public static Piece getTypeOfPieceToCreate(final char ch, Player owner) {
+
+        Piece piece = null;
+
+        // Determine the type of piece
+        switch(Character.toLowerCase(ch)) {
+            case 'p':
+                piece = new Pawn(owner);
+                break;
+            case 'b':
+                piece = new Bishop(owner);
+                break;
+            case 'r':
+                piece = new Rook(owner);
+                break;
+            case 'n':
+                piece = new Knight(owner);
+                break;
+            case 'q':
+                piece = new Queen(owner);
+                break;
+            case 'k':
+                piece = new King(owner);
+                break;
+            default:
+                break;
+        }
+
+        return piece;
     }
 }
