@@ -7,11 +7,29 @@ import com.chess.engine.Position;
 import com.chess.engine.moves.Move;
 import com.chess.engine.moves.MoveHistory;
 import com.chess.engine.moves.MoveUtils;
-import com.chess.engine.pieces.*;
+import com.chess.engine.pieces.Bishop;
+import com.chess.engine.pieces.King;
+import com.chess.engine.pieces.Knight;
+import com.chess.engine.pieces.Pawn;
+import com.chess.engine.pieces.Piece;
+import com.chess.engine.pieces.Queen;
+import com.chess.engine.pieces.Rook;
 
-import javax.swing.*;
-import java.awt.*;
-import java.util.*;
+import javax.swing.JLabel;
+import javax.swing.JLayeredPane;
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import java.awt.Color;
+import java.awt.Cursor;
+import java.awt.Dimension;
+import java.awt.GridLayout;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedHashMap;
+import java.util.Map;
+import java.util.Set;
+import java.util.TreeMap;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
@@ -20,9 +38,7 @@ public class Board extends JPanel {
     // All tiles for the current board
     private final Map<Position, Tile> tileMap;
 
-    // Map of tiles that contain a piece which can move
-    private final Map<Tile, Boolean> highlightedTiles;
-
+    // Map of players
     private final Map<Player.Color, Player> immutablePlayers;
 
     // Contains the king position for each player
@@ -32,12 +48,12 @@ public class Board extends JPanel {
     private final Map<Player, Map<Integer, Map<Piece, Set<Move>>>> movesForPlayers;
     private final Map<Player, Map<Integer, Map<Piece, Set<Move>>>> validMovesForPlayers;
 
-    // The current game state
+    // The current game state / move history
     private final GameState gameState;
     private final MoveHistory moveHistory;
 
-    // Pane the board is added to
-    private JLayeredPane layeredPane;
+    // Create layered pane for dragging purposes
+    private JLayeredPane layeredPane = new JLayeredPane();
 
     /**
      * Clone the other board to create another instance without UI
@@ -66,7 +82,6 @@ public class Board extends JPanel {
 
         // Add our tiles
         this.tileMap = new LinkedHashMap<>(ChessConsts.NUM_TILES);
-        this.highlightedTiles = new HashMap<>(ChessConsts.NUM_TILES);
 
         // Add our players
         Map<Player.Color, Player> players = new HashMap<>(ChessConsts.NUM_PLAYERS);
@@ -79,8 +94,8 @@ public class Board extends JPanel {
         this.validMovesForPlayers = new HashMap<>(ChessConsts.NUM_PLAYERS);
         immutablePlayers.forEach((key, value) -> {
             // Use 500 as a chess game should never reach this # of turns
-            this.movesForPlayers.put(value, new HashMap<>(500));
-            this.validMovesForPlayers.put(value, new HashMap<>(500));
+            this.movesForPlayers.put(value, new HashMap<>(300));
+            this.validMovesForPlayers.put(value, new HashMap<>(300));
         });
 
         // Initialize the current game state, move history and king positions
@@ -93,8 +108,6 @@ public class Board extends JPanel {
 
         // Only add UI portion if desired
         if(withUI) {
-            // Create layered pane for dragging purposes
-            this.layeredPane = new JLayeredPane();
             // TODO need to figure out how to add layout here for resizing
             //layeredPane.setLayout(new FlowLayout());
             this.setBounds(0, 0, ChessConsts.BOARD_WIDTH, ChessConsts.BOARD_HEIGHT);
@@ -106,7 +119,7 @@ public class Board extends JPanel {
             this.addMouseMotionListener(listener);
 
             // Display the pieces on the board
-            this.displayBoard();
+            displayBoard();
 
             // Add the myself to our layered pane's default layer
             this.layeredPane.add(this, JLayeredPane.DEFAULT_LAYER);
@@ -114,10 +127,18 @@ public class Board extends JPanel {
     }
 
     /**
+     * Reset the {@code Board} to Default Position
+     */
+    public void reset() {
+        loadBoardFromFen(FenUtils.DEFAULT_POSITION);
+        displayBoard();
+    }
+
+    /**
      * Updates reference to game board and recreates it with given fen
      * @param fen a valid fen string to update the board with. Providing an invalid fen will result in an error message.
      */
-    public void loadBoardFromFen(final String fen) {
+    private void loadBoardFromFen(final String fen) {
 
         // Clear each player's pieces / captured pieces
         getPlayers().values().forEach(player -> {
@@ -127,22 +148,21 @@ public class Board extends JPanel {
 
         // Clear tiles / highlights on the board
         getTileMap().clear();
-        highlightedTiles.clear();
 
         try {
+
             // Load in the fen string
             FenUtils.loadFen(this, fen);
-
-            // Initialize highlighted tiles to same as our map of tiles and default not highlighted
-            getTileMap().forEach((key, value) -> highlightedTiles.put(value, false));
 
         } catch (FenUtils.FenException e) {
             System.err.println(e.getMessage());
         }
     }
 
-    /*
+    /**
      * Construct a game piece at the given position
+     * @param ch the character representing the piece
+     * @param positionOnBoard the {@code Position} to construct the piece at
      */
     void constructPiece(final char ch, final Position positionOnBoard) {
         Piece piece = null;
@@ -187,11 +207,11 @@ public class Board extends JPanel {
      * Generate moves for the current board state
      * @param player the {@code Player} to generate moves for
      */
-    public void generateMovesForPlayer(Player player) {
+    public void generateMovesForPlayer(Player player, int turn) {
         // Generate moves for all pieces owned by me
         getTileMap().values().stream()
                 .filter(tile -> tile.isOccupied() && player.equals(tile.getPiece().getOwner()))
-                .forEach(tile -> tile.getPiece().addMovesToBoard(this, tile));
+                .forEach(tile -> tile.getPiece().addMovesToBoard(this, tile, turn));
     }
 
     /**
@@ -216,14 +236,7 @@ public class Board extends JPanel {
      */
     public Map<Piece, Set<Move>> getMovesForTurn(int turn, Player player) {
         Map<Integer, Map<Piece, Set<Move>>> movesForPlayer = getMovesForPlayer(player);
-        Map<Piece, Set<Move>> movesForTurn = movesForPlayer.get(turn);
-
-        if(movesForTurn == null) {
-            movesForTurn = new HashMap<>();
-            movesForPlayer.put(turn, movesForTurn);
-        }
-
-        return movesForTurn;
+        return movesForPlayer.computeIfAbsent(turn, k -> new HashMap<>());
     }
 
     /**
@@ -234,14 +247,7 @@ public class Board extends JPanel {
      */
     public Set<Move> getMovesForPiece(int turn, Piece piece) {
         Map<Piece, Set<Move>> movesForTurn = getMovesForTurn(turn, piece.getOwner());
-        Set<Move> movesForPiece = movesForTurn.get(piece);
-
-        if(movesForPiece == null) {
-            movesForPiece = new HashSet<>();
-            movesForTurn.put(piece, movesForPiece);
-        }
-
-        return movesForPiece;
+        return movesForTurn.computeIfAbsent(piece, k -> new HashSet<>());
     }
 
     /**
@@ -254,35 +260,14 @@ public class Board extends JPanel {
 
     /**
      * Get valid moves for a specific player on a given turn
+     * NOTE - this method is expensive as it evaluates all pieces on the board
      * @param player the {@code Player} to get moves for
      * @param turn the {@code int} representing what turn to get moves for
      * @return the {@code Map<Piece, Set<Move>>} of moves for the @{code Player} on the given turn
      */
-    public Map<Piece, Set<Move>> getValidMovesForTurn(int turn, Player player) {
-        // Get valid moves for a given turn
+    private Map<Piece, Set<Move>> getValidMovesForTurn(int turn, Player player) {
         Map<Integer, Map<Piece, Set<Move>>> validMovesForPlayer = getValidMovesForPlayer(player);
-        Map<Piece, Set<Move>> validMovesForTurn = validMovesForPlayer.get(turn);
-
-        // If moves for the given turn have not been generated yet, then create them
-        if(validMovesForTurn == null) {
-            validMovesForTurn = new HashMap<>();
-            int fullMoves = getGameState().getFullMoves();
-
-            // For each piece, execute a test move and add valid moves for the turn
-            for(Piece piece : player.getPieces()) {
-                Set<Move> validMovesForPiece = getMovesForPiece(fullMoves, piece).stream()
-                        .filter(move -> MoveUtils.executeTestMove(this, move.getOrigin(), move.getDestination()))
-                        .collect(Collectors.toSet());
-
-                validMovesForTurn.put(piece, validMovesForPiece);
-            }
-
-            // Put valid moves into our map for the current player
-            validMovesForPlayer.put(fullMoves, validMovesForTurn);
-        }
-
-        // Return valid moves for the turn for the given player
-        return validMovesForTurn;
+        return validMovesForPlayer.computeIfAbsent(turn, k -> new HashMap<>());
     }
 
     /**
@@ -294,7 +279,18 @@ public class Board extends JPanel {
      * @return the {@code Set<Move>} for the given piece on the given turn
      */
     public Set<Move> getValidMovesForPiece(int turn, Piece piece) {
-        return getValidMovesForTurn(turn, piece.getOwner()).getOrDefault(piece, Collections.emptySet());
+        Map<Piece, Set<Move>> validMovesForTurn = getValidMovesForTurn(turn, piece.getOwner());
+        Set<Move> validMovesForPiece = validMovesForTurn.get(piece);
+
+        if(validMovesForPiece == null) {
+            Predicate<Move> validMove = move -> MoveUtils.executeTestMove(this, move.getOrigin(), move.getDestination());
+            validMovesForPiece = getMovesForPiece(turn, piece).parallelStream().filter(validMove)
+                                .distinct().collect(Collectors.toSet());
+
+            validMovesForTurn.put(piece, validMovesForPiece);
+        }
+
+        return validMovesForPiece;
     }
 
     /**
@@ -315,10 +311,16 @@ public class Board extends JPanel {
      */
     public MoveHistory getMoveHistory() { return this.moveHistory; }
 
+    /**
+     * Undo the most recent move
+     */
     public void undo() {
         moveHistory.undo();
     }
 
+    /**
+     * Redo the most recent move
+     */
     public void redo() {
         moveHistory.redo();
     }
@@ -355,10 +357,8 @@ public class Board extends JPanel {
         this.removeAll();
 
         // Remove highlight from all tiles that were previously highlighted
-        highlightedTiles.entrySet().stream().filter(Map.Entry::getValue).forEach(entry -> {
-            entry.setValue(false);
-            entry.getKey().highlightTile(false);
-        });
+        getTileMap().values().stream().filter(Tile::isHighlighted)
+                .forEach(tile -> tile.highlightTile(false, null));
 
         // Add all of our tiles to the chess panel
         getTileMap().values().forEach(tile -> {
@@ -377,12 +377,14 @@ public class Board extends JPanel {
                 Piece piece = tile.getPiece();
                 tile.add(piece);
 
+                // TODO -> Not working properly
+                piece.setCursor(Cursor.getPredefinedCursor(Cursor.MOVE_CURSOR));
+
                 // Highlight tiles containing pieces with valid moves for current player
                 if(GameSettings.INSTANCE.isEnableHighlighting() && piece.getOwner().equals(getGameState().getPlayerTurn())) {
                     // As long as the piece has moves, highlight it
-                    if(getValidMovesForPiece(getGameState().getFullMoves(), piece).size() > 0) {
-                        tile.setBackground(Color.GREEN);
-                        highlightedTiles.replace(tile, true);
+                    if(getValidMovesForPiece(getGameState().getFullMoves(), piece).stream().findFirst().isPresent()) {
+                        tile.highlightTile(true, Color.GREEN);
                     }
                 }
             }
@@ -393,7 +395,7 @@ public class Board extends JPanel {
 
         // If player doesn't have valid moves, then the game is over
         // TODO -> If the game is over before frame loads, then pane shows first..
-        if(!gameState.getPlayerTurn().hasValidMoves(this)) {
+        if(!gameState.getPlayerTurn().hasValidMove(this)) {
             gameState.setGameOver(true);
             String[] options = {"Yes", "No", "Quit" };
             JOptionPane.showOptionDialog(this, "Game is ended in " + (gameState.isStaleMate() ? " stale mate." : " check mate.")

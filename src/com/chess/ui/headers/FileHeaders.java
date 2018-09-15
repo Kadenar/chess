@@ -1,7 +1,9 @@
 package com.chess.ui.headers;
 
-import javax.swing.*;
-import java.awt.*;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.SwingConstants;
+import java.awt.GridLayout;
 
 public class FileHeaders extends JPanel{
     private static final String[] headers = {"a", "b", "c", "d", "e", "f", "g", "h" };

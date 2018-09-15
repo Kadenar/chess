@@ -2,7 +2,7 @@ import com.chess.engine.board.Board;
 import com.chess.engine.board.FenUtils;
 import com.chess.ui.ChessFrame;
 
-import javax.swing.*;
+import javax.swing.SwingUtilities;
 
 public class Chess {
 

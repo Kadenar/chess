@@ -2,29 +2,37 @@ package com.chess.ui;
 
 import com.chess.ChessConsts;
 import com.chess.engine.board.Board;
+import com.chess.engine.moves.MoveHistory;
 import com.chess.engine.moves.MoveType;
 import com.chess.ui.menus.DebugOptionsMenu;
 import com.chess.ui.menus.GameOptionsMenu;
 import com.chess.ui.panels.BoardPanel;
-import com.chess.ui.panels.GameStatePanel;
 
-import javax.swing.*;
-import java.awt.*;
+import javax.swing.JFrame;
+import javax.swing.JMenuBar;
+import javax.swing.WindowConstants;
+import java.awt.Dimension;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
 
 public class ChessFrame extends JFrame {
 
     private final Board board;
     private final BoardPanel boardPanel;
-    private final GameStatePanel historyPanel;
+    private final MoveHistory history;
 
     public ChessFrame(Board board) {
         super("Chess");
-        this.board = board;
         this.setMinimumSize(new Dimension(ChessConsts.WINDOW_WIDTH, ChessConsts.WINDOW_HEIGHT));
         JFrame.setDefaultLookAndFeelDecorated(true);
         this.setSize(ChessConsts.WINDOW_WIDTH, ChessConsts.WINDOW_HEIGHT);
         this.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
         this.setResizable(true);
+
+        // Initialize board and panel as well as history
+        this.board = board;
+        this.boardPanel = new BoardPanel(board);
+        this.history = board.getMoveHistory();
 
         // Add game options menu
         JMenuBar menuBar = new JMenuBar();
@@ -33,8 +41,6 @@ public class ChessFrame extends JFrame {
         setJMenuBar(menuBar);
 
         // Add all headers and panels to the frame
-        this.historyPanel = new GameStatePanel(board);
-        this.boardPanel = new BoardPanel(board);
         addHeadersAndPanels();
 
         // Display the frame and play opening sound
@@ -65,7 +71,7 @@ public class ChessFrame extends JFrame {
         // location / sizing for history
         constraints.gridx = 1;
         constraints.weightx = 1.0;
-        getContentPane().add(historyPanel, constraints);
+        getContentPane().add(history, constraints);
     }
 
     /**
@@ -80,6 +86,6 @@ public class ChessFrame extends JFrame {
      * Get our history panel
      * @return the history of moves
      */
-    public GameStatePanel getHistoryPanel() { return this.historyPanel; }
+    public MoveHistory getHistoryPanel() { return this.history; }
 
 }

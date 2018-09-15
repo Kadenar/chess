@@ -1,6 +1,6 @@
 package com.chess.engine;
 
-import java.awt.*;
+import java.awt.Point;
 import java.util.Objects;
 
 /*

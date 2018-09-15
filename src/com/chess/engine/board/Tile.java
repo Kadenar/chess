@@ -3,13 +3,15 @@ package com.chess.engine.board;
 import com.chess.engine.Position;
 import com.chess.engine.pieces.Piece;
 
-import javax.swing.*;
-import java.awt.*;
+import javax.swing.BorderFactory;
+import javax.swing.JPanel;
+import java.awt.Color;
 
 public class Tile extends JPanel {
 
     private final Position coordinate;
     private Piece piece;
+    private boolean isHighlighted = false;
 
     // Empty tile
     public Tile(Position pos) {
@@ -20,7 +22,7 @@ public class Tile extends JPanel {
     public Tile(Position pos, Piece piece) {
         super();
         this.coordinate = pos;
-        highlightTile(false);
+        highlightTile(false, null);
         setBorder(BorderFactory.createLineBorder(Color.YELLOW, 1));
         setPiece(piece);
     }
@@ -29,12 +31,22 @@ public class Tile extends JPanel {
      * Highlight the given tile
      * @param highlight whether the tile should be highlighted
      */
-    void highlightTile(boolean highlight) {
+    void highlightTile(boolean highlight, Color color) {
         if(highlight) {
-            setBackground(Color.MAGENTA);
+            setBackground(color);
+            isHighlighted = true;
         } else {
             setBackground(isLight() ? Color.WHITE : Color.GRAY);
+            isHighlighted = false;
         }
+    }
+
+    /**
+     * Determine whether this tile is currently highlighted
+     * @return {@code true} if tile is highlighted, {@code false} if it is not
+     */
+    boolean isHighlighted() {
+        return this.isHighlighted;
     }
 
     /**

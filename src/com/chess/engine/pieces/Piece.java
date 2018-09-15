@@ -9,8 +9,9 @@ import com.chess.engine.moves.Direction;
 import com.chess.engine.moves.Move;
 
 import javax.imageio.ImageIO;
-import javax.swing.*;
-import java.awt.*;
+import javax.swing.ImageIcon;
+import javax.swing.JLabel;
+import java.awt.Image;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
@@ -59,9 +60,11 @@ public abstract class Piece extends JLabel {
      * Add the possible moves for the given piece to the board object
      * @param board the {@code Board} to add moves to
      * @param currentTile the {@code Tile} of the piece
+     * @param turn the turn to add moves to the board for
      */
-    public final void addMovesToBoard(Board board, Tile currentTile) {
-        board.getMovesForTurn(board.getGameState().getFullMoves(), getOwner()).put(this, generateMoves(board, currentTile));
+    public final void addMovesToBoard(Board board, Tile currentTile, int turn) {
+        board.getMovesForTurn(turn, getOwner())
+                .put(this, generateMoves(board, currentTile));
     }
 
     /**
@@ -73,7 +76,7 @@ public abstract class Piece extends JLabel {
      * @return the positions that are valid to be moved to
      */
     final Set<Move> addPositionsForDirection(Board board, Piece piece, Tile currentTile,
-                                       Direction dir, boolean isDiagonal) {
+                                             Direction dir, boolean isDiagonal) {
         Set<Move> positions = new HashSet<>();
 
         // Diagonal movement
@@ -122,7 +125,8 @@ public abstract class Piece extends JLabel {
      * @param rowOffset the row offset (up and down)
      * @return the positions that are valid to be moved to
      */
-    private Set<Move> addPositionsForVertical(Board board, Piece piece, Tile currentTile, int rowOffset) {
+    private Set<Move> addPositionsForVertical(Board board, Piece piece,
+                                              Tile currentTile, int rowOffset) {
         return addPositionsForOffset(board, piece, currentTile, 0, rowOffset);
     }
 
@@ -133,7 +137,8 @@ public abstract class Piece extends JLabel {
      * @param colOffset the column offset (left and right)
      * @return the positions that are valid to be moved to
      */
-    private Set<Move> addPositionsForHorizontal(Board board, Piece piece, Tile currentTile, int colOffset) {
+    private Set<Move> addPositionsForHorizontal(Board board, Piece piece,
+                                                Tile currentTile, int colOffset) {
         return addPositionsForOffset(board, piece, currentTile, colOffset, 0);
     }
 
@@ -145,7 +150,8 @@ public abstract class Piece extends JLabel {
      * @param rowOffSet the row offset (up and down movement)
      * @return the positions that are valid to be moved to
      */
-     final Set<Move> addPositionsForOffset(Board board, Piece piece, Tile currentTile, int colOffset, int rowOffSet) {
+     final Set<Move> addPositionsForOffset(Board board, Piece piece, Tile currentTile,
+                                           int colOffset, int rowOffSet) {
         Position currentPosition = currentTile.getPosition();
         boolean isPawn = piece instanceof Pawn;
         int maxSpacesMoved = piece.getMaxSpacesMoved();
@@ -196,11 +202,7 @@ public abstract class Piece extends JLabel {
             }
 
             // Add our position if it was not occupied or was an opposing piece and does not cause check
-            if(isPawn && offSetPos.isPromotionSquare(piece.getOwner())) {
-                positionsSet.add(new Move(piece, currentTile, offSetTilePiece, offSetTile,true));
-            } else {
-                positionsSet.add(new Move(piece, currentTile, offSetTilePiece, offSetTile));
-            }
+            positionsSet.add(new Move(piece, currentTile, offSetTilePiece, offSetTile));
 
             // Break if the tile was occupied as we can't go past an occupied tile
             if(offSetTileIsOccupied) {

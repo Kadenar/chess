@@ -63,7 +63,7 @@ public class FenUtils {
         gameState.setFullMoves(getFullMove(tokens[5]));
 
         // Populate moves for each player
-        board.getPlayers().values().forEach(board::generateMovesForPlayer);
+        board.getPlayers().values().forEach(player -> board.generateMovesForPlayer(player, gameState.getFullMoves()));
     }
 
     /**
@@ -161,7 +161,7 @@ public class FenUtils {
         sb.append(' ').append(state.getHalfMoves());
 
         /*========== 6th field : full move number ==========*/
-        sb.append(' ').append(state.getFullMoves() / 2 + 1);
+        sb.append(' ').append(state.getFullMoves());
 
         return sb.toString();
     }

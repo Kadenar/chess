@@ -1,20 +1,18 @@
 package com.chess.engine.board;
 
-import com.chess.engine.GameSettings;
 import com.chess.engine.Position;
-import com.chess.engine.moves.Move;
 import com.chess.engine.moves.MoveUtils;
 import com.chess.engine.pieces.Piece;
 import com.chess.ui.ChessFrame;
 
-import javax.swing.*;
-import java.awt.*;
+import javax.swing.JLayeredPane;
+import javax.swing.SwingUtilities;
+import java.awt.Color;
+import java.awt.MouseInfo;
+import java.awt.Point;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Set;
 
 /**
  * Handle mouse interactions with pieces on the board
@@ -24,7 +22,6 @@ class BoardListener implements MouseListener, MouseMotionListener {
     private Tile originatingTile = null;
     private Piece originatingPiece = null;
     private int xAdjustment, yAdjustment;
-    private List<Tile> targetMoveTiles = new ArrayList<>();
     private final Board board;
 
     BoardListener(Board board) {
@@ -41,34 +38,17 @@ class BoardListener implements MouseListener, MouseMotionListener {
     }
 
     /**
-     * Add indicators to the UI for tiles we can move to
-     * only if highlighting is enabled
+     * Add or remove indicators to the UI for tiles we can move to
+     * @param enabled {@code true} to highlight the tiles, and {@code false} to remove highlighting
      */
-    private void addIndicators() {
-        if(GameSettings.INSTANCE.isEnableHighlighting()) {
-            Set<Move> validMoves = board.getValidMovesForPiece(board.getGameState().getFullMoves(), originatingPiece);
-            for (Move validMove : validMoves) {
-                Tile destination = validMove.getDestination();
-                targetMoveTiles.add(destination);
-                destination.highlightTile(true);
-            }
-        }
-    }
-
-    /**
-     * Remove all indicators from the layered pane
-     */
-    private void removeIndicators() {
-        if(GameSettings.INSTANCE.isEnableHighlighting()) {
-            for (Tile targetTile : targetMoveTiles) {
-                targetTile.highlightTile(false);
-            }
-        }
+    private void toggleIndicators(boolean enabled) {
+        board.getValidMovesForPiece(board.getGameState().getFullMoves(), originatingPiece)
+                .forEach(move -> move.getDestination().highlightTile(enabled, Color.MAGENTA));
     }
 
     /**
      * Prevent Player from moving a piece if it is not their turn
-     * @return whether the Player can pickup a given piece
+     * @return whether the {@code Player} can pickup a given piece
      */
     private boolean canPickupPiece() {
         return originatingPiece != null && originatingPiece.getOwner().equals(board.getGameState().getPlayerTurn());
@@ -94,9 +74,6 @@ class BoardListener implements MouseListener, MouseMotionListener {
     @Override
     public void mousePressed(MouseEvent evt) {
 
-        // Clear out target moves
-        targetMoveTiles.clear();
-
         // Get mouse press location in tile coordinate system
         this.originatingTile = board.getTileMap().getOrDefault(getTilePositionFromMouse(), null);
 
@@ -115,7 +92,7 @@ class BoardListener implements MouseListener, MouseMotionListener {
                 yAdjustment = origLoc.y - evt.getY();
 
                 // Add indicators for possible moves
-                addIndicators();
+                toggleIndicators(true);
             }
         }
     }
@@ -154,11 +131,11 @@ class BoardListener implements MouseListener, MouseMotionListener {
     @Override
     public void mouseReleased(MouseEvent evt) {
 
-        // Remove the indicators from tiles
-        removeIndicators();
-
         // If we had a piece being dragged
         if(canPickupPiece()) {
+
+            // Remove the indicators from tiles
+            toggleIndicators(false);
 
             // If the piece was not moved, then restore it to previous position
             Tile draggedToTile = board.getTileMap().getOrDefault(getTilePositionFromMouse(), null);
@@ -170,8 +147,7 @@ class BoardListener implements MouseListener, MouseMotionListener {
                 originatingTile.add(originatingPiece);
                 originatingPiece.setVisible(true);
             } else {
-                // Update game history
-                getFrame().getHistoryPanel().updateHistory();
+                // Re-display the with latest updates after move is executed
                 board.displayBoard();
             }
         }

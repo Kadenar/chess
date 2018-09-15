@@ -1,8 +1,16 @@
 package com.chess.engine.moves;
 
+import com.chess.engine.Player;
+import com.chess.engine.Position;
+import com.chess.engine.board.Board;
+import com.chess.engine.board.BoardUtils;
 import com.chess.engine.board.Tile;
+import com.chess.engine.pieces.King;
+import com.chess.engine.pieces.Pawn;
 import com.chess.engine.pieces.Piece;
+import com.chess.engine.pieces.Queen;
 
+import java.util.Map;
 import java.util.Objects;
 
 public class Move {
@@ -11,20 +19,93 @@ public class Move {
     private final Piece captured;
     private final Tile fromTile;
     private final Tile toTile;
-    private final boolean promotion;
 
     public Move(final Move move) {
-        this(move.moved, move.fromTile, move.captured, move.toTile, move.promotion);
+        this(move.moved, move.fromTile, move.captured, move.toTile);
     }
-    public Move(final Piece piece, final Tile from, final Piece pieceCaptured, final Tile to) { this(piece, from, pieceCaptured, to, false); }
-    public Move(final Piece pieceMoved, final Tile from, final Piece pieceCaptured, final Tile to, final boolean promote) {
+    public Move(final Piece pieceMoved, final Tile from, final Piece pieceCaptured, final Tile to) {
         this.moved = pieceMoved;
         this.fromTile = from;
         this.captured = pieceCaptured;
         this.toTile = to;
-        this.promotion = promote;
     }
 
+    public MoveType execute(Board board) {
+        MoveType typeOfMove = null;
+
+        Map<Position, Tile> tileMap = board.getTileMap();
+        Position targetPosition = getDestination().getPosition();
+        Position moveFromPosition = getOrigin().getPosition();
+        Player currentPlayer = getMovedPiece().getOwner();
+        Player opposingPlayer = currentPlayer.opposite(board);
+
+        Piece capturedPiece = getCapturedPiece();
+        boolean isEnpassantCapture = isEnpassantCapture(board.getGameState().getEPSquare());
+
+        // If moving the king
+        if (getMovedPiece() instanceof King) {
+
+            // Update the king position
+            board.setKingPosition(getMovedPiece().getOwner(), getDestination().getPosition());
+
+            // If king moved > 1 square, move the corresponding rook as well
+            if (isKingCastle()) {
+                typeOfMove = MoveType.CASTLE;
+
+                // Determine whether it was a king or queen side castle
+                boolean queenSideCastle = targetPosition.getColumn() < moveFromPosition.getColumn();
+
+                // Get the current rook position
+                int columnOffSet = queenSideCastle ? -2 : 1;
+                Tile rookTile = tileMap.get(BoardUtils.getOffSetPosition(targetPosition, columnOffSet, 0));
+
+                // Get the rook's new position
+                columnOffSet = queenSideCastle ? 1 : -1;
+                Tile newRookTile = tileMap.get(BoardUtils.getOffSetPosition(targetPosition, columnOffSet, 0));
+
+                // Move the rook
+                newRookTile.setPiece(rookTile.getPiece());
+                rookTile.setPiece(null);
+            }
+        }
+
+        // Add the captured piece to list captured and play capture sound
+        if (isCapture()) {
+            typeOfMove = MoveType.CAPTURE;
+            currentPlayer.capturePiece(opposingPlayer, capturedPiece);
+        }
+        // If this was an en passant capture, then remove the captured pawn
+        else if (isEnpassantCapture) {
+            typeOfMove = MoveType.CAPTURE;
+
+            // Determine the location of the pawn to be captured
+            int rowOffset = ((Pawn) getMovedPiece()).getEnpassantDirection() * -1;
+            Tile capturedPawnTile = tileMap.get(BoardUtils.getOffSetPosition(targetPosition, 0, rowOffset));
+
+            // Capture the pawn
+            capturedPiece = capturedPawnTile.getPiece();
+            currentPlayer.capturePiece(opposingPlayer, capturedPiece);
+            capturedPawnTile.setPiece(null);
+        }
+
+        // Add piece to dragged to tile and remove from originating tile
+        if(isPromotion()) {
+            getDestination().setPiece(new Queen(currentPlayer));
+            currentPlayer.getPieces().remove(getMovedPiece());
+            // TODO on promotion, the pawn doesn't get removed from the UI
+        } else {
+            getDestination().setPiece(getMovedPiece());
+        }
+
+        // Remove piece from originating tile
+        getOrigin().setPiece(null);
+
+        // Add our move to the move history
+        board.getMoveHistory().update(this);
+        //board.getMoveHistory().addMove(this);
+
+        return typeOfMove;
+    }
     /**
      * Get the piece that is being moved
      * @return the piece being moved
@@ -49,6 +130,48 @@ public class Move {
      */
     public Tile getDestination() {
         return this.toTile;
+    }
+
+    /**
+     * Determine whether the given move is enpassant move
+     * @return {@code true} if moved piece was a pawn and moved 2 squares, {@code false} if not
+     */
+    public boolean isEnpassantMove() {
+        return getMovedPiece() instanceof Pawn && BoardUtils.deltaRow(getOrigin(), getDestination()) == 2;
+    }
+
+    /**
+     * Did this move capture a piece?
+     * @return {@code true}
+     */
+    public boolean isCapture() {
+        return getCapturedPiece() != null;
+    }
+
+    /**
+     * Is this an enpassant capture?
+     * @param enpassantLoc the current enpassant tile position
+     * @return {@code true} if enpassant capture, {@code false} otherwise
+     */
+    private boolean isEnpassantCapture(Position enpassantLoc) {
+        return getMovedPiece() instanceof Pawn && getDestination().getPosition().equals(enpassantLoc);
+    }
+
+    /**
+     * Determine whether the given move is a pawn promoting
+     * @return {@code true} if moved piece was a pawn and promotion square, {@code false} otherwise
+     */
+    public boolean isPromotion() {
+        return getMovedPiece() instanceof Pawn
+                && getDestination().getPosition().isPromotionSquare(getMovedPiece().getOwner());
+    }
+
+    /**
+     * Determine whether the given move is a king castling
+     * @return {@code true}  if moved piece is a king and castling, {@code false} otherwise
+     */
+    private boolean isKingCastle() {
+        return getMovedPiece() instanceof King && BoardUtils.deltaCol(getOrigin(), getDestination()) > 1;
     }
 
     @Override

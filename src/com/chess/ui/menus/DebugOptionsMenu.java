@@ -1,13 +1,17 @@
 package com.chess.ui.menus;
 
 import com.chess.engine.GameSettings;
+import com.chess.engine.Player;
 import com.chess.engine.board.Board;
 import com.chess.engine.board.FenUtils;
 import com.chess.engine.board.PGNUtils;
 import com.chess.engine.moves.Move;
 import com.chess.ui.ChessFrame;
 
-import javax.swing.*;
+import javax.swing.JCheckBoxMenuItem;
+import javax.swing.JMenu;
+import javax.swing.JMenuItem;
+import javax.swing.SwingUtilities;
 import java.util.Set;
 
 public class DebugOptionsMenu extends JMenu {
@@ -48,10 +52,14 @@ public class DebugOptionsMenu extends JMenu {
         printPieces.addActionListener(e -> printPieces());
         add(printPieces);
 
+        JMenuItem printMoves = new JMenuItem("Print moves");
+        printMoves.addActionListener(e -> printMoves());
+        add(printMoves);
+
         // Print all moves
-        JMenuItem printGameMoves = new JMenuItem("Print valid moves");
-        printGameMoves.addActionListener(e -> printGameMoves());
-        add(printGameMoves);
+        JMenuItem printValidMoves = new JMenuItem("Print valid moves");
+        printValidMoves.addActionListener(e -> printValidMoves());
+        add(printValidMoves);
     }
 
     /**
@@ -97,19 +105,33 @@ public class DebugOptionsMenu extends JMenu {
     /**
      * Print out all game moves available currently (only those that are valid)
      */
-    private void printGameMoves() {
+    private void printMoves() {
         Board board = getBoard();
         int fullMoves = board.getGameState().getFullMoves();
-        board.getPlayers().values().forEach( player -> {
-            System.out.println("Valid moves for: " + player);
-            player.getPieces().forEach(piece -> {
-                Set<Move> movesForPiece = board.getValidMovesForPiece(fullMoves, piece);
-                if(!movesForPiece.isEmpty()) {
-                    System.out.println(movesForPiece);
-                }
-            });
+        Player player = board.getGameState().getPlayerTurn();
+        System.out.println("All moves for: " + player);
+        player.getPieces().forEach(piece -> {
+            Set<Move> movesForPiece = board.getMovesForPiece(fullMoves, piece);
+            if(!movesForPiece.isEmpty()) {
+                System.out.println(movesForPiece);
+            }
         });
+    }
 
+    /**
+     * Print out all game moves available currently (only those that are valid)
+     */
+    private void printValidMoves() {
+        Board board = getBoard();
+        int fullMoves = board.getGameState().getFullMoves();
+        Player player = board.getGameState().getPlayerTurn();
+        System.out.println("Valid moves for: " + player);
+        player.getPieces().forEach(piece -> {
+            Set<Move> movesForPiece = board.getValidMovesForPiece(fullMoves, piece);
+            if(!movesForPiece.isEmpty()) {
+                System.out.println(movesForPiece);
+            }
+        });
     }
 
     private Board getBoard() {

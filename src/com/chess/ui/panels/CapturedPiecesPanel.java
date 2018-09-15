@@ -3,9 +3,13 @@ package com.chess.ui.panels;
 import com.chess.ChessConsts;
 import com.chess.engine.pieces.Piece;
 
-import javax.swing.*;
+import javax.swing.BoxLayout;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.JSeparator;
+import javax.swing.SwingConstants;
 import javax.swing.border.TitledBorder;
-import java.awt.*;
+import java.awt.Dimension;
 
 class CapturedPiecesPanel extends JPanel {
 

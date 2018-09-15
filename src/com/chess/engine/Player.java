@@ -6,6 +6,8 @@ import com.chess.engine.pieces.Piece;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
 public class Player {
 
@@ -13,7 +15,7 @@ public class Player {
     private final Color color;
 
     // Pieces owner by the player
-    private List<Piece> pieces = new ArrayList<>(ChessConsts.MAX_PIECES);
+    private List<Piece> ownedPieces = new ArrayList<>(ChessConsts.MAX_PIECES);
 
     // Pieces captured by opponent
     private List<Piece> capturedPieces = new ArrayList<>(ChessConsts.MAX_PIECES);
@@ -35,7 +37,7 @@ public class Player {
     }
 
     /**
-     * Create a new {@code Player} instance with a given {@Color}
+     * Create a new {@code Player} instance with a given {@code Color}
      * @param color the {@code Color} of the player
      */
     public Player(Color color) {
@@ -55,7 +57,7 @@ public class Player {
      * @param piece the {@code Piece} to add as controlled
      */
     public void addPiece(Piece piece) {
-        pieces.add(piece);
+        this.ownedPieces.add(piece);
     }
 
     /**
@@ -81,7 +83,7 @@ public class Player {
      * @return a {@code List<Piece>} of pieces that the player still controls
      */
     public List<Piece> getPieces() {
-        return this.pieces;
+        return this.ownedPieces;
     }
 
     /**
@@ -89,8 +91,13 @@ public class Player {
      * @param board the {@code Board} to check
      * @return {@code true} if has valid moves, {@code false} if no valid moves
      */
-    public boolean hasValidMoves(Board board) {
-        return board.getValidMovesForTurn(board.getGameState().getFullMoves(), this).size() > 0;
+    public boolean hasValidMove(Board board) {
+        int fullMoves = board.getGameState().getFullMoves();
+        Predicate<Piece> hasValidMoves = piece -> board.getValidMovesForPiece(fullMoves, piece)
+                                                       .stream().findFirst().isPresent();
+
+        return getPieces().stream().filter(hasValidMoves).collect(Collectors.toList()).size() > 0;
+        //return true;
     }
 
     /**

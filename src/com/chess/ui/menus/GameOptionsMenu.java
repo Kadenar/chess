@@ -1,11 +1,12 @@
 package com.chess.ui.menus;
 
 import com.chess.engine.GameSettings;
-import com.chess.engine.board.Board;
-import com.chess.engine.board.FenUtils;
 import com.chess.ui.ChessFrame;
 
-import javax.swing.*;
+import javax.swing.JCheckBoxMenuItem;
+import javax.swing.JMenu;
+import javax.swing.JMenuItem;
+import javax.swing.SwingUtilities;
 
 public class GameOptionsMenu extends JMenu {
 
@@ -48,11 +49,7 @@ public class GameOptionsMenu extends JMenu {
         // Recreate the board object with default position
         ChessFrame frame = (ChessFrame) SwingUtilities.getRoot(this);
         frame.getHistoryPanel().reset();
-        Board board = frame.getBoard();
-        board.loadBoardFromFen(FenUtils.DEFAULT_POSITION);
-        // TODO -> Remove this eventually
-        //PGNUtils.performPGNMoves(board, board.getMoveHistory());
-        board.displayBoard();
+        frame.getBoard().reset();
     }
 
     /**

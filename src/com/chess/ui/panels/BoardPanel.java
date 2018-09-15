@@ -5,8 +5,9 @@ import com.chess.engine.board.Board;
 import com.chess.ui.headers.FileHeaders;
 import com.chess.ui.headers.RankHeaders;
 
-import javax.swing.*;
-import java.awt.*;
+import javax.swing.JPanel;
+import java.awt.BorderLayout;
+import java.awt.Dimension;
 
 public class BoardPanel extends JPanel {
 

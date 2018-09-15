@@ -9,7 +9,6 @@ import com.chess.engine.moves.Direction;
 import com.chess.engine.moves.Move;
 import com.chess.engine.moves.MoveUtils;
 
-import java.util.Collection;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
@@ -44,8 +43,7 @@ public class King extends Piece {
 
 
         // Check if the king moved
-        boolean kingMoved = board.getMoveHistory().getMoves(move -> move.getMovedPiece().equals(this))
-                                                  .findFirst().orElse(null) != null;
+        boolean kingMoved = board.getMoveHistory().getMoves(move -> move.getMovedPiece().equals(this)).findFirst().isPresent();
 
         // The king can not have moved and can't be in check by opponent
         if(!kingMoved && MoveUtils.isKingInCheck(board, getOwner().opposite(board), getOwner()) == null) {
