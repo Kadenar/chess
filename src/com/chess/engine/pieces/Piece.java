@@ -63,8 +63,7 @@ public abstract class Piece extends JLabel {
      * @param turn the turn to add moves to the board for
      */
     public final void addMovesToBoard(Board board, Tile currentTile, int turn) {
-        board.getMovesForTurn(turn, getOwner())
-                .put(this, generateMoves(board, currentTile));
+        board.getMovesForTurn(turn, getOwner()).put(this, generateMoves(board, currentTile));
     }
 
     /**

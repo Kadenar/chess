@@ -56,35 +56,6 @@ public class Board extends JPanel {
     private JLayeredPane layeredPane = new JLayeredPane();
 
     /**
-     * Clone the other board to create another instance without UI
-     * @param otherBoard the board to clone
-     */
-    public Board(Board otherBoard) {
-        this(FenUtils.getFen(otherBoard), false);
-    }
-
-    public Board(Board otherBoard, boolean test) {
-        this.immutablePlayers = new HashMap<>(ChessConsts.NUM_PLAYERS);
-        otherBoard.immutablePlayers.forEach((key, value) -> this.immutablePlayers.put(key, new Player(value)));
-
-        this.kingPositionMap = new HashMap<>(ChessConsts.NUM_PLAYERS);
-        otherBoard.kingPositionMap.forEach((key, value) -> this.kingPositionMap.put(new Player(key.getColor()), value));
-
-        this.tileMap = new LinkedHashMap<>(ChessConsts.NUM_TILES);
-        otherBoard.tileMap.forEach((key, value) -> this.tileMap.put(key, new Tile(value)));
-
-        this.movesForPlayers = new HashMap<>(ChessConsts.NUM_PLAYERS);
-        this.validMovesForPlayers = new HashMap<>(ChessConsts.NUM_PLAYERS);
-        otherBoard.immutablePlayers.entrySet().forEach(entry -> {
-           this.movesForPlayers.put(entry.getValue(), new HashMap<>(500));
-           this.validMovesForPlayers.put(entry.getValue(), new HashMap<>(500));
-        });
-
-        this.gameState = new GameState(otherBoard.gameState);
-        this.moveHistory = new MoveHistory(otherBoard.moveHistory);
-    }
-
-    /**
      * Create a board with UI always
      * @param fen the fen to load the board with
      */
@@ -148,9 +119,39 @@ public class Board extends JPanel {
     }
 
     /**
+     * Clone the other board to create another instance without UI
+     * @param otherBoard the board to clone
+     */
+    public Board(Board otherBoard) {
+        this(FenUtils.getFen(otherBoard), false);
+
+        /*this.immutablePlayers = new HashMap<>(ChessConsts.NUM_PLAYERS);
+        otherBoard.immutablePlayers.forEach((key, value) -> this.immutablePlayers.put(key, new Player(value)));
+
+        this.kingPositionMap = new HashMap<>(ChessConsts.NUM_PLAYERS);
+        otherBoard.kingPositionMap.forEach((key, value) -> this.kingPositionMap.put(new Player(key.getColor()), value));
+
+        this.tileMap = new LinkedHashMap<>(ChessConsts.NUM_TILES);
+        otherBoard.tileMap.forEach((key, value) -> this.tileMap.put(key, new Tile(value)));
+
+        this.movesForPlayers = new HashMap<>(ChessConsts.NUM_PLAYERS);
+        this.validMovesForPlayers = new HashMap<>(ChessConsts.NUM_PLAYERS);
+        otherBoard.immutablePlayers.entrySet().forEach(entry -> {
+           this.movesForPlayers.put(entry.getValue(), new HashMap<>(500));
+           this.validMovesForPlayers.put(entry.getValue(), new HashMap<>(500));
+        });
+
+        this.gameState = new GameState(otherBoard.gameState);
+        this.moveHistory = new MoveHistory(otherBoard.moveHistory);
+        this.layeredPane = null;
+        */
+    }
+
+    /**
      * Reset the {@code Board} to Default Position
      */
     public void reset() {
+        getMoveHistory().reset();
         loadBoardFromFen(FenUtils.DEFAULT_POSITION);
         displayBoard();
     }

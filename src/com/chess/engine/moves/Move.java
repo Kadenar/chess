@@ -30,82 +30,6 @@ public class Move {
         this.toTile = to;
     }
 
-    public MoveType execute(Board board) {
-        MoveType typeOfMove = null;
-
-        Map<Position, Tile> tileMap = board.getTileMap();
-        Position targetPosition = getDestination().getPosition();
-        Position moveFromPosition = getOrigin().getPosition();
-        Player currentPlayer = getMovedPiece().getOwner();
-        Player opposingPlayer = currentPlayer.opposite(board);
-
-        Piece capturedPiece = getCapturedPiece();
-        boolean isEnpassantCapture = isEnpassantCapture(board.getGameState().getEPSquare());
-
-        // If moving the king
-        if (getMovedPiece() instanceof King) {
-
-            // Update the king position
-            board.setKingPosition(getMovedPiece().getOwner(), getDestination().getPosition());
-
-            // If king moved > 1 square, move the corresponding rook as well
-            if (isKingCastle()) {
-                typeOfMove = MoveType.CASTLE;
-
-                // Determine whether it was a king or queen side castle
-                boolean queenSideCastle = targetPosition.getColumn() < moveFromPosition.getColumn();
-
-                // Get the current rook position
-                int columnOffSet = queenSideCastle ? -2 : 1;
-                Tile rookTile = tileMap.get(BoardUtils.getOffSetPosition(targetPosition, columnOffSet, 0));
-
-                // Get the rook's new position
-                columnOffSet = queenSideCastle ? 1 : -1;
-                Tile newRookTile = tileMap.get(BoardUtils.getOffSetPosition(targetPosition, columnOffSet, 0));
-
-                // Move the rook
-                newRookTile.setPiece(rookTile.getPiece());
-                rookTile.setPiece(null);
-            }
-        }
-
-        // Add the captured piece to list captured and play capture sound
-        if (isCapture()) {
-            typeOfMove = MoveType.CAPTURE;
-            currentPlayer.capturePiece(opposingPlayer, capturedPiece);
-        }
-        // If this was an en passant capture, then remove the captured pawn
-        else if (isEnpassantCapture) {
-            typeOfMove = MoveType.CAPTURE;
-
-            // Determine the location of the pawn to be captured
-            int rowOffset = ((Pawn) getMovedPiece()).getEnpassantDirection() * -1;
-            Tile capturedPawnTile = tileMap.get(BoardUtils.getOffSetPosition(targetPosition, 0, rowOffset));
-
-            // Capture the pawn
-            capturedPiece = capturedPawnTile.getPiece();
-            currentPlayer.capturePiece(opposingPlayer, capturedPiece);
-            capturedPawnTile.setPiece(null);
-        }
-
-        // Add piece to dragged to tile and remove from originating tile
-        if(isPromotion()) {
-            getDestination().setPiece(new Queen(currentPlayer));
-            currentPlayer.getPieces().remove(getMovedPiece());
-            // TODO on promotion, the pawn doesn't get removed from the UI
-        } else {
-            getDestination().setPiece(getMovedPiece());
-        }
-
-        // Remove piece from originating tile
-        getOrigin().setPiece(null);
-
-        // Add our move to the move history
-        board.getMoveHistory().update(this);
-        //board.getMoveHistory().addMove(this);
-
-        return typeOfMove;
-    }
     /**
      * Get the piece that is being moved
      * @return the piece being moved
@@ -200,5 +124,109 @@ public class Move {
         return getMovedPiece() + ": "
                 + getOrigin().getPosition().toString()
                 + " -> " + getDestination().getPosition().toString();
+    }
+
+    /**
+     * Execute given move on a board
+     * @param board the {@code Board} to perform the move on
+     * @param isTestBoard {@code true} if this is a test board,
+     *                    {@code false} if it is the actual baord
+     */
+    public void execute(Board board, boolean isTestBoard) {
+        MoveType typeOfMove = null;
+        Map<Position, Tile> tileMap = board.getTileMap();
+        Position targetPosition = getDestination().getPosition();
+        Position moveFromPosition = getOrigin().getPosition();
+        Piece movedPiece = getMovedPiece();
+        Player currentPlayer = movedPiece.getOwner();
+        Player opposingPlayer = currentPlayer.opposite(board);
+
+        Piece capturedPiece = getCapturedPiece();
+        boolean isEnpassantCapture = isEnpassantCapture(board.getGameState().getEPSquare());
+
+        // If moving the king
+        if (movedPiece instanceof King) {
+
+            // Update the king position
+            board.setKingPosition(movedPiece.getOwner(), getDestination().getPosition());
+
+            // If king moved > 1 square, move the corresponding rook as well
+            if (isKingCastle()) {
+                typeOfMove = MoveType.CASTLE;
+
+                // Determine whether it was a king or queen side castle
+                boolean queenSideCastle = targetPosition.getColumn() < moveFromPosition.getColumn();
+
+                // Get the current rook position
+                int columnOffSet = queenSideCastle ? -2 : 1;
+                Tile rookTile = tileMap.get(BoardUtils.getOffSetPosition(targetPosition, columnOffSet, 0));
+
+                // Get the rook's new position
+                columnOffSet = queenSideCastle ? 1 : -1;
+                Tile newRookTile = tileMap.get(BoardUtils.getOffSetPosition(targetPosition, columnOffSet, 0));
+
+                // Move the rook to new position
+                newRookTile.setPiece(rookTile.getPiece());
+                rookTile.setPiece(null);
+            }
+        }
+
+        // Add the captured piece to list captured and play capture sound
+        if (isCapture()) {
+            typeOfMove = MoveType.CAPTURE;
+            currentPlayer.capturePiece(opposingPlayer, capturedPiece);
+        }
+        // If this was an en passant capture, then remove the captured pawn
+        else if (isEnpassantCapture) {
+            typeOfMove = MoveType.CAPTURE;
+
+            // Determine the location of the pawn to be captured
+            int rowOffset = ((Pawn) movedPiece).getEnpassantDirection() * -1;
+            Tile capturedPawnTile = tileMap.get(BoardUtils.getOffSetPosition(targetPosition, 0, rowOffset));
+
+            // Capture the pawn
+            capturedPiece = capturedPawnTile.getPiece();
+            currentPlayer.capturePiece(opposingPlayer, capturedPiece);
+            capturedPawnTile.setPiece(null);
+        }
+
+        // Add piece to dragged to tile and remove from originating tile
+        if(isPromotion()) {
+            getDestination().setPiece(new Queen(currentPlayer));
+            currentPlayer.getPieces().remove(movedPiece);
+            // TODO on promotion, the pawn doesn't get removed from the UI
+        } else {
+            getDestination().setPiece(movedPiece);
+        }
+
+        // Remove piece from originating tile
+        getOrigin().setPiece(null);
+
+        // Add our move to the move history
+        board.getMoveHistory().update(this);
+
+        // Need to clear previous set of moves for player who just moved
+        // Update each player's moves for next turn
+        int fullMoves = board.getGameState().getFullMoves();
+        board.getPlayers().values().forEach(player -> {
+            if(currentPlayer.isWhite()) {
+                board.getMovesForTurn(fullMoves, player).clear();
+            }
+            board.generateMovesForPlayer(player, fullMoves);
+        });
+
+        // If current player checked opponent, play checking sound
+        if(MoveUtils.isKingInCheck(board, currentPlayer, opposingPlayer) != null) {
+            typeOfMove = MoveType.CHECK;
+        }
+        // Otherwise play standard move sound if no sound assigned yet
+        else if(typeOfMove == null) {
+            typeOfMove = MoveType.REGULAR;
+        }
+
+        // Play corresponding sound based on type of move if not performing test move
+        if(!isTestBoard) {
+            typeOfMove.playSound();
+        }
     }
 }

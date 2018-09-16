@@ -7,15 +7,18 @@ import java.util.Objects;
  * Represents a piece position on the chessboard
  */
 public class Position {
+    // The Rank
     private int row;
+
+    // The File
     private int column;
 
-    public Position(int row, int column){
+    public Position(int row, int column) {
         this.row = row;
         this.column = column;
     }
 
-    public Position(Position other){
+    public Position(Position other) {
         this.row = other.row;
         this.column = other.column;
     }
@@ -55,13 +58,8 @@ public class Position {
      * @return true if a promotion square, false if not
      */
     public boolean isPromotionSquare(Player player) {
-
-        // If player is white, promotion row is 8
-        if(player.isWhite()) {
-            return getRow() == 7;
-        }
-
-        return getRow() == 0;
+        // Get promotion row for given player
+        return player.isWhite() ? getRow() == 7 : getRow() == 0;
     }
 
     /**

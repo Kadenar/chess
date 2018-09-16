@@ -24,7 +24,7 @@ public class MoveUtils {
      * @return {@code true} if move can be performed, {@code false} if move cannot be performed
      */
     public static boolean executeTestMove(Board board, Tile originatingTile, Tile targetTile) {
-        Board testBoard = new Board(board, true);
+        Board testBoard = new Board(board);
         Tile originTile = testBoard.getTileMap().get(originatingTile.getPosition());
         Piece draggedPiece = originTile.getPiece();
         Player currentPlayer = draggedPiece.getOwner();
@@ -75,33 +75,8 @@ public class MoveUtils {
         // Update the game state information for the board
         updateGameState(board, move);
 
-        Player currentPlayer = move.getMovedPiece().getOwner();
-        Player opposingPlayer = currentPlayer.opposite(board);
-
         // The type of move we performed (Standard, Capture, Check, or Castle)
-        MoveType typeOfMove = move.execute(board);
-
-        // Need to clear previous set of moves for player who just moved
-        // Update each player's moves for next turn
-        int fullMoves = board.getGameState().getFullMoves();
-        board.getPlayers().values().forEach(player -> {
-            board.getMovesForTurn(fullMoves, player).clear();
-            board.generateMovesForPlayer(opposingPlayer, fullMoves);
-        });
-
-        // If current player checked opponent, play checking sound
-        if (isKingInCheck(board, currentPlayer, opposingPlayer) != null) {
-            typeOfMove = MoveType.CHECK;
-        }
-        // Otherwise play standard move sound if no sound assigned yet
-        else if (typeOfMove == null) {
-            typeOfMove = MoveType.REGULAR;
-        }
-
-        // Play corresponding sound based on type of move if not performing test move
-        if (!isTestBoard) {
-            typeOfMove.playSound();
-        }
+        move.execute(board, isTestBoard);
     }
 
     /**

@@ -17,7 +17,6 @@ import java.awt.GridBagLayout;
 
 public class ChessFrame extends JFrame {
 
-    private final Board board;
     private final BoardPanel boardPanel;
     private final MoveHistory history;
 
@@ -30,14 +29,13 @@ public class ChessFrame extends JFrame {
         this.setResizable(true);
 
         // Initialize board and panel as well as history
-        this.board = board;
         this.boardPanel = new BoardPanel(board);
         this.history = board.getMoveHistory();
 
         // Add game options menu
         JMenuBar menuBar = new JMenuBar();
-        menuBar.add(new GameOptionsMenu());
-        menuBar.add(new DebugOptionsMenu());
+        menuBar.add(new GameOptionsMenu(board));
+        menuBar.add(new DebugOptionsMenu(board));
         setJMenuBar(menuBar);
 
         // Add all headers and panels to the frame
@@ -73,19 +71,4 @@ public class ChessFrame extends JFrame {
         constraints.weightx = 1.0;
         getContentPane().add(history, constraints);
     }
-
-    /**
-     * Get our board panel
-     * @return the board to reload
-     */
-    public Board getBoard() {
-        return this.board;
-    }
-
-    /**
-     * Get our history panel
-     * @return the history of moves
-     */
-    public MoveHistory getHistoryPanel() { return this.history; }
-
 }

@@ -13,7 +13,6 @@ public class Tile extends JPanel {
     private Piece piece;
     private boolean isHighlighted = false;
 
-
     /**
      * Construct a tile at given position without any piece
      * @param pos the positino of the tile

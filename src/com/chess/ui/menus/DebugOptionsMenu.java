@@ -6,18 +6,20 @@ import com.chess.engine.board.Board;
 import com.chess.engine.board.FenUtils;
 import com.chess.engine.board.PGNUtils;
 import com.chess.engine.moves.Move;
-import com.chess.ui.ChessFrame;
+import com.chess.engine.moves.MoveUtils;
 
 import javax.swing.JCheckBoxMenuItem;
 import javax.swing.JMenu;
 import javax.swing.JMenuItem;
-import javax.swing.SwingUtilities;
 import java.util.Set;
 
 public class DebugOptionsMenu extends JMenu {
 
-    public DebugOptionsMenu() {
+    private final Board board;
+
+    public DebugOptionsMenu(Board board) {
         super("Debug options");
+        this.board = board;
         populateMenu();
     }
 
@@ -52,11 +54,12 @@ public class DebugOptionsMenu extends JMenu {
         printPieces.addActionListener(e -> printPieces());
         add(printPieces);
 
+        // Print all moves
         JMenuItem printMoves = new JMenuItem("Print moves");
         printMoves.addActionListener(e -> printMoves());
         add(printMoves);
 
-        // Print all moves
+        // Print all valid moves
         JMenuItem printValidMoves = new JMenuItem("Print valid moves");
         printValidMoves.addActionListener(e -> printValidMoves());
         add(printValidMoves);
@@ -68,14 +71,13 @@ public class DebugOptionsMenu extends JMenu {
     private void enableDebugging() {
         GameSettings settings = GameSettings.INSTANCE;
         settings.setEnableDebugging(!settings.isEnableDebugging());
-        getBoard().displayBoard();
+        board.displayBoard();
     }
 
     /**
      * Print the current board state as a FEN string
      */
     private void printFen() {
-        Board board = getBoard();
         System.out.println(FenUtils.getFen(board));
         System.out.println(board);
     }
@@ -84,7 +86,7 @@ public class DebugOptionsMenu extends JMenu {
      * Print out the PGN from move history
      */
     private void printPGN() {
-        System.out.println(PGNUtils.getPGN(getBoard().getMoveHistory()));
+        System.out.println(PGNUtils.getPGN(board.getMoveHistory()));
     }
 
     private void parsePGN() {
@@ -95,7 +97,7 @@ public class DebugOptionsMenu extends JMenu {
      * Print the current game state in terms of pieces
      */
     private void printPieces() {
-        getBoard().getPlayers().values().forEach(player -> {
+        board.getPlayers().values().forEach(player -> {
             System.out.println(player + " pieces:");
             System.out.println("Controlled: " + player.getPieces());
             System.out.println("Captured: " + player.getCapturedPieces());
@@ -106,15 +108,15 @@ public class DebugOptionsMenu extends JMenu {
      * Print out all game moves available currently (only those that are valid)
      */
     private void printMoves() {
-        Board board = getBoard();
         int fullMoves = board.getGameState().getFullMoves();
-        Player player = board.getGameState().getPlayerTurn();
-        System.out.println("All moves for: " + player);
-        player.getPieces().forEach(piece -> {
-            Set<Move> movesForPiece = board.getMovesForPiece(fullMoves, piece);
-            if(!movesForPiece.isEmpty()) {
-                System.out.println(movesForPiece);
-            }
+        board.getPlayers().values().forEach(player -> {
+            System.out.println("All moves for: " + player);
+            player.getPieces().forEach(piece -> {
+                Set<Move> movesForPiece = board.getMovesForPiece(fullMoves, piece);
+                if (!movesForPiece.isEmpty()) {
+                    System.out.println(movesForPiece);
+                }
+            });
         });
     }
 
@@ -122,20 +124,15 @@ public class DebugOptionsMenu extends JMenu {
      * Print out all game moves available currently (only those that are valid)
      */
     private void printValidMoves() {
-        Board board = getBoard();
         int fullMoves = board.getGameState().getFullMoves();
-        Player player = board.getGameState().getPlayerTurn();
-        System.out.println("Valid moves for: " + player);
-        player.getPieces().forEach(piece -> {
-            Set<Move> movesForPiece = board.getValidMovesForPiece(fullMoves, piece);
-            if(!movesForPiece.isEmpty()) {
-                System.out.println(movesForPiece);
-            }
+        board.getPlayers().values().forEach(player -> {
+            System.out.println("Valid moves for: " + player);
+            player.getPieces().forEach(piece -> {
+                Set<Move> movesForPiece = board.getValidMovesForPiece(fullMoves, piece);
+                if (!movesForPiece.isEmpty()) {
+                    System.out.println(movesForPiece);
+                }
+            });
         });
-    }
-
-    private Board getBoard() {
-        ChessFrame frame = (ChessFrame) SwingUtilities.getRoot(this);
-        return frame.getBoard();
     }
 }

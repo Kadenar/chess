@@ -1,17 +1,19 @@
 package com.chess.ui.menus;
 
 import com.chess.engine.GameSettings;
-import com.chess.ui.ChessFrame;
+import com.chess.engine.board.Board;
 
 import javax.swing.JCheckBoxMenuItem;
 import javax.swing.JMenu;
 import javax.swing.JMenuItem;
-import javax.swing.SwingUtilities;
 
 public class GameOptionsMenu extends JMenu {
 
-    public GameOptionsMenu() {
+    private final Board board;
+
+    public GameOptionsMenu(Board board) {
         super("Game options");
+        this.board = board;
         populateMenu();
     }
 
@@ -47,9 +49,7 @@ public class GameOptionsMenu extends JMenu {
      */
     private void resetGameState() {
         // Recreate the board object with default position
-        ChessFrame frame = (ChessFrame) SwingUtilities.getRoot(this);
-        frame.getHistoryPanel().reset();
-        frame.getBoard().reset();
+        board.reset();
     }
 
     /**
@@ -58,8 +58,7 @@ public class GameOptionsMenu extends JMenu {
     private void enableHighlighting() {
         GameSettings settings = GameSettings.INSTANCE;
         settings.setEnableHighlighting(!settings.isEnableHighlighting());
-        ChessFrame frame = (ChessFrame) SwingUtilities.getRoot(this);
-        frame.getBoard().displayBoard();
+        board.displayBoard();
     }
 
     /**
@@ -68,8 +67,7 @@ public class GameOptionsMenu extends JMenu {
     private void enableCoordinateDisplay() {
         GameSettings settings = GameSettings.INSTANCE;
         settings.setDisplayTilePositions(!settings.isDisplayTilePositions());
-        ChessFrame frame = (ChessFrame) SwingUtilities.getRoot(this);
-        frame.getBoard().displayBoard();
+        board.displayBoard();
     }
 
 }
