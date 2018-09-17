@@ -7,15 +7,9 @@ import com.chess.engine.Position;
 import com.chess.engine.moves.Move;
 import com.chess.engine.moves.MoveHistory;
 import com.chess.engine.moves.MoveUtils;
-import com.chess.engine.pieces.Bishop;
 import com.chess.engine.pieces.King;
-import com.chess.engine.pieces.Knight;
-import com.chess.engine.pieces.Pawn;
 import com.chess.engine.pieces.Piece;
-import com.chess.engine.pieces.Queen;
-import com.chess.engine.pieces.Rook;
 
-import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JLayeredPane;
 import javax.swing.JOptionPane;
@@ -86,7 +80,7 @@ public class Board extends JPanel {
         this.movesForPlayers = new HashMap<>(ChessConsts.NUM_PLAYERS);
         this.validMovesForPlayers = new HashMap<>(ChessConsts.NUM_PLAYERS);
         immutablePlayers.forEach((key, value) -> {
-            // Use 500 as a chess game should never reach this # of turns
+            // Use 300 as a chess game should never reach this # of turns
             this.movesForPlayers.put(value, new HashMap<>(300));
             this.validMovesForPlayers.put(value, new HashMap<>(300));
         });
@@ -288,8 +282,7 @@ public class Board extends JPanel {
 
         if(validMovesForPiece == null) {
             Predicate<Move> validMove = move -> MoveUtils.executeTestMove(this, move.getOrigin(), move.getDestination());
-            validMovesForPiece = getMovesForPiece(turn, piece).parallelStream().filter(validMove)
-                                .distinct().collect(Collectors.toSet());
+            validMovesForPiece = getMovesForPiece(turn, piece).parallelStream().filter(validMove).collect(Collectors.toSet());
 
             validMovesForTurn.put(piece, validMovesForPiece);
         }
@@ -347,10 +340,6 @@ public class Board extends JPanel {
         kingPositionMap.put(player, newPosition);
     }
 
-    /*
-     * UI related part of the board
-     */
-
     /**
      * Initialize the game board
      * - All chess tiles
@@ -365,6 +354,14 @@ public class Board extends JPanel {
                 .forEach(tile -> tile.highlightTile(false, null));
 
         Player currentPlayer = gameState.getPlayerTurn();
+
+        // Highlight last move's tiles
+        Move lastMove = getMoveHistory().getLastMove();
+        if(lastMove != null) {
+            lastMove.getOrigin().highlightTile(true, new Color(50, 255, 200, 255));
+            lastMove.getDestination().highlightTile(true, new Color(50, 255, 150, 255));
+        }
+
         // Add all of our tiles to the chess panel
         getTileMap().values().forEach(tile -> {
 
@@ -404,20 +401,6 @@ public class Board extends JPanel {
             gameState.setGameOver(MoveUtils.isKingInCheck(this,
                     currentPlayer.opposite(this), currentPlayer) == null);
 
-            //String[] options = {"Yes", "No", "Quit" };
-            /*JButton yes = new JButton("Yes");
-            yes.addActionListener(e -> {
-                reset();
-                JOptionPane.getRootFrame().dispose();
-            });
-            JButton no = new JButton("No");
-            no.addActionListener(e -> JOptionPane.getRootFrame().dispose());
-            JButton quit = new JButton("Quit");
-            JButton[] buttons = {yes, no, quit};
-            quit.addActionListener(e -> System.exit(0));
-            JOptionPane.showOptionDialog(this, "Game ended in " + (gameState.isStaleMate() ? " stale mate." : " check mate.")
-                    + "\nWould you like to start a new game?", "Game over", JOptionPane.YES_NO_CANCEL_OPTION, JOptionPane.QUESTION_MESSAGE, null, buttons, buttons[0]);
-            */
             int value = JOptionPane.showConfirmDialog(this,
                     "Game ended in " + (gameState.isStaleMate() ? " stale mate." : " check mate.")
                             + "\nWould you like to start a new game?", "Game over", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE);

@@ -10,6 +10,7 @@ import com.chess.engine.pieces.Pawn;
 import com.chess.engine.pieces.Piece;
 import com.chess.engine.pieces.Queen;
 
+import java.awt.Color;
 import java.util.Map;
 import java.util.Objects;
 

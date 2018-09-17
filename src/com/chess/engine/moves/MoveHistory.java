@@ -120,7 +120,7 @@ public class MoveHistory extends JPanel {
         this.add(moveHistoryPanel);
     }
     /**
-     * Add Undo and Redo buttons
+     * Add Undo and Redo buttons to display
      */
     private void addUndoRedoButtons(JPanel moveHistoryPanel) {
         JPanel undoRedo = new JPanel();
@@ -138,7 +138,7 @@ public class MoveHistory extends JPanel {
     }
 
     /**
-     * Add move history table
+     * Add move history table to display
      */
     private void addMoveHistoryTable(JPanel moveHistoryPanel) {
         // Set-up history text
@@ -156,7 +156,7 @@ public class MoveHistory extends JPanel {
     }
 
     /**
-     * Add captured pieces panel
+     * Add captured pieces panel to display
      */
     private void addCapturedPiecesPanel() {
         // Setup captured pieces panel
@@ -199,6 +199,7 @@ public class MoveHistory extends JPanel {
 
     /**
      * Update the history whenever a move is performed
+     * @param latestMove the most recent move that was performed
      */
     public void update(Move latestMove) {
         GameState currentState = board.getGameState();

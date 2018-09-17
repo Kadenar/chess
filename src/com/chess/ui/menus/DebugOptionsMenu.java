@@ -1,12 +1,10 @@
 package com.chess.ui.menus;
 
 import com.chess.engine.GameSettings;
-import com.chess.engine.Player;
 import com.chess.engine.board.Board;
 import com.chess.engine.board.FenUtils;
 import com.chess.engine.board.PGNUtils;
 import com.chess.engine.moves.Move;
-import com.chess.engine.moves.MoveUtils;
 
 import javax.swing.JCheckBoxMenuItem;
 import javax.swing.JMenu;
