@@ -3,7 +3,6 @@ package com.chess.engine.board;
 import com.chess.engine.Position;
 import com.chess.engine.moves.MoveUtils;
 import com.chess.engine.pieces.Piece;
-import com.chess.ui.ChessFrame;
 
 import javax.swing.JLayeredPane;
 import javax.swing.SwingUtilities;
@@ -27,14 +26,6 @@ class BoardListener implements MouseListener, MouseMotionListener {
     BoardListener(Board board) {
         super();
         this.board = board;
-    }
-
-    /**
-     * Get a reference to ChessFrame
-     * @return the chess frame the board belongs to
-     */
-    private ChessFrame getFrame() {
-        return (ChessFrame) SwingUtilities.getAncestorOfClass(ChessFrame.class, board.getLayeredPane());
     }
 
     /**

@@ -208,12 +208,16 @@ public class Move {
         // Need to clear previous set of moves for player who just moved
         // Update each player's moves for next turn
         int fullMoves = board.getGameState().getFullMoves();
-        board.getPlayers().values().forEach(player -> {
-            if(currentPlayer.isWhite()) {
-                board.getMovesForTurn(fullMoves, player).clear();
-            }
-            board.generateMovesForPlayer(player, fullMoves);
-        });
+
+        // Clear moves if white, since black moves on the same turn
+        if(currentPlayer.isWhite()) {
+            board.getMovesForTurn(fullMoves, opposingPlayer).clear();
+            board.getMovesForTurn(fullMoves, currentPlayer).clear();
+        }
+
+        // Regenerate moves for players (current player first)
+        board.generateMovesForPlayer(currentPlayer, fullMoves);
+        board.generateMovesForPlayer(opposingPlayer, fullMoves);
 
         // If current player checked opponent, play checking sound
         if(MoveUtils.isKingInCheck(board, currentPlayer, opposingPlayer) != null) {

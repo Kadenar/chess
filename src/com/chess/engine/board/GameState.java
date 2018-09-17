@@ -53,7 +53,6 @@ public class GameState {
     public int getFullMoves() { return this.fullMoves; }
     public int getHalfMoves() { return this.halfMoves; }
     public boolean isStaleMate() { return this.stalemate; }
-    public boolean isGameOver() { return this.stalemate || this.gameOver; }
 
     // Setters
     public void setPlayerTurn(Player player) { this.playerTurn = player; }
@@ -61,7 +60,10 @@ public class GameState {
     public void setEnpassantSquare(Position enpassantSquare) { this.enPassant = enpassantSquare; }
     public void setHalfMoves(int halfMoves) { this.halfMoves = halfMoves; }
     public void setFullMoves(int fullMoves) { this.fullMoves = fullMoves; }
-    public void setGameOver(boolean gameOver) { this.gameOver = gameOver; }
+    public void setGameOver(boolean gameOver, boolean isStaleMate) {
+        this.gameOver = gameOver;
+        this.stalemate = isStaleMate;
+    }
 
     /**
      * Check whether given Player can king side castle
@@ -93,6 +95,6 @@ public class GameState {
                "EP Square: " + getEPSquare() + "\n" +
                "Castling: " + getCastles() + "\n" +
                "Is stale mate: " + isStaleMate() + "\n" +
-               "Game over: " + isGameOver();
+               "Game over: " + this.gameOver;
     }
 }

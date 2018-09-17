@@ -398,8 +398,11 @@ public class Board extends JPanel {
 
         // If player doesn't have valid moves, then the game is over
         // TODO -> If the game is over before frame loads, then pane shows first..
-        if(!gameState.getPlayerTurn().hasValidMove(this)) {
-            gameState.setGameOver(true);
+        Player currentPlayer = gameState.getPlayerTurn();
+        if(!currentPlayer.hasValidMove(this)) {
+            gameState.setGameOver(true,
+                    MoveUtils.isKingInCheck(this, currentPlayer.opposite(this), currentPlayer) == null);
+
             String[] options = {"Yes", "No", "Quit" };
             JOptionPane.showOptionDialog(this, "Game is ended in " + (gameState.isStaleMate() ? " stale mate." : " check mate.")
                     + "\nWould you like to start a new game?", "Game over", JOptionPane.YES_NO_CANCEL_OPTION, JOptionPane.QUESTION_MESSAGE, null, options, options[0]);

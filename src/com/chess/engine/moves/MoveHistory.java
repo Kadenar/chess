@@ -86,6 +86,9 @@ public class MoveHistory extends JPanel {
         this.allMoves = other.allMoves;
     }
 
+    public Move getLastMove() {
+        return this.lastMove;
+    }
     /**
      * Get a list of moves based on filter condition
      * @return get a {@code Stream<Move>} based on filtering condition

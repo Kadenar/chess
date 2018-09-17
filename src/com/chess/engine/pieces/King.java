@@ -41,12 +41,12 @@ public class King extends Piece {
         validPositions.addAll(addPositionsForDirection(board, this, currentTile, Direction.RIGHT, false));
         validPositions.addAll(addPositionsForDirection(board, this, currentTile, Direction.LEFT, false));
 
-
         // Check if the king moved
         boolean kingMoved = board.getMoveHistory().getMoves(move -> move.getMovedPiece().equals(this)).findFirst().isPresent();
 
         // The king can not have moved and can't be in check by opponent
-        if(!kingMoved && MoveUtils.isKingInCheck(board, getOwner().opposite(board), getOwner()) == null) {
+        Piece targetingPiece = MoveUtils.isKingInCheck(board, getOwner().opposite(board), getOwner());
+        if(!kingMoved &&  targetingPiece == null) {
 
             // castling king side
             // TODO -> Might be able to remove this when rule
