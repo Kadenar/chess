@@ -6,11 +6,16 @@ import com.chess.engine.board.Board;
 import com.chess.engine.board.BoardUtils;
 import com.chess.engine.board.Tile;
 import com.chess.engine.pieces.King;
+import com.chess.engine.pieces.Knight;
 import com.chess.engine.pieces.Pawn;
 import com.chess.engine.pieces.Piece;
 import com.chess.engine.pieces.Queen;
 
+import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import java.awt.Color;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
 import java.util.Map;
 import java.util.Objects;
 
@@ -193,7 +198,12 @@ public class Move {
 
         // Add piece to dragged to tile and remove from originating tile
         if(isPromotion()) {
-            getDestination().setPiece(new Queen(currentPlayer));
+            // TODO -> If on test board and the move is a promotion, need better way to generate multiple boards
+            if(isTestBoard) {
+                getDestination().setPiece(new Queen(currentPlayer));
+            } else {
+                getDestination().setPiece(PromotionSelection.displaySelection(board, currentPlayer));
+            }
             currentPlayer.getPieces().remove(movedPiece);
             // TODO on promotion, the pawn doesn't get removed from the UI
         } else {

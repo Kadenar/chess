@@ -44,6 +44,8 @@ public class MoveHistory extends JPanel {
     // All moves that have been performed
     private final List<Move> allMoves;
 
+    private final List<Move> undoRedoMoves;
+
     // Move history table / scrolling
     private final JTable moveHistory = new JTable(new DefaultTableModel()) {
         @Override
@@ -68,6 +70,7 @@ public class MoveHistory extends JPanel {
         // Backend information
         this.board = board;
         this.allMoves = new ArrayList<>();
+        this.undoRedoMoves = new ArrayList<>();
 
         // UI components for Move History
         this.setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
@@ -84,11 +87,17 @@ public class MoveHistory extends JPanel {
         this.board = other.board;
         this.lastMove = other.lastMove;
         this.allMoves = other.allMoves;
+        this.undoRedoMoves = other.undoRedoMoves;
     }
 
+    /**
+     * Get the most recent move that was performed
+     * @return the most recent {@code Move} that was performed by the user
+     */
     public Move getLastMove() {
         return this.lastMove;
     }
+
     /**
      * Get a list of moves based on filter condition
      * @return get a {@code Stream<Move>} based on filtering condition
@@ -213,6 +222,7 @@ public class MoveHistory extends JPanel {
         // Add the latest move to our move history and set latest move
         this.lastMove = latestMove;
         this.allMoves.add(latestMove);
+        this.undoRedoMoves.clear();
 
         // History is updated after the move is performed so if current player is white, then it was black who just moved
         if(currentState.getPlayerTurn().getColor().equals(Player.Color.WHITE)) {
@@ -248,6 +258,7 @@ public class MoveHistory extends JPanel {
 
         // Clean up moves
         this.allMoves.clear();
+        this.undoRedoMoves.clear();
         this.lastMove = null;
 
         // Remove all rows from move history
@@ -269,15 +280,34 @@ public class MoveHistory extends JPanel {
      * Remove the latest move
      */
     public void undo() {
-        allMoves.remove(this.lastMove);
-        // TODO
+
+        // Add the last move performed to list of undo / redo moves
+        if(lastMove != null) {
+            System.out.println("Last move before: " + lastMove);
+            this.undoRedoMoves.add(this.lastMove);
+
+            // Set our last move to previous move before this
+            int allMovesSize = allMoves.size();
+            this.lastMove = allMovesSize > 1 ? allMoves.get(allMovesSize - undoRedoMoves.size()) : null;
+            System.out.println("Last move after: " + lastMove);
+
+        }
+
     }
 
     /**
      * Redo the most recent move
      */
     public void redo() {
-        // TODO
+        int undoRedoMovesSize = undoRedoMoves.size();
+
+        // If we have any undo remove moves, pop the first 1 off
+        if(undoRedoMovesSize > 0) {
+            System.out.println("Last move before: " + lastMove);
+            this.lastMove = undoRedoMoves.get(0);
+            System.out.println("Last move after: " + lastMove);
+            undoRedoMoves.remove(0);
+        }
     }
 
     /**

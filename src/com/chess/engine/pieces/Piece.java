@@ -22,7 +22,7 @@ import java.util.Set;
 public abstract class Piece extends JLabel {
 
     private final Player owner;
-    private final JLabel scaledImg;
+    private JLabel scaledImg;
 
     public Piece(Player color, String pieceImagePath) {
         super();

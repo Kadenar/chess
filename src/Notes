@@ -1,0 +1,15 @@
+List of TODOS:
+1) Fix move notation entries when multiple pieces could have performed the same move (i.e. -> 2 knights)
+2) Add undo / redo options and support
+3) Add time controls
+4) Add ability to click on any of the previous moves to see the board state in read-only format
+5) Add PGN notation parsing and execute the moves
+6) Test performance of copy constructor vs. new instantiation on test moves
+7) Add unit test coverage
+8) Possible to use enum for Player instead of class?
+9) Fix castling for game state in MoveUtils
+10) Fix JOptionPane showing on game startup if the game is over already
+11) Allow for more than just queen promotion
+12) When promoting, the pawn does not get removed from the drag layer
+13) Evaluate position for each player (who is doing better)
+14) Add AI at some point?

@@ -378,16 +378,14 @@ public class Board extends JPanel {
             if(tile.isOccupied()) {
                 Piece piece = tile.getPiece();
                 tile.add(piece);
-
-                // TODO -> Not working properly
-                piece.setCursor(Cursor.getPredefinedCursor(Cursor.MOVE_CURSOR));
+                piece.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
 
                 // Highlight tiles containing pieces with valid moves for current player
-                if(GameSettings.INSTANCE.isEnableHighlighting() && piece.getOwner().equals(currentPlayer)) {
-                    // As long as the piece has moves, highlight it
-                    if(getValidMovesForPiece(getGameState().getFullMoves(), piece).stream().findFirst().isPresent()) {
-                        tile.highlightTile(true, new Color(50,205,50));
-                    }
+                // As long as the piece has moves, highlight it
+                if(GameSettings.INSTANCE.isEnableHighlighting()
+                        && piece.getOwner().equals(currentPlayer)
+                        && getValidMovesForPiece(getGameState().getFullMoves(), piece).stream().findFirst().isPresent()) {
+                    tile.highlightTile(true, new Color(50,205,50));
                 }
             }
 
