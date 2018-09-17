@@ -60,8 +60,8 @@ public class GameState {
     public void setEnpassantSquare(Position enpassantSquare) { this.enPassant = enpassantSquare; }
     public void setHalfMoves(int halfMoves) { this.halfMoves = halfMoves; }
     public void setFullMoves(int fullMoves) { this.fullMoves = fullMoves; }
-    public void setGameOver(boolean gameOver, boolean isStaleMate) {
-        this.gameOver = gameOver;
+    public void setGameOver(boolean isStaleMate) {
+        this.gameOver = true;
         this.stalemate = isStaleMate;
     }
 

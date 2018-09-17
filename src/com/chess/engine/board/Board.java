@@ -15,6 +15,7 @@ import com.chess.engine.pieces.Piece;
 import com.chess.engine.pieces.Queen;
 import com.chess.engine.pieces.Rook;
 
+import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JLayeredPane;
 import javax.swing.JOptionPane;
@@ -363,6 +364,7 @@ public class Board extends JPanel {
         getTileMap().values().stream().filter(Tile::isHighlighted)
                 .forEach(tile -> tile.highlightTile(false, null));
 
+        Player currentPlayer = gameState.getPlayerTurn();
         // Add all of our tiles to the chess panel
         getTileMap().values().forEach(tile -> {
 
@@ -384,7 +386,7 @@ public class Board extends JPanel {
                 piece.setCursor(Cursor.getPredefinedCursor(Cursor.MOVE_CURSOR));
 
                 // Highlight tiles containing pieces with valid moves for current player
-                if(GameSettings.INSTANCE.isEnableHighlighting() && piece.getOwner().equals(getGameState().getPlayerTurn())) {
+                if(GameSettings.INSTANCE.isEnableHighlighting() && piece.getOwner().equals(currentPlayer)) {
                     // As long as the piece has moves, highlight it
                     if(getValidMovesForPiece(getGameState().getFullMoves(), piece).stream().findFirst().isPresent()) {
                         tile.highlightTile(true, Color.GREEN);
@@ -398,14 +400,30 @@ public class Board extends JPanel {
 
         // If player doesn't have valid moves, then the game is over
         // TODO -> If the game is over before frame loads, then pane shows first..
-        Player currentPlayer = gameState.getPlayerTurn();
         if(!currentPlayer.hasValidMove(this)) {
-            gameState.setGameOver(true,
-                    MoveUtils.isKingInCheck(this, currentPlayer.opposite(this), currentPlayer) == null);
+            gameState.setGameOver(MoveUtils.isKingInCheck(this,
+                    currentPlayer.opposite(this), currentPlayer) == null);
 
-            String[] options = {"Yes", "No", "Quit" };
-            JOptionPane.showOptionDialog(this, "Game is ended in " + (gameState.isStaleMate() ? " stale mate." : " check mate.")
-                    + "\nWould you like to start a new game?", "Game over", JOptionPane.YES_NO_CANCEL_OPTION, JOptionPane.QUESTION_MESSAGE, null, options, options[0]);
+            //String[] options = {"Yes", "No", "Quit" };
+            /*JButton yes = new JButton("Yes");
+            yes.addActionListener(e -> {
+                reset();
+                JOptionPane.getRootFrame().dispose();
+            });
+            JButton no = new JButton("No");
+            no.addActionListener(e -> JOptionPane.getRootFrame().dispose());
+            JButton quit = new JButton("Quit");
+            JButton[] buttons = {yes, no, quit};
+            quit.addActionListener(e -> System.exit(0));
+            JOptionPane.showOptionDialog(this, "Game ended in " + (gameState.isStaleMate() ? " stale mate." : " check mate.")
+                    + "\nWould you like to start a new game?", "Game over", JOptionPane.YES_NO_CANCEL_OPTION, JOptionPane.QUESTION_MESSAGE, null, buttons, buttons[0]);
+            */
+            int value = JOptionPane.showConfirmDialog(this,
+                    "Game ended in " + (gameState.isStaleMate() ? " stale mate." : " check mate.")
+                            + "\nWould you like to start a new game?", "Game over", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE);
+            if(value == 0) {
+                reset();
+            }
         }
 
         layeredPane.revalidate();
