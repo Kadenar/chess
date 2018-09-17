@@ -34,7 +34,7 @@ class BoardListener implements MouseListener, MouseMotionListener {
      */
     private void toggleIndicators(boolean enabled) {
         board.getValidMovesForPiece(board.getGameState().getFullMoves(), originatingPiece)
-                .forEach(move -> move.getDestination().highlightTile(enabled, Color.MAGENTA));
+                .forEach(move -> move.getDestination().highlightTile(enabled, new Color(135,206,235)));
     }
 
     /**

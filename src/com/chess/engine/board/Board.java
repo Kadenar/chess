@@ -358,8 +358,8 @@ public class Board extends JPanel {
         // Highlight last move's tiles
         Move lastMove = getMoveHistory().getLastMove();
         if(lastMove != null) {
-            lastMove.getOrigin().highlightTile(true, new Color(50, 255, 200, 255));
-            lastMove.getDestination().highlightTile(true, new Color(50, 255, 150, 255));
+            lastMove.getOrigin().highlightTile(true, new Color(50, 255, 200));
+            lastMove.getDestination().highlightTile(true, new Color(50, 255, 150));
         }
 
         // Add all of our tiles to the chess panel
@@ -386,7 +386,7 @@ public class Board extends JPanel {
                 if(GameSettings.INSTANCE.isEnableHighlighting() && piece.getOwner().equals(currentPlayer)) {
                     // As long as the piece has moves, highlight it
                     if(getValidMovesForPiece(getGameState().getFullMoves(), piece).stream().findFirst().isPresent()) {
-                        tile.highlightTile(true, Color.GREEN);
+                        tile.highlightTile(true, new Color(50,205,50));
                     }
                 }
             }

@@ -6,7 +6,7 @@ import com.chess.engine.moves.MoveHistory;
 import com.chess.engine.moves.MoveType;
 import com.chess.ui.menus.DebugOptionsMenu;
 import com.chess.ui.menus.GameOptionsMenu;
-import com.chess.ui.panels.BoardPanel;
+import com.chess.engine.board.BoardPanel;
 
 import javax.swing.JFrame;
 import javax.swing.JMenuBar;

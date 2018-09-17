@@ -17,5 +17,5 @@ public final class ChessConsts {
     public final static int HISTORY_HEIGHT = WINDOW_HEIGHT - 130;
 
     public final static int BOARD_WIDTH = WINDOW_WIDTH - 275;
-    public final static int BOARD_HEIGHT = WINDOW_HEIGHT - 63;
+    public final static int BOARD_HEIGHT = WINDOW_HEIGHT - 78;
 }

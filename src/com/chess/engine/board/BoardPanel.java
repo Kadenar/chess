@@ -1,4 +1,4 @@
-package com.chess.ui.panels;
+package com.chess.engine.board;
 
 import com.chess.ChessConsts;
 import com.chess.engine.board.Board;
