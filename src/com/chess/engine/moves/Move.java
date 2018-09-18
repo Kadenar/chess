@@ -195,7 +195,7 @@ public class Move {
         // Add piece to dragged to tile and remove from originating tile
         if(isPromotion()) {
             // TODO -> If on test board and the move is a promotion, need better way to generate multiple boards
-            this.promotionSelection = isTestBoard ? new Queen(currentPlayer) : PromotionSelection.displaySelection(board, currentPlayer);
+            this.promotionSelection = isTestBoard ? new Queen(currentPlayer) : new PromotionSelection().displaySelections(board, currentPlayer);
             getDestination().setPiece(promotionSelection);
             currentPlayer.getPieces().remove(movedPiece);
             currentPlayer.getPieces().add(promotionSelection);

@@ -8,7 +8,8 @@ List of TODOS:
 7) Add unit test coverage
 8) Fix castling for game state in MoveUtils (allowed queenside even when knight is in the way)
 9) Fix JOptionPane showing on game startup if the game is over already
-10) Allow for more than just queen promotion (CURRENTLY DOING)
-11) When promoting, the pawn does not get removed from the drag layer
+10) Allow for more than just queen promotion (DONE)
+11) When promoting, the pawn does not get removed from the drag layer (DONE)
 12) Evaluate position for each player (who is doing better)
 13) Add AI at some point?
+14) Add server / client interactions

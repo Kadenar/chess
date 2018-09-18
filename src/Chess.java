@@ -14,7 +14,8 @@ class Chess {
         String castlingBroken = "2k1r2r/pbpp1pbp/5NpB/1P5N/6n1/1q1Q2P1/P1P1PPBP/R3K2R w KQ - 1 18";
         String anotherCastle = "r3k2r/pB1p3p/1p1qp1p1/2p2p2/2P5/NPQ3PP/P3PP2/R3K2R w KQkq - 0 10";
         String lastCastle = "2k1r2r/pbpp1pbp/5NpB/1P5N/1q1Q2n1/6P1/P1P1PPBP/R3K2R w KQ - 3 19";
+        String almostPromote = "rnbqk1nr/ppppp1P1/5p2/8/8/8/PPPPP1PP/RNBQKBNR w KQkq - 0 5";
         String gameOver = "1kQ4B/p1p2p1p/1N4p1/1P5N/q5n1/4r1P1/P1P1PPBP/R3K2R b KQ - 0 12";
-        SwingUtilities.invokeLater(() -> new ChessFrame(new Board(defaultPosition)));
+        SwingUtilities.invokeLater(() -> new ChessFrame(new Board(almostPromote)));
     }
 }
