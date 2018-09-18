@@ -23,7 +23,9 @@ public class Move {
 
     public Move(final Move move) {
         this(move.moved, move.fromTile, move.captured, move.toTile);
+        this.promotionSelection = move.promotionSelection;
     }
+
     public Move(final Piece pieceMoved, final Tile from, final Piece pieceCaptured, final Tile to) {
         this.moved = pieceMoved;
         this.fromTile = from;
@@ -42,7 +44,7 @@ public class Move {
      * Get the piece that was captured from this move
      * @return the {@code Piece} that was captured, or null if there was no capture
      */
-    public Piece getCapturedPiece() { return this.captured; }
+    Piece getCapturedPiece() { return this.captured; }
 
     /**
      * Get the origin tile the move comes from
@@ -62,7 +64,7 @@ public class Move {
      * Determine whether the given move is enpassant move
      * @return {@code true} if moved piece was a pawn and moved 2 squares, {@code false} if not
      */
-    public boolean isEnpassantMove() {
+    boolean isEnpassantMove() {
         return getMovedPiece() instanceof Pawn && BoardUtils.deltaRow(getOrigin(), getDestination()) == 2;
     }
 
@@ -70,7 +72,7 @@ public class Move {
      * Did this move capture a piece?
      * @return {@code true} if a piece was captured, {@code false} if no piece captured
      */
-    public boolean isCapture() {
+    boolean isCapture() {
         return getCapturedPiece() != null;
     }
 
@@ -87,7 +89,7 @@ public class Move {
      * Determine whether the given move is a pawn promoting
      * @return {@code true} if moved piece was a pawn and promotion square, {@code false} otherwise
      */
-    public boolean isPromotion() {
+    boolean isPromotion() {
         return getMovedPiece() instanceof Pawn
                 && getDestination().getPosition().isPromotionSquare(getMovedPiece().getOwner());
     }
@@ -134,7 +136,7 @@ public class Move {
      * @param isTestBoard {@code true} if this is a test board,
      *                    {@code false} if it is the actual baord
      */
-    public void execute(Board board, boolean isTestBoard) {
+    void execute(Board board, boolean isEPCapture, boolean isTestBoard) {
         MoveType typeOfMove = null;
         Map<Position, Tile> tileMap = board.getTileMap();
         Position targetPosition = getDestination().getPosition();
@@ -142,9 +144,7 @@ public class Move {
         Piece movedPiece = getMovedPiece();
         Player currentPlayer = movedPiece.getOwner();
         Player opposingPlayer = currentPlayer.opposite(board);
-
         Piece capturedPiece = getCapturedPiece();
-        boolean isEnpassantCapture = isEnpassantCapture(board.getGameState().getEPSquare());
 
         // If moving the king
         if (movedPiece instanceof King) {
@@ -179,7 +179,7 @@ public class Move {
             currentPlayer.capturePiece(opposingPlayer, capturedPiece);
         }
         // If this was an en passant capture, then remove the captured pawn
-        else if (isEnpassantCapture) {
+        else if (isEPCapture) {
             typeOfMove = MoveType.CAPTURE;
 
             // Determine the location of the pawn to be captured

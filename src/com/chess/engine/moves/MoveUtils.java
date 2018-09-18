@@ -72,11 +72,14 @@ public class MoveUtils {
      */
     private static void updateBoard(Board board, Move move, boolean isTestBoard) {
 
+        // TODO -> There has to be a better way to do this than caching this here
+        boolean isEP = move.getMovedPiece() instanceof Pawn && board.getGameState().getEPSquare() != null;
+
         // Update the game state information for the board
         updateGameState(board, move);
 
         // The type of move we performed (Standard, Capture, Check, or Castle)
-        move.execute(board, isTestBoard);
+        move.execute(board, isEP, isTestBoard);
     }
 
     /**
