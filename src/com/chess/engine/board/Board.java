@@ -283,7 +283,6 @@ public class Board extends JPanel {
         if(validMovesForPiece == null) {
             Predicate<Move> validMove = move -> MoveUtils.executeTestMove(this, move.getOrigin(), move.getDestination());
             validMovesForPiece = getMovesForPiece(turn, piece).parallelStream().filter(validMove).collect(Collectors.toSet());
-
             validMovesForTurn.put(piece, validMovesForPiece);
         }
 

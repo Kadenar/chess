@@ -315,7 +315,7 @@ public class MoveHistory extends JPanel {
      * @return the {@code String} notation entry for history
      */
     public String getNotationEntry(Move move) {
-
+        // Ensure we have a valid move
         if(move == null) {
             return "";
         }

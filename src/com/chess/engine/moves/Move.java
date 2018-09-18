@@ -6,25 +6,19 @@ import com.chess.engine.board.Board;
 import com.chess.engine.board.BoardUtils;
 import com.chess.engine.board.Tile;
 import com.chess.engine.pieces.King;
-import com.chess.engine.pieces.Knight;
 import com.chess.engine.pieces.Pawn;
 import com.chess.engine.pieces.Piece;
 import com.chess.engine.pieces.Queen;
-
-import javax.swing.JLabel;
-import javax.swing.JOptionPane;
-import java.awt.Color;
-import java.awt.event.MouseEvent;
-import java.awt.event.MouseListener;
 import java.util.Map;
 import java.util.Objects;
 
 public class Move {
 
     private final Piece moved;
-    private final Piece captured;
     private final Tile fromTile;
+    private final Piece captured;
     private final Tile toTile;
+    private Piece promotionSelection;
 
     public Move(final Move move) {
         this(move.moved, move.fromTile, move.captured, move.toTile);
@@ -34,29 +28,30 @@ public class Move {
         this.fromTile = from;
         this.captured = pieceCaptured;
         this.toTile = to;
+        this.promotionSelection = null;
     }
 
     /**
      * Get the piece that is being moved
-     * @return the piece being moved
+     * @return the {@code Piece} being moved
      */
     public Piece getMovedPiece() { return this.moved; }
 
     /**
      * Get the piece that was captured from this move
-     * @return the piece that was captured, or null if there was no capture
+     * @return the {@code Piece} that was captured, or null if there was no capture
      */
     public Piece getCapturedPiece() { return this.captured; }
 
     /**
      * Get the origin tile the move comes from
-     * @return the Tile to move from
+     * @return the {@code Tile} to move from
      */
     public Tile getOrigin() { return this.fromTile; }
 
     /**
      * Get destination tile the move goes to
-     * @return the Tile to move to
+     * @return the {@code Tile} to move to
      */
     public Tile getDestination() {
         return this.toTile;
@@ -72,7 +67,7 @@ public class Move {
 
     /**
      * Did this move capture a piece?
-     * @return {@code true}
+     * @return {@code true} if a piece was captured, {@code false} if no piece captured
      */
     public boolean isCapture() {
         return getCapturedPiece() != null;
@@ -199,13 +194,10 @@ public class Move {
         // Add piece to dragged to tile and remove from originating tile
         if(isPromotion()) {
             // TODO -> If on test board and the move is a promotion, need better way to generate multiple boards
-            if(isTestBoard) {
-                getDestination().setPiece(new Queen(currentPlayer));
-            } else {
-                getDestination().setPiece(PromotionSelection.displaySelection(board, currentPlayer));
-            }
+            this.promotionSelection = isTestBoard ? new Queen(currentPlayer) : PromotionSelection.displaySelection(board, currentPlayer);
+            getDestination().setPiece(promotionSelection);
             currentPlayer.getPieces().remove(movedPiece);
-            // TODO on promotion, the pawn doesn't get removed from the UI
+            currentPlayer.getPieces().add(promotionSelection);
         } else {
             getDestination().setPiece(movedPiece);
         }

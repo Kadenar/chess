@@ -139,7 +139,10 @@ class BoardListener implements MouseListener, MouseMotionListener {
                 originatingPiece.setVisible(true);
             } else {
                 // Re-display the with latest updates after move is executed
+                //originatingPiece.setVisible(false);
+                board.getLayeredPane().remove(originatingPiece);
                 board.displayBoard();
+                //originatingPiece.setVisible(true);
             }
         }
     }

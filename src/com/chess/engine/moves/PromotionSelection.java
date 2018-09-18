@@ -2,6 +2,7 @@ package com.chess.engine.moves;
 
 import com.chess.engine.Player;
 import com.chess.engine.board.Board;
+import com.chess.engine.board.BoardUtils;
 import com.chess.engine.pieces.Bishop;
 import com.chess.engine.pieces.Knight;
 import com.chess.engine.pieces.Piece;
@@ -110,6 +111,6 @@ class PromotionSelection {
             pickedPiece = bishop;
         }
 
-        return pickedPiece;
+        return BoardUtils.getTypeOfPieceToCreate(pickedPiece.toString().charAt(0), currentPlayer);
     }
 }

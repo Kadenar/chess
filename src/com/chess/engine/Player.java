@@ -4,8 +4,8 @@ import com.chess.ChessConsts;
 import com.chess.engine.board.Board;
 import com.chess.engine.pieces.Piece;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
@@ -15,10 +15,10 @@ public class Player {
     private final Color color;
 
     // Pieces owner by the player
-    private List<Piece> ownedPieces;
+    private Set<Piece> ownedPieces;
 
     // Pieces captured by opponent
-    private List<Piece> capturedPieces;
+    private Set<Piece> capturedPieces;
 
     // The available colors for a player
     public enum Color {
@@ -42,8 +42,8 @@ public class Player {
      */
     public Player(Color color) {
         this.color = color;
-        this.ownedPieces = new ArrayList<>(ChessConsts.MAX_PIECES);
-        this.capturedPieces = new ArrayList<>(ChessConsts.MAX_PIECES);
+        this.ownedPieces = new HashSet<>(ChessConsts.MAX_PIECES);
+        this.capturedPieces = new HashSet<>(ChessConsts.MAX_PIECES);
     }
 
     /**
@@ -52,8 +52,8 @@ public class Player {
      */
     public Player(Player other) {
         this.color = other.color;
-        this.ownedPieces = new ArrayList<>(other.ownedPieces);
-        this.capturedPieces = new ArrayList<>(other.capturedPieces);
+        this.ownedPieces = new HashSet<>(other.ownedPieces);
+        this.capturedPieces = new HashSet<>(other.capturedPieces);
     }
 
     /**
@@ -86,7 +86,7 @@ public class Player {
      * Get list of pieces that player has lost
      * @return a {@code List<Piece>} of pieces the player no longer controls
      */
-    public List<Piece> getCapturedPieces() {
+    public Set<Piece> getCapturedPieces() {
         return this.capturedPieces;
     }
 
@@ -94,7 +94,7 @@ public class Player {
      * Get list of pieces that player controls
      * @return a {@code List<Piece>} of pieces that the player still controls
      */
-    public List<Piece> getPieces() {
+    public Set<Piece> getPieces() {
         return this.ownedPieces;
     }
 
@@ -106,10 +106,8 @@ public class Player {
     public boolean hasValidMove(Board board) {
         int fullMoves = board.getGameState().getFullMoves();
         Predicate<Piece> hasValidMoves = piece -> board.getValidMovesForPiece(fullMoves, piece)
-                                                       .stream().findFirst().isPresent();
-
-        return getPieces().stream().filter(hasValidMoves).collect(Collectors.toList()).size() > 0;
-        //return true;
+                                                   .stream().findFirst().isPresent();
+        return getPieces().stream().anyMatch(hasValidMoves);
     }
 
     /**
