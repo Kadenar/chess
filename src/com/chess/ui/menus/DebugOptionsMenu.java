@@ -88,7 +88,7 @@ public class DebugOptionsMenu extends JMenu {
     }
 
     private void parsePGN() {
-        PGNUtils.parsePGN("pgn/sample.pgn");
+        PGNUtils.parsePGN("files/pgn/sample.pgn");
     }
 
     /**

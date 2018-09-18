@@ -33,7 +33,7 @@ public class GameSettings {
      * Just wanted a way to toggle values without having to enable each run
      */
     private void parseUserSettings() {
-        File f = new File("settings/settings.txt");
+        File f = new File("files/settings/settings.txt");
         try {
             BufferedReader reader = new BufferedReader(new FileReader(f));
             String line;

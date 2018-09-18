@@ -120,27 +120,6 @@ public class Board extends JPanel {
      */
     public Board(Board otherBoard) {
         this(FenUtils.getFen(otherBoard), false);
-
-        /*this.immutablePlayers = new HashMap<>(ChessConsts.NUM_PLAYERS);
-        otherBoard.immutablePlayers.forEach((key, value) -> this.immutablePlayers.put(key, new Player(value)));
-
-        this.kingPositionMap = new HashMap<>(ChessConsts.NUM_PLAYERS);
-        otherBoard.kingPositionMap.forEach((key, value) -> this.kingPositionMap.put(new Player(key.getColor()), value));
-
-        this.tileMap = new LinkedHashMap<>(ChessConsts.NUM_TILES);
-        otherBoard.tileMap.forEach((key, value) -> this.tileMap.put(key, new Tile(value)));
-
-        this.movesForPlayers = new HashMap<>(ChessConsts.NUM_PLAYERS);
-        this.validMovesForPlayers = new HashMap<>(ChessConsts.NUM_PLAYERS);
-        otherBoard.immutablePlayers.entrySet().forEach(entry -> {
-           this.movesForPlayers.put(entry.getValue(), new HashMap<>(500));
-           this.validMovesForPlayers.put(entry.getValue(), new HashMap<>(500));
-        });
-
-        this.gameState = new GameState(otherBoard.gameState);
-        this.moveHistory = new MoveHistory(otherBoard.moveHistory);
-        this.layeredPane = null;
-        */
     }
 
     /**
@@ -415,7 +394,7 @@ public class Board extends JPanel {
      * Get the layered pane object which we use to drag pieces around on
      * @return the layered pane which our chessboard exists within
      */
-    public JLayeredPane getLayeredPane() {
+    JLayeredPane getLayeredPane() {
         return this.layeredPane;
     }
 

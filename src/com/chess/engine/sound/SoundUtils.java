@@ -13,7 +13,7 @@ public class SoundUtils {
     public static void playMoveSound(String soundName) {
         try {
             // Open an audio input stream.
-            File soundFile = new File("sound/" + soundName + ".wav");
+            File soundFile = new File("files/sound/" + soundName + ".wav");
             AudioInputStream audioIn = AudioSystem.getAudioInputStream(soundFile);
             // Get a sound clip resource.
             Clip clip = AudioSystem.getClip();

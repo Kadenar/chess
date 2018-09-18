@@ -81,17 +81,6 @@ public class MoveHistory extends JPanel {
     }
 
     /**
-     * Create move history instance with same board, and moves as the other
-     * @param other the {@code MoveHistory} to copy
-     */
-    public MoveHistory(MoveHistory other) {
-        this.board = other.board;
-        this.lastMove = other.lastMove;
-        this.allMoves = other.allMoves;
-        this.undoRedoMoves = other.undoRedoMoves;
-    }
-
-    /**
      * Get the most recent move that was performed
      * @return the most recent {@code Move} that was performed by the user
      */
@@ -211,7 +200,7 @@ public class MoveHistory extends JPanel {
      * Update the history whenever a move is performed
      * @param latestMove the most recent move that was performed
      */
-    public void update(Move latestMove) {
+    void update(Move latestMove) {
         GameState currentState = board.getGameState();
         DefaultTableModel model = (DefaultTableModel) this.moveHistory.getModel();
 
@@ -337,6 +326,10 @@ public class MoveHistory extends JPanel {
                 builder.append("x");
             }
             builder.append(movedTo);
+            if(move.isPromotion()) {
+                System.out.println(movedToTile.getPiece());
+                builder.append("=").append(movedToTile.getPiece());
+            }
         }
         // If last move was a king castle
         else if(movedPiece instanceof King && BoardUtils.deltaCol(movedFromTile, movedToTile) > 1) {
@@ -356,15 +349,16 @@ public class MoveHistory extends JPanel {
             builder.append(movedTo);
         }
 
-        // TODO -> Allow more than just queen promotion
-        if(move.isPromotion()) {
-            builder.append("Q");
-        }
-
         Player movingPlayer = movedPiece.getOwner();
         if(MoveUtils.isKingInCheck(board, movingPlayer, movingPlayer.opposite(board)) != null) {
-            builder.append("+");
+            // User still has valid moves
+            if(movingPlayer.opposite(board).hasValidMove(board)) {
+                builder.append("+");
+            } else {
+                builder.append("#");
+            }
         }
+
 
         return builder.toString();
     }

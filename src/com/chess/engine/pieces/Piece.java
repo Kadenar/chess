@@ -30,7 +30,7 @@ public abstract class Piece extends JLabel {
         JLabel testImg = null;
 
         try {
-            BufferedImage myPicture = ImageIO.read(new File("images/" + color.toString() + pieceImagePath));
+            BufferedImage myPicture = ImageIO.read(new File("files/images/" + color.toString() + pieceImagePath));
             ImageIcon pieceIcon = new ImageIcon(myPicture);
             setIcon(pieceIcon);
             testImg = new JLabel(new ImageIcon(pieceIcon.getImage().getScaledInstance(
