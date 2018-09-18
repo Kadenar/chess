@@ -7,7 +7,6 @@ import com.chess.engine.pieces.Piece;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.function.Predicate;
-import java.util.stream.Collectors;
 
 public class Player {
 
@@ -83,16 +82,16 @@ public class Player {
     }
 
     /**
-     * Get list of pieces that player has lost
-     * @return a {@code List<Piece>} of pieces the player no longer controls
+     * Get set of pieces that player has lost
+     * @return a {@code Set<Piece>} of pieces the player no longer controls
      */
     public Set<Piece> getCapturedPieces() {
         return this.capturedPieces;
     }
 
     /**
-     * Get list of pieces that player controls
-     * @return a {@code List<Piece>} of pieces that the player still controls
+     * Get set of pieces that player controls
+     * @return a {@code Set<Piece>} of pieces that the player still controls
      */
     public Set<Piece> getPieces() {
         return this.ownedPieces;
