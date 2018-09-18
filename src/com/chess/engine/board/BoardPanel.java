@@ -1,7 +1,6 @@
 package com.chess.engine.board;
 
 import com.chess.ChessConsts;
-import com.chess.engine.board.Board;
 import com.chess.ui.headers.FileHeaders;
 import com.chess.ui.headers.RankHeaders;
 

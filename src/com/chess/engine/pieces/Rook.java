@@ -25,12 +25,12 @@ public class Rook extends Piece {
         Set<Move> validPositions = new HashSet<>();
 
         // Vertical movement
-        validPositions.addAll(addPositionsForDirection(board, this, currentPosition, Direction.UP, false));
-        validPositions.addAll(addPositionsForDirection(board, this, currentPosition, Direction.DOWN, false));
+        validPositions.addAll(addPositionsForDirection(board, currentPosition, Direction.UP));
+        validPositions.addAll(addPositionsForDirection(board, currentPosition, Direction.DOWN));
 
         // Horizontal movement
-        validPositions.addAll(addPositionsForDirection(board, this, currentPosition, Direction.RIGHT, false));
-        validPositions.addAll(addPositionsForDirection(board, this, currentPosition, Direction.LEFT, false));
+        validPositions.addAll(addPositionsForDirection(board, currentPosition, Direction.RIGHT));
+        validPositions.addAll(addPositionsForDirection(board, currentPosition, Direction.LEFT));
 
         // Return valid positions that the rook can move to
         return validPositions;

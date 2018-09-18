@@ -4,7 +4,7 @@ import com.chess.ui.ChessFrame;
 
 import javax.swing.SwingUtilities;
 
-public class Chess {
+class Chess {
 
     public static void main(String[] args) {
         //Board board = new Board("r3k2r/p3b1pp/np1qbn2/2pN4/1PP1Np2/B2B4/P1QP2PP/R3K2R b KQkq - 0 9");

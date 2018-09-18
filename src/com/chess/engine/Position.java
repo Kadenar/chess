@@ -8,10 +8,10 @@ import java.util.Objects;
  */
 public class Position {
     // The Rank
-    private int row;
+    private final int row;
 
     // The File
-    private int column;
+    private final int column;
 
     public Position(int row, int column) {
         this.row = row;

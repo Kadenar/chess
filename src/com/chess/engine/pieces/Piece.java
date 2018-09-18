@@ -22,9 +22,9 @@ import java.util.Set;
 public abstract class Piece extends JLabel {
 
     private final Player owner;
-    private JLabel scaledImg;
+    private final JLabel scaledImg;
 
-    public Piece(Player color, String pieceImagePath) {
+    Piece(Player color, String pieceImagePath) {
         super();
         this.owner = color;
         JLabel testImg = null;
@@ -52,7 +52,7 @@ public abstract class Piece extends JLabel {
      * Create the possible moves for the given piece (to be implemented based on type of piece)
      * @param board the {@code Board} to generate moves for this piece
      * @param currentTile the current {@code Tile} of the piece
-     * @return set of possible moves that are possible
+     * @return set of possible moves that are possible for the given piece
      */
     abstract Set<Move> generateMoves(Board board, Tile currentTile);
 
@@ -67,38 +67,48 @@ public abstract class Piece extends JLabel {
     }
 
     /**
+     * Movement for all available directions that do not include diagonal moves
+     * @param board the current board
+     * @param currentTile the current tile of the piece
+     * @param dir the direction of movemenet (up, down, left, right)
+     * @return the set of moves for the piece
+     */
+    final Set<Move> addPositionsForDirection(Board board, Tile currentTile, Direction dir) {
+        return addPositionsForDirection(board, currentTile, dir, false);
+    }
+
+    /**
      * Movement for all available directions (Up, Down, Left, Right, Diagonal Up, Diagonal Down)
-     * @param piece the piece
-     * @param currentTile the current position of the piece
+     * @param board the current board
+     * @param currentTile the current tile of the piece
      * @param dir the direction of movement (up, down, left, right)
      * @param isDiagonal whether diagonal movement
-     * @return the positions that are valid to be moved to
+     * @return the set of moves for the piece
      */
-    final Set<Move> addPositionsForDirection(Board board, Piece piece, Tile currentTile,
-                                             Direction dir, boolean isDiagonal) {
+    final Set<Move> addPositionsForDirection(Board board, Tile currentTile, Direction dir, boolean isDiagonal) {
         Set<Move> positions = new HashSet<>();
 
         // Diagonal movement
         if(isDiagonal) {
             int rowOffset = dir == Direction.UP ? 1 : -1;
-            positions.addAll(addPositionsForDiagonal(board, piece, currentTile, 1, rowOffset));
-            positions.addAll(addPositionsForDiagonal(board, piece, currentTile, -1, rowOffset));
+            positions.addAll(addPositionsForDiagonal(board, currentTile, 1, rowOffset));
+            positions.addAll(addPositionsForDiagonal(board, currentTile, -1, rowOffset));
         }
         // Vertical up
         else if(dir == Direction.UP) {
-            positions.addAll(addPositionsForVertical(board, piece, currentTile, 1));
+            positions.addAll(addPositionsForVertical(board, currentTile, 1));
         }
         // Vertical down
         else if(dir == Direction.DOWN) {
-            positions.addAll(addPositionsForVertical(board, piece, currentTile, -1));
+            positions.addAll(addPositionsForVertical(board, currentTile, -1));
         }
         // Horizontal left
         else if(dir == Direction.LEFT) {
-            positions.addAll(addPositionsForHorizontal(board, piece, currentTile, -1));
+            positions.addAll(addPositionsForHorizontal(board, currentTile, -1));
         }
         // Horizontal right
         else if(dir == Direction.RIGHT) {
-            positions.addAll(addPositionsForHorizontal(board, piece, currentTile, 1));
+            positions.addAll(addPositionsForHorizontal(board, currentTile, 1));
         }
 
         return positions;
@@ -106,54 +116,46 @@ public abstract class Piece extends JLabel {
 
     /**
      * Add positions for a diagonal in given x and y offset direction
-     * @param piece the piece to determine positions for
      * @param currentTile the current position of the piece
      * @param colOffset the column offset (left and right)
      * @param rowOffset the row offset (up and down)
-     * @return the positions that are valid to be moved to
+     * @return the set of diagonal moves for the piece
      */
-    private Set<Move> addPositionsForDiagonal(Board board, Piece piece, Tile currentTile,
-                                              int colOffset, int rowOffset) {
-        return addPositionsForOffset(board, piece, currentTile, colOffset, rowOffset);
+    private Set<Move> addPositionsForDiagonal(Board board, Tile currentTile, int colOffset, int rowOffset) {
+        return addPositionsForOffset(board, currentTile, colOffset, rowOffset);
     }
 
     /**
-     * Add positions for a vertical in given y offset direction
-     * @param piece the piece
+     * Add positions for a vertical with given row offset
      * @param currentTile the current position of the piece
      * @param rowOffset the row offset (up and down)
-     * @return the positions that are valid to be moved to
+     * @return the set of vertical moves for the piece
      */
-    private Set<Move> addPositionsForVertical(Board board, Piece piece,
-                                              Tile currentTile, int rowOffset) {
-        return addPositionsForOffset(board, piece, currentTile, 0, rowOffset);
+    private Set<Move> addPositionsForVertical(Board board, Tile currentTile, int rowOffset) {
+        return addPositionsForOffset(board, currentTile, 0, rowOffset);
     }
 
     /**
-     * Add positions for a horizontal in given column offset direction
-     * @param piece the piece
+     * Add positions for a horizontal with given column offset
      * @param currentTile the current position of the piece
      * @param colOffset the column offset (left and right)
-     * @return the positions that are valid to be moved to
+     * @return the set of horizontal positions for the piece
      */
-    private Set<Move> addPositionsForHorizontal(Board board, Piece piece,
-                                                Tile currentTile, int colOffset) {
-        return addPositionsForOffset(board, piece, currentTile, colOffset, 0);
+    private Set<Move> addPositionsForHorizontal(Board board, Tile currentTile, int colOffset) {
+        return addPositionsForOffset(board, currentTile, colOffset, 0);
     }
 
     /**
      * Add positions for a given offset
-     * @param piece the piece
      * @param currentTile the current position of the piece
      * @param colOffset the column offset (left and right movement)
      * @param rowOffSet the row offset (up and down movement)
-     * @return the positions that are valid to be moved to
+     * @return the set of moves with a given offset from current tile
      */
-     final Set<Move> addPositionsForOffset(Board board, Piece piece, Tile currentTile,
-                                           int colOffset, int rowOffSet) {
+     final Set<Move> addPositionsForOffset(Board board, Tile currentTile, int colOffset, int rowOffSet) {
         Position currentPosition = currentTile.getPosition();
-        boolean isPawn = piece instanceof Pawn;
-        int maxSpacesMoved = piece.getMaxSpacesMoved();
+        boolean isPawn = this instanceof Pawn;
+        int maxSpacesMoved = getMaxSpacesMoved();
 
         // Set max spaces to 1 for pawns not on home row
         if(isPawn && (currentPosition.getRow() != 1 && currentPosition.getRow() != 6)) {
@@ -184,7 +186,7 @@ public abstract class Piece extends JLabel {
 
                 // Don't allow a pawn to be moved to another pawn's location unless it is a diagonal move
                 // Don't allow a pawn to move diagonally if the pawn on that tile is the same owner
-                if ((isPawn && colOffset == 0) || piece.sameSide(offSetTilePiece)) {
+                if ((isPawn && colOffset == 0) || this.sameSide(offSetTilePiece)) {
                     break;
                 }
 
@@ -201,7 +203,7 @@ public abstract class Piece extends JLabel {
             }
 
             // Add our position if it was not occupied or was an opposing piece and does not cause check
-            positionsSet.add(new Move(piece, currentTile, offSetTilePiece, offSetTile));
+            positionsSet.add(new Move(this, currentTile, offSetTilePiece, offSetTile));
 
             // Break if the tile was occupied as we can't go past an occupied tile
             if(offSetTileIsOccupied) {
@@ -233,7 +235,7 @@ public abstract class Piece extends JLabel {
      * a piece can move by default unless overridden
      * @return 8 spaces
      */
-    public int getMaxSpacesMoved() {
+    int getMaxSpacesMoved() {
         return 8;
     }
 

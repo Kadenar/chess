@@ -3,6 +3,7 @@ package com.chess.engine.board;
 import com.chess.ChessConsts;
 import com.chess.engine.GameSettings;
 import com.chess.engine.Player;
+import com.chess.engine.PlayerColor;
 import com.chess.engine.Position;
 import com.chess.engine.moves.Move;
 import com.chess.engine.moves.MoveHistory;
@@ -34,7 +35,7 @@ public class Board extends JPanel {
     private final Map<Position, Tile> tileMap;
 
     // Map of players
-    private final Map<Player.Color, Player> immutablePlayers;
+    private final Map<PlayerColor, Player> immutablePlayers;
 
     // Contains the king position for each player
     private final Map<Player, Position> kingPositionMap;
@@ -48,7 +49,7 @@ public class Board extends JPanel {
     private final MoveHistory moveHistory;
 
     // Create layered pane for dragging purposes
-    private JLayeredPane layeredPane = new JLayeredPane();
+    private final JLayeredPane layeredPane = new JLayeredPane();
 
     /**
      * Create a board with UI always
@@ -64,16 +65,16 @@ public class Board extends JPanel {
      * @param fen the fen string to present on a chessboard
      * @param withUI true if should UI be rendered, false if not
      */
-    public Board(String fen, boolean withUI) {
+    private Board(String fen, boolean withUI) {
         super(new GridLayout(ChessConsts.NUM_TILE, ChessConsts.NUM_TILE));
 
         // Add our tiles
         this.tileMap = new LinkedHashMap<>(ChessConsts.NUM_TILES);
 
         // Add our players
-        Map<Player.Color, Player> players = new HashMap<>(ChessConsts.NUM_PLAYERS);
-        players.put(Player.Color.WHITE, new Player(Player.Color.WHITE));
-        players.put(Player.Color.BLACK, new Player(Player.Color.BLACK));
+        Map<PlayerColor, Player> players = new HashMap<>(ChessConsts.NUM_PLAYERS);
+        players.put(PlayerColor.WHITE, new Player(PlayerColor.WHITE));
+        players.put(PlayerColor.BLACK, new Player(PlayerColor.BLACK));
         this.immutablePlayers = Collections.unmodifiableMap(players);
 
         // Our moves / valid moves for both players
@@ -183,8 +184,8 @@ public class Board extends JPanel {
      */
     void constructPiece(final char ch, final Position positionOnBoard) {
         // Determine the color this piece belongs to
-        Player owner = Character.isUpperCase(ch) ? getPlayers().get(Player.Color.WHITE)
-                                                 : getPlayers().get(Player.Color.BLACK);
+        Player owner = Character.isUpperCase(ch) ? getPlayers().get(PlayerColor.WHITE)
+                                                 : getPlayers().get(PlayerColor.BLACK);
 
         // Get the type of piece to be created
         Piece piece = BoardUtils.getTypeOfPieceToCreate(ch, owner);
@@ -293,7 +294,7 @@ public class Board extends JPanel {
      * Map of players based on player color (White and Black)
      * @return the two players for the given board
      */
-    public Map<Player.Color, Player> getPlayers() { return this.immutablePlayers; }
+    public Map<PlayerColor, Player> getPlayers() { return this.immutablePlayers; }
 
     /**
      * The current game state of the board

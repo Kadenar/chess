@@ -25,12 +25,10 @@ public class Bishop extends Piece {
         Set<Move> validPositions = new HashSet<>();
 
         // Up 1, over 1
-        validPositions.addAll(addPositionsForDirection(board, this, currentPosition,
-                                                                Direction.UP, true));
+        validPositions.addAll(addPositionsForDirection(board, currentPosition, Direction.UP, true));
 
         // Down 1, over 1
-        validPositions.addAll(addPositionsForDirection(board, this, currentPosition,
-                                                                Direction.DOWN, true));
+        validPositions.addAll(addPositionsForDirection(board, currentPosition, Direction.DOWN, true));
 
         // Return valid positions that the bishop can move to
         return validPositions;

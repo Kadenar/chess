@@ -2,6 +2,7 @@ package com.chess.engine.moves;
 
 import com.chess.ChessConsts;
 import com.chess.engine.Player;
+import com.chess.engine.PlayerColor;
 import com.chess.engine.Position;
 import com.chess.engine.board.Board;
 import com.chess.engine.board.BoardUtils;
@@ -225,7 +226,7 @@ public class MoveHistory extends JPanel {
         this.undoRedoMoves.clear();
 
         // History is updated after the move is performed so if current player is white, then it was black who just moved
-        if(currentState.getPlayerTurn().getColor().equals(Player.Color.WHITE)) {
+        if(currentState.getPlayerTurn().getColor().equals(PlayerColor.WHITE)) {
             int rowCount = model.getRowCount();
             if(rowCount == 0) {
                 model.addRow(new Object[] {currentState.getFullMoves() + ".", "", getNotationEntry(latestMove)});

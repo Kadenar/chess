@@ -8,6 +8,7 @@ import com.chess.engine.pieces.Knight;
 import com.chess.engine.pieces.Piece;
 import com.chess.engine.pieces.Queen;
 import com.chess.engine.pieces.Rook;
+
 import javax.swing.JOptionPane;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
@@ -98,7 +99,7 @@ class PromotionSelection {
 
         Piece[] options = {queen, rook, knight, bishop};
         int value = JOptionPane.showOptionDialog(board, "Promote your pawn to which piece?", "Promotion!",
-                JOptionPane.OK_OPTION, JOptionPane.QUESTION_MESSAGE, null, options, options[0]);
+                JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE, null, options, options[0]);
         
         Piece pickedPiece;
         if(value == 0) {

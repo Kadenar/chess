@@ -11,35 +11,19 @@ import java.util.function.Predicate;
 public class Player {
 
     // Player's color
-    private final Color color;
+    private final PlayerColor color;
 
     // Pieces owner by the player
-    private Set<Piece> ownedPieces;
+    private final Set<Piece> ownedPieces;
 
     // Pieces captured by opponent
-    private Set<Piece> capturedPieces;
-
-    // The available colors for a player
-    public enum Color {
-        WHITE {
-            @Override
-            public String toString() {
-                return "w";
-            }
-        },
-        BLACK {
-            @Override
-            public String toString() {
-                return "b";
-            }
-        }
-    }
+    private final Set<Piece> capturedPieces;
 
     /**
      * Create a new {@code Player} instance with a given {@code Color}
      * @param color the {@code Color} of the player
      */
-    public Player(Color color) {
+    public Player(PlayerColor color) {
         this.color = color;
         this.ownedPieces = new HashSet<>(ChessConsts.MAX_PIECES);
         this.capturedPieces = new HashSet<>(ChessConsts.MAX_PIECES);
@@ -59,7 +43,7 @@ public class Player {
      * Get the color of the player
      * @return what {@code Color} this player is
      */
-    public Color getColor() {
+    public PlayerColor getColor() {
         return this.color;
     }
 
@@ -114,15 +98,15 @@ public class Player {
      * @return {@code true} if white, {@code false} if black
      */
     public boolean isWhite() {
-        return getColor() == Color.WHITE;
+        return getColor() == PlayerColor.WHITE;
     }
 
     /**
      * Get opposing {@code Color}
      * @return if player is white, returns black. otherwise, returns white.
      */
-    private Color opposite() {
-        return isWhite() ? Color.BLACK : Color.WHITE;
+    private PlayerColor opposite() {
+        return isWhite() ? PlayerColor.BLACK : PlayerColor.WHITE;
     }
 
     /**

@@ -30,16 +30,16 @@ public class King extends Piece {
         Set<Move> validPositions = new HashSet<>();
 
         // Vertical movement
-        validPositions.addAll(addPositionsForDirection(board, this, currentTile, Direction.UP, false));
-        validPositions.addAll(addPositionsForDirection(board, this, currentTile, Direction.DOWN, false));
-
-        // Diagonal movement
-        validPositions.addAll(addPositionsForDirection(board, this, currentTile, Direction.UP, true));
-        validPositions.addAll(addPositionsForDirection(board, this, currentTile, Direction.DOWN, true));
+        validPositions.addAll(addPositionsForDirection(board, currentTile, Direction.UP));
+        validPositions.addAll(addPositionsForDirection(board, currentTile, Direction.DOWN));
 
         // Horizontal movement
-        validPositions.addAll(addPositionsForDirection(board, this, currentTile, Direction.RIGHT, false));
-        validPositions.addAll(addPositionsForDirection(board, this, currentTile, Direction.LEFT, false));
+        validPositions.addAll(addPositionsForDirection(board, currentTile, Direction.RIGHT));
+        validPositions.addAll(addPositionsForDirection(board, currentTile, Direction.LEFT));
+
+        // Diagonal movement
+        validPositions.addAll(addPositionsForDirection(board, currentTile, Direction.UP, true));
+        validPositions.addAll(addPositionsForDirection(board, currentTile, Direction.DOWN, true));
 
         // Check if the king moved
         boolean kingMoved = board.getMoveHistory().getMoves(move -> move.getMovedPiece().equals(this)).findFirst().isPresent();
@@ -132,6 +132,7 @@ public class King extends Piece {
 
         // If all conditions pass, then add the move
         Tile kingTile = tiles.get(kingPosition);
+        // TODO -> Castling queen side does not check for knight occupied between rook and king
         if(tiles.entrySet().stream()
             .filter(entry -> entry.getKey().getRow() == kingPosition.getRow()) // Must be on same row as king
             .filter(betweenKingTarget) // Must be between king and target position

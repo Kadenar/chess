@@ -24,23 +24,17 @@ public class Queen extends Piece {
     Set<Move> generateMoves(Board board, Tile currentPosition) {
         Set<Move> validPositions = new HashSet<>();
 
-        // Diagonal movement
-        validPositions.addAll(addPositionsForDirection(board, this, currentPosition,
-                                                                Direction.UP, true));
-        validPositions.addAll(addPositionsForDirection(board, this, currentPosition,
-                                                                Direction.DOWN, true));
-
         // Vertical movement
-        validPositions.addAll(addPositionsForDirection(board, this, currentPosition,
-                                                                Direction.UP, false));
-        validPositions.addAll(addPositionsForDirection(board, this, currentPosition,
-                                                                Direction.DOWN, false));
+        validPositions.addAll(addPositionsForDirection(board, currentPosition, Direction.UP));
+        validPositions.addAll(addPositionsForDirection(board, currentPosition, Direction.DOWN));
 
         // Horizontal movement
-        validPositions.addAll(addPositionsForDirection(board, this, currentPosition,
-                                                                Direction.RIGHT, false));
-        validPositions.addAll(addPositionsForDirection(board, this, currentPosition,
-                                                                Direction.LEFT, false));
+        validPositions.addAll(addPositionsForDirection(board, currentPosition, Direction.RIGHT));
+        validPositions.addAll(addPositionsForDirection(board, currentPosition, Direction.LEFT));
+
+        // Diagonal movement
+        validPositions.addAll(addPositionsForDirection(board, currentPosition, Direction.UP, true));
+        validPositions.addAll(addPositionsForDirection(board, currentPosition, Direction.DOWN, true));
 
         // Return valid positions that the queen can move to
         return validPositions;

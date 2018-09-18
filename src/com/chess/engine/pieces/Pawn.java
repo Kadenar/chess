@@ -1,6 +1,7 @@
 package com.chess.engine.pieces;
 
 import com.chess.engine.Player;
+import com.chess.engine.PlayerColor;
 import com.chess.engine.board.Board;
 import com.chess.engine.board.Tile;
 import com.chess.engine.moves.Direction;
@@ -20,47 +21,35 @@ public class Pawn extends Piece {
      * @return 1 or -1 depending on Player color
      */
     public int getEnpassantDirection() {
-        return getOwner().getColor().equals(Player.Color.WHITE) ? 1 : -1;
+        return getOwner().getColor().equals(PlayerColor.WHITE) ? 1 : -1;
     }
 
     /**
      * A pawn can only move forward
      * - If first move, it can move 2 tiles, otherwise only 1 at a time
      * - It can move diagonally to capture a piece
-     * @param currentPosition the current tile the king is located on
+     * @param currentTile the current tile the king is located on
      * @return list of valid moves the king can make
      */
     @Override
-    Set<Move> generateMoves(Board board, Tile currentPosition) {
+    Set<Move> generateMoves(Board board, Tile currentTile) {
+        Set<Move> validPositions = new HashSet<>();
+
         // Vertical movement based on color
         Direction dir  = getOwner().isWhite() ? Direction.UP : Direction.DOWN;
 
-        // Return valid positions that the pawn can move to
-        return addPositionsForPawn(board, currentPosition, dir);
-    }
-
-    /**
-     * Movement for the pawn
-     * @param piece the pawn piece
-     * @param currentTile the current position of the pawn
-     * @param dir the direction
-     * @return the positions that are valid to be moved to
-     */
-    private Set<Move> addPositionsForPawn(Board board, Tile currentTile, Direction dir) {
-        Set<Move> validPositions = new HashSet<>();
-
-        int rowOffSet = 0;
+        int rowOffSet;
         if(dir == Direction.UP) {
             rowOffSet = 1;
-        } else if(dir == Direction.DOWN) {
+        } else {
             rowOffSet = -1;
         }
 
         // First check if the pawn can move in the forward direction
-        validPositions.addAll(addPositionsForOffset(board, this, currentTile, 0, rowOffSet));
+        validPositions.addAll(addPositionsForOffset(board, currentTile, 0, rowOffSet));
 
         // Next check if the pawn can move in the diagonal direction
-        validPositions.addAll(addPositionsForDirection(board, this, currentTile, dir, true));
+        validPositions.addAll(addPositionsForDirection(board, currentTile, dir, true));
 
         return validPositions;
     }

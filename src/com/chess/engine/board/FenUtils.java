@@ -1,6 +1,7 @@
 package com.chess.engine.board;
 
 import com.chess.engine.Player;
+import com.chess.engine.PlayerColor;
 import com.chess.engine.Position;
 
 public class FenUtils {
@@ -173,10 +174,10 @@ public class FenUtils {
      * @return the white or black player
      */
     private static Player getPlayerTurn(final Board board, final String turn) throws FenException {
-        if(Player.Color.WHITE.toString().equals(turn)) {
-            return board.getPlayers().get(Player.Color.WHITE);
-        } else if(Player.Color.BLACK.toString().equals(turn)) {
-            return board.getPlayers().get(Player.Color.BLACK);
+        if(PlayerColor.WHITE.toString().equals(turn)) {
+            return board.getPlayers().get(PlayerColor.WHITE);
+        } else if(PlayerColor.BLACK.toString().equals(turn)) {
+            return board.getPlayers().get(PlayerColor.BLACK);
         } else {
             throw new FenException("Malformed fen string: expected 'to play' as second field but found " + turn);
         }

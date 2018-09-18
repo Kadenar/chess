@@ -20,35 +20,24 @@ public class Knight extends Piece {
      * - down 2 and over 1
      * - up 1 and over 2
      * - down 1 and over 2
-     * @param currentPosition the current tile the knight is located on
-     * @return list of valid moves the knight can make
+     * @param currentTile the current tile the knight is located on
+     * @return set of valid moves the knight can make
      */
     @Override
-    Set<Move> generateMoves(Board board, Tile currentPosition) {
-        // Return valid positions that the knight can move to
-        return addPositionsForKnight(board, this, currentPosition);
-    }
-
-    /**
-     * Method specifically used for Knights for movement
-     * @param piece the knight to be moved
-     * @param currentTile the current position of the knight
-     * @return the positions that are valid to be moved to
-     */
-    private Set<Move> addPositionsForKnight(Board board, Piece piece, Tile currentTile) {
+    Set<Move> generateMoves(Board board, Tile currentTile) {
         Set<Move> positions = new HashSet<>();
 
         // Over 1 up and down 2
-        positions.addAll(addPositionsForOffset(board, piece, currentTile, 1, -2));
-        positions.addAll(addPositionsForOffset(board, piece, currentTile, 1, 2));
-        positions.addAll(addPositionsForOffset(board, piece, currentTile, -1, 2));
-        positions.addAll(addPositionsForOffset(board, piece, currentTile, -1, -2));
+        positions.addAll(addPositionsForOffset(board, currentTile, 1, -2));
+        positions.addAll(addPositionsForOffset(board, currentTile, 1, 2));
+        positions.addAll(addPositionsForOffset(board, currentTile, -1, 2));
+        positions.addAll(addPositionsForOffset(board, currentTile, -1, -2));
 
         // Over 2 up and down 1
-        positions.addAll(addPositionsForOffset(board, piece, currentTile, 2, -1));
-        positions.addAll(addPositionsForOffset(board, piece, currentTile, 2, 1));
-        positions.addAll(addPositionsForOffset(board, piece, currentTile, -2, 1));
-        positions.addAll(addPositionsForOffset(board, piece, currentTile, -2, -1));
+        positions.addAll(addPositionsForOffset(board, currentTile, 2, -1));
+        positions.addAll(addPositionsForOffset(board, currentTile, 2, 1));
+        positions.addAll(addPositionsForOffset(board, currentTile, -2, 1));
+        positions.addAll(addPositionsForOffset(board, currentTile, -2, -1));
 
         return positions;
     }
